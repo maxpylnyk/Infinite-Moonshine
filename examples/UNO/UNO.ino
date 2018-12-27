@@ -1,14 +1,14 @@
 #include <SPI.h>
 
-#define noop (void) 0
+#define noop ((void) 0)
 #define wait noop noop noop noop noop noop noop noop noop noop noop 
 
 const uint8_t onlineMask    = 0x01;
 const uint8_t transferMask  = 0x02;
 const uint8_t restartMask   = 0x04;
 
-const uint8_t megaSlavePin = 0;
-const uint8_t dataSize = 50;
+const uint8_t megaSlavePin = 4;
+const uint8_t dataSize = 44;
 const int interruptStartIndex = 0;
 const int interruptEndIndex = 1;
 
@@ -78,6 +78,7 @@ void endTransfer() {
 void readCallsign(uint8_t callsign) {
   if (callsign & onlineMask) {
     //log slave online
+    Serial.println("slave online");
   } else {
     restartSlave();
   }
@@ -86,6 +87,7 @@ void readCallsign(uint8_t callsign) {
   }
   if (callsign & restartMask) {
     //master was restarted
+    Serial.println("master was restarted");
   }
 }
 

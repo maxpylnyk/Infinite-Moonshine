@@ -1,59 +1,10 @@
-transfer
-
-state	1B	uint8_t
-
-ONLINE			xxxxxxx1
-TRANSFER_REQ	xxxxxx1x
-OFF_RESTART		xxxxx1xx
-STAND_BY_STATE	0000xxxx
-INIT_STATE    	0001xxxx	returnTap
-STAB_STATE     	0010xxxx	minHeat
-HEAD_STATE     	0011xxxx	outTap, headHeat
-PRE_BODY_STATE 	0100xxxx	
-BODY_STATE     	0101xxxx	outTap, bodyHeat
-PRE_TAIL_STATE 	0110xxxx	outTap, rf, tailHeat
-INISH_STATE		0111xxxx
-CANCEL_STATE	1000xxxx
-ERROR_STATE   	1111xxxx
-
-rf-sw-lo-hi-over	1B	uint8_t
-	lo		xxxxxxx1
-	hi		xxxxxx1x
-	over	xxxxx1xx
-	sw		xxxx1xxx
-	rf		0011xxxx
-
-alc		2B	int16_t	raw sensor value
-tr1		4B	float
-tr2		4B	float
-tr3		4B	float
-pres	12B	float float	float pres envTemp tblTemp
-heat	2B	uint8_t uint8_t power adjStep
-mtr1	2B	int16_t
-mtr2	2B	int16_t
-mtr3	2B	int16_t
-adjExt	2B	int16_t
-adjCool	2B	int16_t
-sesN	4B	uint32_t
-
-pin map
-
-//bar		3.3V GND 20 21
-//tr 		2
-ssr		3
-//alc		4 a0
-//hlvl	5 a1 a2 a3
-mtr 	22-37
-spi		50-53
-reset pin 49 @ MEGA, a5 @ UNO
-megaSlaveSelect 4 @ UNO
-
-
 Синхронизация
 
-со стороны mega происходит проверка зависания, uno отвечает. 
-если ответ не приходит - mega перезагружает uno.
-если mega не отправляет сигнал через ожидаемое время + задержка - uno перезагружает mega.
+
+со стороны uno происходит проверка зависания, mega отвечает. 
+если ответ не приходит - uno перезагружает mega.
+если через ожидаемое время с uno не поступает сигнал - mega перезагружает uno
+каждый контроллер имеет встроенную проверку на случай одновременного зависания
 
 через больший промежуток времени проводится передача показаний всех сенсоров и управляющих элементов для записи в журнал.
 
@@ -61,7 +12,7 @@ megaSlaveSelect 4 @ UNO
 
 mega использует для отладки журнал serial
 uno использует для записи файл на sd карте. имя файла YYYYMMDD.LOG
-номер сессии хранится в памяти mega в виде uint32_t и синхронизируется.
+номер сессии хранится в памяти в виде uint32_t и синхронизируется.
 после зависания в процессе работы сессия восстанавливается с этим номером
 
 Журнал
@@ -147,28 +98,35 @@ uno использует для записи файл на sd карте. имя
 ход крана охлаждения достиг предела, но температура флегмы не понижается
 сработал датчик переполнения
 любой из элементов не отвечает, элементы управления не реагируют на команды
+error state active, show malfunction message
 
 Максимум
 
 кран отбора -> уменьшить нагрев
-реле -> уменьшить отбор
+реле -> остановить алгоритм поиска
 кран возврата -> уменьшить нагрев
 кран охлаждения -> уменьшить нагрев
 
 
-todo
 
-Сенсоры
-Управляющие элементы
-Логика управления
-Синхронизация
-Журнал
-Графический интерфейс
-Ручной режим
 
-опрос датчиков температуры 650 мс - быстро
-управление с измеренной инерционностью
-запоминать стабильное значение
+
+
+common
+ссылки на объекты классов в главном классе
+string в библиотеках (см. mcufriend)
+int -> int32_t
+все расчеты с промежуточными переменными
+stdint.h
+arduino.h только в хедер
+
+
+
+
+sensors
+introduce init time
+imsensor cpp
+edit pin map
 
 alc: init debug, measure time, optimize and calibrate levels
 hlev: init, test getsyncarray, fit resistors
@@ -178,37 +136,158 @@ mtr: calibrate maxPosition, mlToSteps
 heater: debug calibrate, default adjStep, powerHead, powerBody
 measure request and receive time, and values in debug methods
 
-introduce init time
-imsensor cpp
+pin map
+
+//bar		3.3V GND 20 21
+//tr 		2
+ssr		3
+//alc		4 a0
+//hlvl	5 a1 a2 a3
+mtr 	22-37
+spi		50-53
+reset pin 49 @ MEGA, a5 @ UNO
+megaSlaveSelect 4 @ UNO
+
+UNO
+13	SCK
+12	MISO
+11	MOSI
+10	SS
+
+MEGA
+44-46	PWM
+50	MISO
+51	MOSI
+52	SCK
+53	SS
+
+
+
+
+control
+полношаговый режим
+
+реечная передача
+	рейка 20 см
+	скорость 6 мм/с
+	ширина зубьев рейки 6 мм
+прямозубая передача
+	передаточное число 2..6 кпд 95-97%
+		4
+		шаг 1.57
+
+акрил
+	коэф пуассона 0,37
+	модуль юнга (упругости) 3300 МПа
+	HRC твердость по роквеллу 95
+
+двигатель
+
+0.0805 Нм 1 Вт потребление	0.1484 Вт мощность
+0.0586 Нм	1.28 Вт потребление	0.1012 Вт мощность
+
+	момент	0,1194 Нм полшага	12 об/мин
+					0,1592 Нм полный шаг 6 об/мин
+
+
+
+
 
 states
 session + time counter + src vol + output counter
+
+
+
+
 sync
 timer - provides log stamp and time measurements. 
 logger - serial @ mega and writes file @ uno
+
+init & restart logic
+
+normal operation
+0000	offline
+0001	online
+0011	transfer required
+
+restart
+0111	other restarted and transfer required
+
+initialization
+1001	initialization // uno after turning on
+1011	init and transfer required // mega waiting for cmd after turning on
+
+
+
+
+make flags volatile
+introduce waitdog
+if callsign incorrect -> ask again -> restart if incorrect
+fill data
+uno transfer byte delay -> wait
+
+
+
+
+transfer 44B
+
+state	1B	uint8_t
+
+ONLINE					xxxxxxx1
+TRANSFER				xxxxxx1x
+RESTART					xxxxx1xx
+INITIALIZATION 	xxxx1xxx
+
+STAND_BY_STATE	0000xxxx
+HEAT_STATE			0001xxxx	returnTap
+STAB_STATE     	0010xxxx	minHeat
+HEAD_STATE     	0011xxxx	outTap, headHeat
+PRE_BODY_STATE 	0100xxxx	
+BODY_STATE     	0101xxxx	outTap, bodyHeat
+PRE_TAIL_STATE 	0110xxxx	outTap, rf, tailHeat
+FINISH_STATE		0111xxxx
+
+CANCEL_STATE		1000xxxx
+ERROR_STATE   	1111xxxx
+
+rf-sw-lo-hi-over	1B	uint8_t
+	lo		xxxxxxx1
+	hi		xxxxxx1x
+	over	xxxxx1xx
+	sw		xxxx1xxx
+	rf		0011xxxx
+
+alc		2B	int16_t	raw sensor value
+tr1		4B	float
+tr2		4B	float
+tr3		4B	float
+pres	12B	float float	float pres envTemp tblTemp
+heat	2B	uint8_t uint8_t power adjStep
+mtr1	2B	int16_t
+mtr2	2B	int16_t
+mtr3	2B	int16_t
+adjExt	2B	int16_t
+adjCool	2B	int16_t
+sesN	4B	uint32_t
+
+
+
+
+
 ui
-assemble and debug
-
-int -> int32_t
-все расчеты с промежуточными переменными
-stdint.h
-arduino.h только в хедер
-
-измерить время ответа на изменение мощности нагрева,
- скорости отбора, обратного отбора, охлаждения, выхода продукта из доохладителя
-измерить минимальную мощность нагрева
-если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
-предусмотреть сообщения о выходе из строя компонентов
-сумма всех исходящих токов платы не должна превышать 200 мА
+inverse screen by Y axis
+all sizes to absolute values
+numeric keyboard and input pane
+info pane
+settings pane
 
 
+
+
+
+log
 IMTime time
 IMLogger sd 20181207 8.3 .LOG .EXP
-motors
-rfratio control logic
-calibrate reflux ratio = 3
-
-схема для гидроуровня
 
 log structure:
 
@@ -235,7 +314,25 @@ returnTap int16_t 2B as integer
 rf	uint8_t 1B as integer
 
 
-master отправляет массив пустых значений, принимает показания датчиков.
-если master отправил 
-при заполнении массива значениями на стороне slave выставляется соответствующий статус.
-последующий 
+
+
+logic
+rfratio based control
+reflux ratio = 3
+
+
+управление с измеренной инерционностью
+запоминать стабильное значение
+форсировать стабильные значения при отборе тела по команде
+проследить зависимость охлаждения от температуры среды
+исследовать различие фактической температуры кипения спирта от табличной
+измерить время ответа на изменение мощности нагрева,
+ скорости отбора, обратного отбора, охлаждения, выхода продукта из доохладителя
+измерить минимальную мощность нагрева
+если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
+предусмотреть сообщения о выходе из строя компонентов
+
+
+
+
+manual mode

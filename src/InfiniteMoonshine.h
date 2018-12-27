@@ -17,6 +17,8 @@ class InfiniteMoonshine {
     bool dataFromSlave;
     bool wasRestarted;
 
+    uint32_t sessionNum;
+
   public:
     InfiniteMoonshine();
 

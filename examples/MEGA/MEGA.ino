@@ -1,8 +1,8 @@
 const int interruptStartIndex = 0;
 const int interruptEndIndex = 1;
 
+volatile bool interrupted;
 bool masterWasRestarted;
-bool interrupted;
 bool dataTransfer;
 
 bool dataFromMaster;
@@ -11,7 +11,7 @@ bool dataFromSlave;
 const uint8_t onlineMask    = 0x01;
 const uint8_t transferMask  = 0x02;
 const uint8_t restartMask   = 0x04;
-const uint8_t dataSize = 50;//??
+const uint8_t dataSize = 44;
 uint8_t dataIndex;
 uint8_t data[dataSize];
 
