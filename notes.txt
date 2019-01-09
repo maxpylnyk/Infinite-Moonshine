@@ -1,6 +1,5 @@
 Синхронизация
 
-
 со стороны uno происходит проверка зависания, mega отвечает. 
 если ответ не приходит - uno перезагружает mega.
 если через ожидаемое время с uno не поступает сигнал - mega перезагружает uno
@@ -15,6 +14,7 @@ uno использует для записи файл на sd карте. имя
 номер сессии хранится в памяти в виде uint32_t и синхронизируется.
 после зависания в процессе работы сессия восстанавливается с этим номером
 
+
 Журнал
 
 хранит записи с меткой времени и данными сенсоров и управляющих устройств.
@@ -27,13 +27,14 @@ uno использует для записи файл на sd карте. имя
 после этого система готова начать работу.
 если сессия была отменена, в конце журнала производится соответствующая запись.
 
+
 Этапы работы
 
 ожидание
 
 нагрев выключен. кран отбора закрыт, охлаждение включено. сессия неактивна.
 
-инициализация
+нагрев
 
 создается новая сессия, считываются данные предыдущей, передаются в соответствующие конструкторы.
 охлаждение работает, кран отбора закрыт, кран возврата открыт на рабочее значение для отбора голов 300мл/ч.
@@ -100,6 +101,7 @@ uno использует для записи файл на sd карте. имя
 любой из элементов не отвечает, элементы управления не реагируют на команды
 error state active, show malfunction message
 
+
 Максимум
 
 кран отбора -> уменьшить нагрев
@@ -113,28 +115,27 @@ error state active, show malfunction message
 
 
 common
-ссылки на объекты классов в главном классе
-string в библиотеках (см. mcufriend)
-int -> int32_t
+ссылки Class * object; oblect->method();
+string в библиотеках #include "Arduino.h" только в хедер
+int -> int32_t, int16_t -> int, #include "stdint.h"
 все расчеты с промежуточными переменными
-stdint.h
-arduino.h только в хедер
+
 
 
 
 
 sensors
-introduce init time
-imsensor cpp
 edit pin map
+measure init, request and receive time, and values in debug methods
 
 alc: init debug, measure time, optimize and calibrate levels
 hlev: init, test getsyncarray, fit resistors
 bar: debug
 therm: debug 
-mtr: calibrate maxPosition, mlToSteps
+mtr: calibrate maxPosition, mlToSteps, test fullstep mode
 heater: debug calibrate, default adjStep, powerHead, powerBody
-measure request and receive time, and values in debug methods
+
+
 
 pin map
 
@@ -165,7 +166,6 @@ MEGA
 
 
 control
-полношаговый режим
 
 реечная передача
 	рейка 20 см
@@ -189,8 +189,23 @@ control
 	момент	0,1194 Нм полшага	12 об/мин
 					0,1592 Нм полный шаг 6 об/мин
 
+Модуль m = 1.5
+Число зубьев шестерни z1 = 9
+Число зубьев колеса z2 = 36
+Диаметр делительной окружности шестерни = 13.5
+Диаметр делительной окружности колеса = 54
+Высота зуба = 3.375
+Диаметр окружности выступов шестерни = 16.5
+Диаметр окружности выступов колеса = 57
+Диаметр окружности впадин шестерни = 9.75
+Диаметр окружности впадин колеса = 50.25
+Толщина зуба по дуге делительной окружности = 2.356194
+Межосевое расстояние = 33.75
 
 
+Including files from the libraries folder, and subfolders, uses <> around the path/file name.
+
+Including files from the sketch folder, and subfolders, uses "" around the path/file name.
 
 
 states
@@ -225,7 +240,8 @@ introduce waitdog
 if callsign incorrect -> ask again -> restart if incorrect
 fill data
 uno transfer byte delay -> wait
-
+config pins @ setup
+inherit sync for control
 
 
 
@@ -275,11 +291,31 @@ sesN	4B	uint32_t
 
 
 ui
-inverse screen by Y axis
-all sizes to absolute values
+
+utftglue::settextcursor выравнивание
+
 numeric keyboard and input pane
 info pane
 settings pane
+график выбранного параметра с маштабированием
+отображение значения при нажатии
+
+buttons
+cancel
+info
+log
+settings
+plus
+minus
+up
+down
+left
+right
+
+keyboard
+
+indicate panes and switch handle code
+fillCircle with radius==1 -> drawPixel
 
 
 
@@ -287,7 +323,8 @@ settings pane
 
 log
 IMTime time
-IMLogger sd 20181207 8.3 .LOG .EXP
+IMLogger sd 20181207 8.3 .LOG
+синхронизация и запись на sd карту одновременно
 
 log structure:
 
@@ -319,7 +356,7 @@ rf	uint8_t 1B as integer
 logic
 rfratio based control
 reflux ratio = 3
-
+InfiniteMoonshine from sync sketh
 
 управление с измеренной инерционностью
 запоминать стабильное значение
@@ -336,3 +373,24 @@ reflux ratio = 3
 
 
 manual mode
+
+
+
+
+
+
+sync outside classes
+
+IMUNO -> receives array
+barometer
+timer
+logger 
+ui
+
+IMMEGA -> transmits array
+
+//debug mode : Serial.begin();
+
+alc, hlevel, therms
+heater and motors
+state -> init(), loop(), logic

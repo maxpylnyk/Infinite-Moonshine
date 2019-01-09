@@ -12,8 +12,8 @@ const uint8_t onlineMask    = 0x01;
 const uint8_t transferMask  = 0x02;
 const uint8_t restartMask   = 0x04;
 const uint8_t dataSize = 44;
-uint8_t dataIndex;
-uint8_t data[dataSize];
+volatile uint8_t dataIndex;
+volatile uint8_t data[dataSize];
 
 void setup() {
   Serial.begin(9600);

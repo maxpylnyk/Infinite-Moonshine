@@ -47,6 +47,18 @@ void checkSlave() {
   endTransfer();
 }
 
+uint8_t transferByte(uint8_t message) {
+  uint8_t answer = SPI.transfer(message);
+  //wait;
+  delayMicroseconds(20);
+  return answer;
+}uint8_t trasferByte(uint8_t message) {
+  uint8_t answer = SPI.transfer(message);
+  //wait;
+  delayMicroseconds(20);
+  return answer;
+}
+
 void transferData() {
   beginTransfer();
 
@@ -54,13 +66,6 @@ void transferData() {
     data[i] = transferByte(data[i]);
   }
   endTransfer();
-}
-
-uint8_t trasferByte(uint8_t message) {
-  uint8_t answer = SPI.transfer(message);
-  //wait;
-  delayMicroseconds(20);
-  return answer;
 }
 
 void beginTransfer() {

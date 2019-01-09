@@ -2,9 +2,6 @@
 #include <SD.h>
 #include <TouchScreen.h>
 
-#include <Fonts/FreeSans18pt7b.h>
-//#include <FreeDefaultFonts.h>
-
 double INFINITY_WIDTH_MULTIPLIER = 0.8625;
 double BAR_HEIGHT_MULTIPLIER = 0.2959;
 double BUTTONS_WIDTH_MULTIPLIER = 0.2219;
@@ -48,8 +45,7 @@ void setup() {
     Serial.print(F("cannot start SD"));
     while (1);
   }
-  pinMode(4, OUTPUT);
-  digitalWrite(4, LOW);
+
   paintBackground();
   drawInfinity(MAIN_COLOR);
   drawInfoButton();
@@ -68,9 +64,9 @@ TSPoint scanTouch(void) {
   tp = ts.getPoint();
   out = TSPoint(tp.x, tp.y, tp.z);
   
-  pinMode(YP, OUTPUT);      //restore shared pins
+  pinMode(YP, OUTPUT);
   pinMode(XM, OUTPUT);
-  digitalWrite(YP, HIGH);  //because TFT control pins
+  digitalWrite(YP, HIGH);
   digitalWrite(XM, HIGH);
   
   return out;
@@ -333,38 +329,5 @@ void printState() {
   screen.setFont(NULL);
   setColor(MAIN_COLOR);
   screen.setTextSize(2);
-  screen.print(utf8rus("Ректификация"), 90, screen.height() - 25);
-}
-
-String utf8rus(String source)
-{
-  int i,k;
-  String target;
-  unsigned char n;
-  char m[2] = { '0', '\0' };
-
-  k = source.length(); i = 0;
-
-  while (i < k) {
-    n = source[i]; i++;
-
-    if (n >= 0xC0) {
-      switch (n) {
-        case 0xD0: {
-          n = source[i]; i++;
-          if (n == 0x81) { n = 0xA8; break; }
-          if (n >= 0x90 && n <= 0xBF) n = n + 0x30;
-          break;
-        }
-        case 0xD1: {
-          n = source[i]; i++;
-          if (n == 0x91) { n = 0xB8; break; }
-          if (n >= 0x80 && n <= 0x8F) n = n + 0x70;
-          break;
-        }
-      }
-    }
-    m[0] = n; target = target + String(m);
-  }
-return target;
+  screen.print("Ректификация", 90, screen.height() - 25);
 }

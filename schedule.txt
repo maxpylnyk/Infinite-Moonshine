@@ -1,12 +1,6 @@
-отладить синхронизацию
-класс IMLogger, IMTime, IMScreen
-отладить запись в журнал
-синхронизация и запись на sd карту одновременно
-логика
-графика
-ручной режим
-
-развести оставшиеся платы
+sync
+fix existing classes
+развести оставшиеся платы -> edit pin map
 крепление плат и моторов
 шестерни
 прокладки
@@ -16,3 +10,56 @@
 сборка
 канализация
 вытяжка
+
+sensors mega side -> check calibrate init debug
+  alc
+  therm
+  hlevel
+  bar //uno side
+
+control mega side -> sync
+  heater
+  step motor
+
+logic
+  condenser node : therm, motor
+    receive env temp
+  extraction node : two therms, three motors, heater, hlevel, alc
+    rfratio control logic
+    receive pres, calc table temp
+    search
+
+states both sides
+  stby
+  heat
+  stab
+  head
+  pre_body
+  body
+  pre_tail
+  finish
+  error
+
+sync -> sketches with IM main class
+  init restart logic
+  waitdog
+  volatile
+  fill array
+  test transfer
+  wait
+
+log uno side
+  time stamp
+  sd read write
+  stats
+  learn
+
+ui uno side
+  text only buttons
+  num keyboard
+  panes
+  graph
+
+manual uno side
+  ui edit mode
+

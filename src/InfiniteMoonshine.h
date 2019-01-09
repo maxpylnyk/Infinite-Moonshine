@@ -2,20 +2,19 @@
 #define INFINITE_MOONSHINE_H
 
 #include "Arduino.h"
-#include "IMHeater.h"
-#include "IMHydroLevel.h"
-#include "IMBarometer.h"
-#include "IMAlcoholSensor.h"
-#include "IMThermometers.h"
-#include "IMStepMotor.h"
-#include "IMSwitch.h"
+#include "control/IMHeater.h"
+#include "sensors/IMHydroLevel.h"
+#include "sensors/IMBarometer.h"
+#include "sensors/IMAlcoholSensor.h"
+#include "sensors/IMThermometers.h"
+#include "control/IMStepMotor.h"
 #include "stdint.h"
 
 class InfiniteMoonshine {
   private:
     bool dataFromMaster;
     bool dataFromSlave;
-    bool wasRestarted;
+    bool restarted;
 
     uint32_t sessionNum;
 
