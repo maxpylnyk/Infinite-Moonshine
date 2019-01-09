@@ -15,6 +15,7 @@ class IMSynchronizable {
     void toArray(uint16_t data, uint8_t bytes[]);
 
   protected:
+    static const int8_t byteSize = 1;
     static const int8_t shortSize = 2;
     static const int8_t floatSize = 4;
 

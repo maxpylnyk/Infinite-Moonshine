@@ -3,11 +3,19 @@
 
 #include "Arduino.h"
 #include "stdint.h"
+#include "utilities/IMSynchronizable.h"
 
 #define SSR_PIN 3
 
-class IMHeater {
+typedef enum {
+  DECREASE = -1,
+  FIXED    =  0,
+  INCREASE =  1
+} HeaterCall;
+
+class IMHeater : public IMSynchronizable {
   private:
+    static const int8_t syncBytesCount = byteSize + byteSize;
     static const uint8_t powerOff = 0;
     static const uint8_t powerMin = 127;
     static const uint8_t powerMax = 255;
@@ -15,12 +23,6 @@ class IMHeater {
     static const uint8_t maxAdjStep = 128;
     static const int8_t maxCount = 3;
     static const int8_t adjCoef = 2;
-
-    typedef enum HeaterCall : int8_t {
-      DECREASE = -1,
-      FIXED    =  0,
-      INCREASE =  1
-    } HeaterCall;
 
     int8_t coarseCounter;
     int8_t fineCounter;
@@ -46,6 +48,9 @@ class IMHeater {
     void maxValue();
     uint8_t getPower();
     uint8_t getAdjStep();
+
+    void getSyncArray(uint8_t bytes[]);
+    void sync(uint8_t bytes[]);
 
 };
 

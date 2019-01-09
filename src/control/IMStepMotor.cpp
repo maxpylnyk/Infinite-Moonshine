@@ -1,7 +1,7 @@
 #include "IMStepMotor.h"
 
 IMStepMotor::IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4) :
-pins({pin1, pin2, pin3, pin4}), seqCounter(0), currentPosition(0), targetPosition(0) {
+  IMSynchronizable(syncBytesCount), pins({pin1, pin2, pin3, pin4}), seqCounter(0), currentPosition(0), targetPosition(0) {
   for (int i = 0; i < pinsCount; i++) {
     pinMode(pins[i], OUTPUT);
   }
@@ -23,12 +23,12 @@ bool IMStepMotor::setCurrentPosition(int32_t position) {
   return true;
 }
 
-int32_t IMStepMotor::mlToSteps(int32_t mlH) {
+int32_t IMStepMotor::mlToSteps(int16_t mlH) {
   return mlH;//tbd
 }
 
-int32_t IMStepMotor::stepsToMl(int32_t steps) {
-  return steps;//tbd
+int16_t IMStepMotor::stepsToMl(int32_t steps) {
+  return (int16_t) steps;//tbd
 }
 
 static unsigned long IMStepMotor::getPauseUS() {
@@ -61,14 +61,14 @@ int32_t IMStepMotor::getTargetPosition() {
   return targetPosition;
 }
 
-bool IMStepMotor::setFlow(int32_t mlH) {
+bool IMStepMotor::setFlow(int16_t mlH) {
   Serial.println("flow to set "+String(mlH));
   int32_t steps = mlToSteps(mlH);
   Serial.println("steps to set "+String(steps));
   setTargetPosition(steps);
 }
 
-int32_t IMStepMotor::getFlow() {
+int16_t IMStepMotor::getFlow() {
   int32_t steps = getTargetPosition();
   return stepsToMl(steps);
 }
@@ -143,4 +143,14 @@ void IMStepMotor::move() {
   for (int i = 0; i < pinsCount; i++) {
     digitalWrite(pins[i], pattern[i]);
   }
+}
+
+void IMStepMotor::getSyncArray(uint8_t bytes[]) {
+  toArray(getFlow(), *bytes);
+}
+
+void IMStepMotor::sync(uint8_t bytes[]) {
+  int16_t flow = toShort(*bytes);
+
+  setFlow(flow);
 }

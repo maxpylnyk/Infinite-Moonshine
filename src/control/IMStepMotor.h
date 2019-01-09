@@ -3,9 +3,11 @@
 
 #include "stdint.h"
 #include "Arduino.h"
+#include "utilities/IMSynchronizable.h"
 
-class IMStepMotor {
+class IMStepMotor : public IMSynchronizable {
   private:
+    static const int8_t syncBytesCount = shortSize;
     static const uint8_t pinsCount = 4;
     static const uint8_t adjStep = 1;
     static const uint8_t seqSize = 4;
@@ -24,8 +26,8 @@ class IMStepMotor {
 
     bool setTargetPosition(int32_t position);
     bool setCurrentPosition(int32_t position);
-    int32_t mlToSteps(int32_t mlH);
-    int32_t stepsToMl(int32_t steps);
+    int32_t mlToSteps(int16_t mlH);
+    int16_t stepsToMl(int32_t steps);
     void move();
 
   public:
@@ -38,9 +40,12 @@ class IMStepMotor {
     bool zeroPosition();
     int32_t getCurrentPosition();
     int32_t getTargetPosition();
-    bool setFlow(int32_t mlH);
-    int32_t getFlow();
+    bool setFlow(int16_t mlH);
+    int16_t getFlow();
     void loop();
+
+    void getSyncArray(uint8_t bytes[]);
+    void sync(uint8_t bytes[]);
 
 };
 

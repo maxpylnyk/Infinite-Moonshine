@@ -6,18 +6,19 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-InfiniteMoonshine	KEYWORD1
-IMDecimal	KEYWORD1
+InfiniteMoonshine	             KEYWORD1
+IMUno                          KEYWORD1
+IMMega                         KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-init	KEYWORD2
-getFloat	KEYWORD2
+init                           KEYWORD2
+loop                           KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
-BAROMETER_RESOLUTION	LITERAL1
+BYTES_COUNT                    LITERAL1

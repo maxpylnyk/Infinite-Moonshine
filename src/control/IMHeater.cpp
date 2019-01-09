@@ -1,7 +1,7 @@
 #include "IMHeater.h"
 
 IMHeater::IMHeater(uint8_t powerHead, uint8_t powerBody, uint8_t adjStep) :
- powerHead(powerHead), powerBody(powerBody), adjStep(adjStep) {
+ IMSynchronizable(syncBytesCount), powerHead(powerHead), powerBody(powerBody), adjStep(adjStep) {
   pinMode(SSR_PIN, OUTPUT);
   off();
 }
@@ -118,4 +118,18 @@ uint8_t IMHeater::getPower() {
 
 uint8_t IMHeater::getAdjStep() {
   return adjStep;
+}
+
+void IMHeater::getSyncArray(uint8_t bytes[]) {
+  toArray(getPower(), *bytes);
+  toArray(getAdjStep(), *(bytes+byteSize));
+}
+
+void IMHeater::sync(uint8_t bytes[]) {
+  uint8_t temp = bytes[0];
+
+  setPower(temp);
+
+  temp = bytes[1];
+  setAdjStep(temp);
 }
