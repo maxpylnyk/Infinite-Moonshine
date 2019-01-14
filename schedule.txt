@@ -1,5 +1,5 @@
 sync
-fix existing classes
+fix enums
 развести оставшиеся платы -> edit pin map
 крепление плат и моторов
 шестерни
@@ -11,15 +11,15 @@ fix existing classes
 канализация
 вытяжка
 
-sensors mega side -> check calibrate init debug
+sensors mega side calibrate init debug
   alc
   therm
   hlevel
   bar //uno side
 
-control mega side -> sync
+control mega side
   heater
-  step motor
+  step motor loop to debug
 
 logic
   condenser node : therm, motor

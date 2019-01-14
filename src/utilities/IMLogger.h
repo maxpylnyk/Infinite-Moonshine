@@ -2,25 +2,23 @@
 #define IM_LOGGER_H
 
 #include "Arduino.h"
-#include "utilities/IMTime.h"
-
-typedef enum {
-  INFO = "INFO",
-  ERROR = "ERROR"
-} IMLogLevel;
+#include "utilities/IMTimer.h"
+#include <SD.h>
 
 class IMLogger {
   private:
-    IMTime timer;
+    static const int SD_CS = 10;
 
-    String toString(message, IMLogLevel level);
-    void print(String message);
+    IMTimer timer;
+    String fileName;
+    File logFile;
 
   public:
     IMLogger();
+    IMLogger(String fileName);
 
-    void info(String message);
-    void error(String message);
+    bool init();
+    bool print(String);
 
 };
 

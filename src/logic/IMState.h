@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 
-typedef enum {
+typedef enum StateIndex : uint8_t {
   STAND_BY_STATE = 0x00,
   HEAT_STATE     = 0x10,
   STAB_STATE     = 0x20,
@@ -13,8 +13,9 @@ typedef enum {
   PRE_TAIL_STATE = 0x60,
   FINISH_STATE   = 0x70,
   CANCEL_STATE   = 0x80,
+  MANUAL_MODE    = 0xA0,
   ERROR_STATE    = 0xF0
-} StateIndex;
+};
 
 class IMState {
 	private:

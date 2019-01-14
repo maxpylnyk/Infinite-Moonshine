@@ -115,11 +115,16 @@ error state active, show malfunction message
 
 
 common
-ссылки Class * object; oblect->method();
-string в библиотеках #include "Arduino.h" только в хедер
-int -> int32_t, int16_t -> int, #include "stdint.h"
+ссылки Class * object; oblect->method(); прототипирование
+String в библиотеках #include <Arduino.h>только в хедер
+int -> int32_t, int16_t -> int, #include <stdint.h>
 все расчеты с промежуточными переменными
 
+Including files from the libraries folder, and subfolders,
+ uses <> around the path/file name.
+
+Including files from the sketch folder, and subfolders,
+ uses "" around the path/file name.
 
 
 
@@ -203,15 +208,6 @@ control
 Межосевое расстояние = 33.75
 
 
-Including files from the libraries folder, and subfolders, uses <> around the path/file name.
-
-Including files from the sketch folder, and subfolders, uses "" around the path/file name.
-
-
-states
-session + time counter + src vol + output counter
-
-
 
 
 sync
@@ -235,13 +231,10 @@ initialization
 
 
 
-make flags volatile
 introduce waitdog
 if callsign incorrect -> ask again -> restart if incorrect
 fill data
-uno transfer byte delay -> wait
 config pins @ setup
-inherit sync for control
 
 
 
@@ -266,25 +259,6 @@ FINISH_STATE		0111xxxx
 CANCEL_STATE		1000xxxx
 ERROR_STATE   	1111xxxx
 
-rf-sw-lo-hi-over	1B	uint8_t
-	lo		xxxxxxx1
-	hi		xxxxxx1x
-	over	xxxxx1xx
-	sw		xxxx1xxx
-	rf		0011xxxx
-
-alc		2B	int16_t	raw sensor value
-tr1		4B	float
-tr2		4B	float
-tr3		4B	float
-pres	12B	float float	float pres envTemp tblTemp
-heat	2B	uint8_t uint8_t power adjStep
-mtr1	2B	int16_t
-mtr2	2B	int16_t
-mtr3	2B	int16_t
-adjExt	2B	int16_t
-adjCool	2B	int16_t
-sesN	4B	uint32_t
 
 
 
@@ -318,46 +292,6 @@ indicate panes and switch handle code
 fillCircle with radius==1 -> drawPixel
 
 
-
-
-
-log
-IMTime time
-IMLogger sd 20181207 8.3 .LOG
-синхронизация и запись на sd карту одновременно
-
-log structure:
-
-time unsigned long 4B as integer
-state	uint8_t 1B	as binary
-rf-sw-lo-hi-ovr uint8_t 1B as binary
-alc int16_t 2B as integer
-tr1		4B	float	as decimal
-tr2		4B	float	as decimal
-tr3		4B	float	as decimal
-pres	12B	float float	float pres envTemp tblTemp as decimal
-heat	2B	uint8_t uint8_t power adjStep as integer
-mtr1	2B	int16_t	as integer
-mtr2	2B	int16_t	as integer
-mtr3	2B	int16_t as integer
-adjExt	2B	int16_t	as integer
-adjCool	2B	int16_t	as integer
-
-state init values
-
-heat	uint8_t 1B as integer
-outTap int16_t 2B as integer
-returnTap int16_t 2B as integer
-rf	uint8_t 1B as integer
-
-
-
-
-logic
-rfratio based control
-reflux ratio = 3
-InfiniteMoonshine from sync sketh
-
 управление с измеренной инерционностью
 запоминать стабильное значение
 форсировать стабильные значения при отборе тела по команде
@@ -365,7 +299,7 @@ InfiniteMoonshine from sync sketh
 исследовать различие фактической температуры кипения спирта от табличной
 измерить время ответа на изменение мощности нагрева,
  скорости отбора, обратного отбора, охлаждения, выхода продукта из доохладителя
-измерить минимальную мощность нагрева
+измерить минимальную мощность нагрева кипения
 если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
 предусмотреть сообщения о выходе из строя компонентов
 
@@ -373,7 +307,6 @@ InfiniteMoonshine from sync sketh
 
 
 manual mode
-
 
 
 
