@@ -1,42 +1,50 @@
 #include "IMAlcoholSensor.h"
 
 IMAlcoholSensor::IMAlcoholSensor() :
- IMSensor(syncBytesCount, initTime, requestTime, receiveTime) {}
+ IMSensor(initTime, requestTime, receiveTime) {
+   pinMode(PinMap::ALC_HEAT, OUTPUT);
+ }
 
-void IMAlcoholSensor::setValue(int16_t data) {
-  value = data;
+void IMAlcoholSensor::setLevel(int16_t data) {
+  level = data;
 }
 
 bool IMAlcoholSensor::init() {
-  pinMode(HEAT_PIN, OUTPUT);
-  return true;
+  requestData();
+  delay(requestTime);
+  receiveData();
+  initLevel = getLevel();
+  return initLevel < treshold;
 }
 
 void IMAlcoholSensor::debug() {
+  digitalWrite(PinMap::ALC_HEAT, HIGH);
 
+  for (int i = 1; i <= 60; i++) {
+    Serial.print(analogRead(PinMap::ALC_DATA));
+    Serial.println(" "+String(i)+" s");
+    delay(1000);
+  }
+  Serial.println("5 sec break");
+  Serial.println();
+  digitalWrite(PinMap::ALC_HEAT, LOW);
+  delay(5000);
 }
 
 bool IMAlcoholSensor::ethanolDetected() {
-  return getValue() > treshold;
+  return getLevel() > treshold;
 }
 
-int16_t IMAlcoholSensor::getValue() {
-  return value;
+int16_t IMAlcoholSensor::getLevel() {
+  return level;
 }
-
-void IMAlcoholSensor::getSyncArray(uint8_t bytes[]) {
-  int16_t data = getValue();
-  toArray(data, bytes);
-}
-
-void IMAlcoholSensor::sync(uint8_t bytes[]) {}
 
 void IMAlcoholSensor::requestData() {
   setMeasuring(true);
-  digitalWrite(HEAT_PIN, HIGH);
+  digitalWrite(PinMap::ALC_HEAT, HIGH);
 }
 void IMAlcoholSensor::receiveData() {
-  setValue(analogRead(DATA_PIN));
-  digitalWrite(HEAT_PIN, LOW);
+  setLevel(analogRead(PinMap::ALC_DATA));
+  digitalWrite(PinMap::ALC_HEAT, LOW);
   setMeasuring(false);
 }

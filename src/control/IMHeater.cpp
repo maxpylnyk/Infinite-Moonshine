@@ -1,12 +1,16 @@
 #include "IMHeater.h"
 
-IMHeater::IMHeater(uint8_t powerHead, uint8_t powerBody, uint8_t adjStep) :
- IMSynchronizable(syncBytesCount), powerHead(powerHead), powerBody(powerBody), adjStep(adjStep) {
-  pinMode(SSR_PIN, OUTPUT);
+IMHeater::IMHeater() {
+  pinMode(PinMap::SSR, OUTPUT);
+  setAdjStep(16);
   off();
 }
 
 bool IMHeater::setAdjStep(uint8_t value) {
+  if (DEBUG_MODE || MANUAL_MODE) {
+    adjStep = value;
+    return true;
+  }
   if (value >= minAdjStep && value <= maxAdjStep) {
     adjStep = value;
     return true;
@@ -15,7 +19,7 @@ bool IMHeater::setAdjStep(uint8_t value) {
 }
 
 void IMHeater::setPower(uint8_t value) {
-  analogWrite(SSR_PIN, power);
+  analogWrite(PinMap::SSR, power);
   power = value;
 }
 
@@ -84,25 +88,15 @@ void IMHeater::off() {
   fineCounter = 0;
 }
 
-void IMHeater::minBoilingValue() {
-  setPower(powerMin);
+void IMHeater::setInitPower(uint8_t pwr) {
+  setPower(pwr);
   prevCall = FIXED;
   coarseCounter = 0;
   fineCounter = 0;
 }
 
-void IMHeater::headValue() {
-  setPower(powerHead);
-  prevCall = FIXED;
-  coarseCounter = 0;
-  fineCounter = 0;
-}
-
-void IMHeater::bodyValue() {
-  setPower(powerBody);
-  prevCall = FIXED;
-  coarseCounter = 0;
-  fineCounter = 0;
+void IMHeater::setInitAdj(uint8_t adj) {
+  setAdjStep(adj);
 }
 
 void IMHeater::maxValue() {
@@ -118,18 +112,4 @@ uint8_t IMHeater::getPower() {
 
 uint8_t IMHeater::getAdjStep() {
   return adjStep;
-}
-
-void IMHeater::getSyncArray(uint8_t bytes[]) {
-  toArray(getPower(), *bytes);
-  toArray(getAdjStep(), *(bytes+byteSize));
-}
-
-void IMHeater::sync(uint8_t bytes[]) {
-  uint8_t temp = bytes[0];
-
-  setPower(temp);
-
-  temp = bytes[1];
-  setAdjStep(temp);
 }

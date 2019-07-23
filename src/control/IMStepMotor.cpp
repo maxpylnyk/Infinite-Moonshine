@@ -1,7 +1,7 @@
 #include "IMStepMotor.h"
 
 IMStepMotor::IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4) :
-  IMSynchronizable(syncBytesCount), pins({pin1, pin2, pin3, pin4}), seqCounter(0), currentPosition(0), targetPosition(0) {
+  pins({pin1, pin2, pin3, pin4}), seqCounter(0), currentPosition(0), targetPosition(0) {
   for (int i = 0; i < pinsCount; i++) {
     pinMode(pins[i], OUTPUT);
   }
@@ -23,12 +23,12 @@ bool IMStepMotor::setCurrentPosition(int32_t position) {
   return true;
 }
 
-int32_t IMStepMotor::mlToSteps(int16_t mlH) {
+int32_t IMStepMotor::mlToSteps(uint16_t mlH) {
   return mlH;//tbd
 }
 
-int16_t IMStepMotor::stepsToMl(int32_t steps) {
-  return (int16_t) steps;//tbd
+uint16_t IMStepMotor::stepsToMl(int32_t steps) {
+  return (uint16_t) steps;//tbd
 }
 
 static unsigned long IMStepMotor::getPauseUS() {
@@ -61,19 +61,22 @@ int32_t IMStepMotor::getTargetPosition() {
   return targetPosition;
 }
 
-bool IMStepMotor::setFlow(int16_t mlH) {
-  Serial.println("flow to set "+String(mlH));
+bool IMStepMotor::setFlow(uint16_t mlH) {
+  Serial.println("setFlow(): flow to set "+String(mlH));
   int32_t steps = mlToSteps(mlH);
-  Serial.println("steps to set "+String(steps));
+  Serial.println("setFlow(): steps to set "+String(steps));
   setTargetPosition(steps);
 }
 
-int16_t IMStepMotor::getFlow() {
+uint16_t IMStepMotor::getFlow() {
   int32_t steps = getTargetPosition();
   return stepsToMl(steps);
 }
 
 void IMStepMotor::loop() {
+  if (onPosition()) {
+    return;
+  }
   if (micros() - lastStepTime < getPauseUS()) {
     return;
   }
@@ -97,20 +100,57 @@ void IMStepMotor::loop() {
   } else {
     seqCounter = 0;
   }
+  //Serial.println("loop(): stepsToMove: "+String(stepsToMove));
+  //Serial.println("loop(): seq: "+String(seqCounter));
+  //Serial.println("loop(): position: "+String(position));
+  setCurrentPosition(position);
   move();
-
-  if (position != 0) {
-    setCurrentPosition(position);
-  }
-  if (stepsToMove == 1 || stepsToMove == -1) {
-    loop();
-  }
   lastStepTime = micros();
+
+  if (onPosition()) {
+    //Serial.println("loop(): sequence completed");
+    disableMagnets();
+  }
 }
 
 void IMStepMotor::move() {
-  switch(seqCounter) {
+  move(seqCounter);
+}
+
+void IMStepMotor::disableMagnets() {
+  seqCounter = 0;
+  move();
+}
+
+void IMStepMotor::move(int8_t step) {
+  switch(step) {
+#if defined(INVERT)
+    case 4:
+      pattern[0] = 1;
+      pattern[1] = 1;
+      pattern[2] = 0;
+      pattern[3] = 0;
+      break;
+    case 3:
+      pattern[0] = 0;
+      pattern[1] = 1;
+      pattern[2] = 1;
+      pattern[3] = 0;
+      break;
+    case 2:
+      pattern[0] = 0;
+      pattern[1] = 0;
+      pattern[2] = 1;
+      pattern[3] = 1;
+      break;
     case 1:
+      pattern[0] = 1;
+      pattern[1] = 0;
+      pattern[2] = 0;
+      pattern[3] = 1;
+      break;
+#else
+      case 1:
       pattern[0] = 1;
       pattern[1] = 1;
       pattern[2] = 0;
@@ -134,6 +174,7 @@ void IMStepMotor::move() {
       pattern[2] = 0;
       pattern[3] = 1;
       break;
+#endif
     default:
       pattern[0] = 0;
       pattern[1] = 0;
@@ -143,14 +184,4 @@ void IMStepMotor::move() {
   for (int i = 0; i < pinsCount; i++) {
     digitalWrite(pins[i], pattern[i]);
   }
-}
-
-void IMStepMotor::getSyncArray(uint8_t bytes[]) {
-  toArray(getFlow(), *bytes);
-}
-
-void IMStepMotor::sync(uint8_t bytes[]) {
-  int16_t flow = toShort(*bytes);
-
-  setFlow(flow);
 }

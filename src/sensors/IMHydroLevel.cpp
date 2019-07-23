@@ -1,6 +1,11 @@
 #include "IMHydroLevel.h"
 
-IMHydroLevel::IMHydroLevel() : IMSensor(syncBytesCount, initTime, requestTime, receiveTime) {}
+IMHydroLevel::IMHydroLevel() : IMSensor(initTime, requestTime, receiveTime) {}
+
+bool IMHydroLevel::init() {
+  //test for false output?
+  return true;
+}
 
 void IMHydroLevel::setDataLo(int data) {
   dataLo = data;
@@ -42,10 +47,6 @@ void IMHydroLevel::setLevel(IMLevel value) {
   level = value;
 }
 
-bool IMHydroLevel::init() {
-  return true;
-}
-
 void IMHydroLevel::debug() {
   receiveData();
   int Vin = 5;
@@ -57,7 +58,7 @@ void IMHydroLevel::debug() {
   float RHi = 0;
   float ROver = 0;
 
-  Serial.println("Raw data "+String(getDataLo())+" "+String(getDataHi())+" "+String(getDataOver()));
+  Serial.println("raw data "+String(getDataLo())+" "+String(getDataHi())+" "+String(getDataOver()));
 
   VoutLo = (getDataLo() * Vin) / 1024.0;
   VoutHi = (getDataHi() * Vin) / 1024.0;
@@ -65,14 +66,16 @@ void IMHydroLevel::debug() {
   Serial.println("Vout "+String(VoutLo)+" "+String(VoutHi)+" "+String(VoutOver));
 
   buffer = Vin / VoutLo - 1;
-    RLo = refResistorLo * buffer;
+  RLo = refResistorLo * buffer;
 
   buffer = Vin / VoutHi - 1;
   RHi = refResistorHi * buffer;
 
   buffer = Vin / VoutOver - 1;
   ROver = refResistorOver * buffer;
-  Serial.println("Resistance "+String(RLo)+" "+String(RHi)+" "+String(ROver));
+  Serial.println("resistance "+String(RLo)+" "+String(RHi)+" "+String(ROver));
+  Serial.println();
+  delay(1000);
 }
 
 void IMHydroLevel::requestData() {
@@ -80,31 +83,25 @@ void IMHydroLevel::requestData() {
 }
 
 void IMHydroLevel::receiveData() {
-  digitalWrite(OUT_PIN, HIGH);
-  setDataLo(analogRead(LO_PIN));
-  setDataHi(analogRead(HI_PIN));
-  setDataOver(analogRead(OVR_PIN));
-  digitalWrite(OUT_PIN, LOW);
+  digitalWrite(PinMap::HLVL_OUT, HIGH);
+  setDataLo(analogRead(PinMap::HLVL_LO));
+  setDataHi(analogRead(PinMap::HLVL_HI));
+  setDataOver(analogRead(PinMap::HLVL_OVR));
+  digitalWrite(PinMap::HLVL_OUT, LOW);
   setMeasuring(false);
 }
 
-void IMHydroLevel::getSyncArray(uint8_t bytes[]) {
-  bytes[0] = (uint8_t) getLevel();
-}
-
-void IMHydroLevel::sync(uint8_t bytes[]) {}
-
 IMLevel IMHydroLevel::getLevel() {
   if (overReached()) {
-    return OVR;
+    return IMLevel::OVR;
   }
   if (hiReached()) {
-    return HI;
+    return IMLevel::HI;
   }
   if (loReached()) {
-    return OK;
+    return IMLevel::OK;
   }
-  return LO;
+  return IMLevel::LO;
 }
 
 bool IMHydroLevel::isOverflowing() {

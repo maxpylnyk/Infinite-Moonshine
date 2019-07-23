@@ -1,25 +1,32 @@
 #ifndef IM_SENSOR_H
 #define IM_SENSOR_H
 
-#include "utilities/IMSynchronizable.h"
+#include "stdint.h"
 #include "Arduino.h"
+#include "utilities/IMCommons.h"
+#include "utilities/IMTimer.h"
 
-class IMSensor : public IMSynchronizable {
+class IMSensor {
   private:
     bool measuring;
+    bool measured;
     uint32_t initTime;
     uint32_t requestTime;
     uint32_t receiveTime;
 
   protected:
-    void setMeasuring(bool value);
+    IMTimer stopwatch;
+
+    void setMeasuring(bool);
+    void setMeasured(bool);
 
   public:
-    IMSensor(int8_t arraySize, uint32_t initTime, uint32_t requestTime, uint32_t receiveTime);
+    IMSensor(uint32_t initTime, uint32_t requestTime, uint32_t receiveTime);
     
     virtual bool init() = 0;
     virtual void debug();
     bool isMeasuring();
+    bool dataReady();
     uint32_t getInitTime();
     uint32_t getRequestTime();
     uint32_t getReceiveTime();

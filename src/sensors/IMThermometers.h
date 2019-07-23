@@ -3,35 +3,41 @@
 
 #include "sensors/IMSensor.h"
 #include "sensors/IMThermometer.h"
+#include "utilities/IMErrors.h"
 #include "OneWire.h"
 #include "DallasTemperature.h"
 
-#define THERMOMETERS_PIN  2
+class IMMega;
 
 class IMThermometers : public IMSensor {
   private:
-    static const float t1Adj = 1.25;
-    static const float t2Adj = 0.875;
-    static const float t3Adj = 1.125;
-    static const float t4Adj = 1.313;
-    static const DeviceAddress t1Address = {0x28, 0xFF, 0x44, 0x18, 0x03, 0x17, 0x04, 0x9D};
-    static const DeviceAddress t2Address = {0x28, 0xFF, 0xAA, 0xD7, 0x02, 0x17, 0x04, 0xED};
-    static const DeviceAddress t3Address = {0x28, 0xFF, 0x25, 0x1A, 0x03, 0x17, 0x04, 0x46};
-    static const DeviceAddress t4Address = {0x28, 0xFF, 0x8D, 0x89, 0x02, 0x17, 0x05, 0xD7};
-    static const uint8_t thermometersCount = 3;
+    static const uint8_t thermometersCount = 4;
     static const uint8_t resolution = 12;
-    static const int8_t syncBytesCount = floatSize * thermometersCount;
-    static const unsigned int initTime = 300;
-    static const unsigned int requestTime = 3;
-    static const unsigned int receiveTime = 50 + 50 * thermometersCount;
+    static const unsigned int initTime = 430;
+    static const unsigned int requestTime = 675;
+    static const unsigned int receiveTime = 100;
 
-    OneWire wire = OneWire(THERMOMETERS_PIN);
-    DallasTemperature tempSensors = DallasTemperature(&wire);
-    IMThermometer steamTherm;
-    IMThermometer condTherm;
-    IMThermometer pipeTherm;
+    float steamAdj = 0.0;
+    float pipeAdj = 0.0;
+    float condAdj = 0.0;
+    float envAdj = 0.0;
 
-    bool initThermometer(IMThermometer t, DeviceAddress address, float adjustment);
+    DeviceAddress steamAddr = {0x28, 0xFF, 0xD8, 0xC9, 0x33, 0x18, 0x02, 0x9E};
+    DeviceAddress pipeAddr = {0x28, 0xFF, 0x6E, 0xD4, 0x33, 0x18, 0x01, 0x0A};
+    DeviceAddress condAddr = {0x28, 0xFF, 0x7E, 0x00, 0x34, 0x18, 0x01, 0x03};
+    DeviceAddress envAddr = {0x28, 0xFF, 0x43, 0xD6, 0x33, 0x18, 0x01, 0x19};
+
+    OneWire wire = OneWire(PinMap::TRM);
+    DallasTemperature sensors = DallasTemperature(&wire);
+    IMErrors * errors;
+    IMThermometer steamTrm = IMThermometer(&sensors, steamAddr, steamAdj, IMError::NO_STEAM_TRM);
+    IMThermometer pipeTrm = IMThermometer(&sensors, pipeAddr, pipeAdj, IMError::NO_PIPE_TRM);
+    IMThermometer condTrm = IMThermometer(&sensors, condAddr, condAdj, IMError::NO_COND_TRM);
+    IMThermometer envTrm = IMThermometer(&sensors, envAddr, envAdj, IMError::NO_ENV_TRM);
+
+    IMThermometer trms[thermometersCount] = {steamTrm, pipeTrm, condTrm, envTrm};
+    
+    void printAddress(const uint8_t*);
 
   public:
     IMThermometers();
@@ -40,11 +46,11 @@ class IMThermometers : public IMSensor {
     void debug();
     void requestData();
     void receiveData();
-    void getSyncArray(uint8_t bytes[]);
-    void sync(uint8_t bytes[]);
+    void setErrorList(IMErrors*);
     float getSteamTemp();
-    float getCondTemp();
     float getPipeTemp();
+    float getCondTemp();
+    float getEnvTemp();
 
 };
 

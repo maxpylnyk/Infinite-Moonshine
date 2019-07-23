@@ -5,6 +5,7 @@
 #include "sensors/IMAlcoholSensor.h"
 #include "sensors/IMHydroLevel.h"
 #include "sensors/IMThermometers.h"
+#include "sensors/IMBarometer.h"
 #include "control/IMHeater.h"
 #include "control/IMStepMotor.h"
 
@@ -12,19 +13,24 @@ class IMState;
 
 class IMMega : public InfiniteMoonshine {
   private:
-    static const uint8_t RST_PIN = 49;
+    float pressure;
+    float envTemp;
 
-    volatile bool interrupted;
-    IMState * state;
+    //IMState * state;
+    Language locale = Language::RUSSIAN;
+    IMCaptions captions = IMCaptions(locale);
+    IMBarometer bar = IMBarometer();
+    IMHydroLevel hlvl = IMHydroLevel();
+    IMAlcoholSensor alc = IMAlcoholSensor();
+    IMThermometers trm = IMThermometers();
+    IMHeater heater = IMHeater();
+    IMStepMotor outMtr = IMStepMotor(PinMap::MTR1_1, PinMap::MTR1_2, PinMap::MTR1_3, PinMap::MTR1_4);
+    IMStepMotor retMtr = IMStepMotor(PinMap::MTR2_1, PinMap::MTR2_2, PinMap::MTR2_3, PinMap::MTR2_4);
+    IMStepMotor condMtr = IMStepMotor(PinMap::MTR3_1, PinMap::MTR3_2, PinMap::MTR3_3, PinMap::MTR3_4);
+    IMStepMotor swMtr = IMStepMotor(PinMap::MTR4_1, PinMap::MTR4_2, PinMap::MTR4_3, PinMap::MTR4_4);
 
-    void initSlaveSPI();
-    void initSlaveMode();
-    void initInterrupts();
-
-    bool readCallsign(uint8_t);
-    uint8_t getCallsign();
-
-    void restartMaster();
+    void sendData();
+    void receiveData();
 
   public:
     IMMega();
@@ -32,7 +38,8 @@ class IMMega : public InfiniteMoonshine {
     bool init();
     void loop();
     void debug();
-    void interruptRoutine();
+    void receiveCallsign();
+    void printErrors();
 
 };
 

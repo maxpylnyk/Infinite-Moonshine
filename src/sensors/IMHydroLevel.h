@@ -3,28 +3,22 @@
 
 #include "sensors/IMSensor.h"
 
-#define OUT_PIN       5
-#define LO_PIN        A1
-#define HI_PIN        A2
-#define OVR_PIN       A3
-
-typedef enum {
-  LO      = 0x00,
-  OK      = 0x01,
-  HI      = 0x03,
-  OVR     = 0x07
-} IMLevel;
+typedef enum IMLevel : uint8_t {
+  LO      = 0x0,
+  OK      = 0x1,
+  HI      = 0x3,
+  OVR     = 0x7
+};
 
 class IMHydroLevel : public IMSensor {
   private:
-    static const int8_t syncBytesCount = 1;
-    static const int treshold = 100;
+    static const int treshold = 400;
     static const unsigned int initTime = 0;
     static const unsigned int requestTime = 0;
     static const unsigned int receiveTime = 0;
     static const float refResistorLo = 2.7;
-    static const float refResistorHi = 2.7;
-    static const float refResistorOver = 2.7;
+    static const float refResistorHi = 3.3;
+    static const float refResistorOver = 4.7;
 
     int dataLo;
     int dataHi;
@@ -49,8 +43,6 @@ class IMHydroLevel : public IMSensor {
     void debug();
     void requestData();
     void receiveData();
-    void getSyncArray(uint8_t bytes[]);
-    void sync(uint8_t bytes[]);
     IMLevel getLevel();
     bool isOverflowing();   
 

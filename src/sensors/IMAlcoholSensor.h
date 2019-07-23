@@ -3,20 +3,17 @@
 
 #include "sensors/IMSensor.h"
 
-#define HEAT_PIN  4
-#define DATA_PIN  A0
-
 class IMAlcoholSensor : public IMSensor {
   private:
-    static const int8_t syncBytesCount = shortSize;
-    static const uint16_t treshold = 240;
-    static const uint32_t initTime = 0;
-    static const uint32_t requestTime = 60 * 1000; //needs optimization
+    static const uint16_t treshold = 320;
+    static const uint32_t requestTime = 60 * 1000;
     static const uint32_t receiveTime = 5;
+    static const uint32_t initTime = requestTime + receiveTime;
 
-    int16_t value;
+    int16_t initLevel = 300;
+    int16_t level = 326;
 
-    void setValue(int16_t data);
+    void setLevel(int16_t);
 
   public:
     IMAlcoholSensor();
@@ -24,9 +21,7 @@ class IMAlcoholSensor : public IMSensor {
     bool init();
     void debug();
     bool ethanolDetected();
-    int16_t getValue();
-    void getSyncArray(uint8_t bytes[]);
-    void sync(uint8_t bytes[]);
+    int16_t getLevel();
     void requestData();
     void receiveData();
 

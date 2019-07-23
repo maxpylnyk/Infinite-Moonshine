@@ -1,51 +1,102 @@
 #include "InfiniteMoonshine.h"
 
-InfiniteMoonshine::InfiniteMoonshine() {}
+InfiniteMoonshine::InfiniteMoonshine(int rstPin) : rstPin(rstPin) {
+  setSessionName(0);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
 
-StateIndex InfiniteMoonshine::getIndex(uint8_t callsign) {
-  switch(callsign & logicMask) {
-    case StateIndex::STAND_BY_STATE:
-      Serial.println("STAND_BY_STATE");
-      return StateIndex::STAND_BY_STATE;
-    case StateIndex::HEAT_STATE:
-      Serial.println("HEAT_STATE");
-      return StateIndex::HEAT_STATE;
-    case StateIndex::STAB_STATE:
-      Serial.println("STAB_STATE");
-      return StateIndex::STAB_STATE;
-    case StateIndex::HEAD_STATE:
-      Serial.println("HEAD_STATE");
-      return StateIndex::HEAD_STATE;
-    case StateIndex::PRE_BODY_STATE:
-      Serial.println("PRE_BODY_STATE");
-      return StateIndex::PRE_BODY_STATE;
-    case StateIndex::BODY_STATE:
-      Serial.println("BODY_STATE");
-      return StateIndex::BODY_STATE;
-    case StateIndex::PRE_TAIL_STATE:
-      Serial.println("PRE_TAIL_STATE");
-      return StateIndex::PRE_TAIL_STATE;
-    case StateIndex::FINISH_STATE:
-      Serial.println("FINISH_STATE");
-      return StateIndex::FINISH_STATE;
-    case StateIndex::CANCEL_STATE:
-      Serial.println("CANCEL_STATE");
-      return StateIndex::CANCEL_STATE;
-    case StateIndex::MANUAL_MODE:
-      Serial.println("MANUAL_MODE");
-      return StateIndex::MANUAL_MODE;
-    case StateIndex::ERROR_STATE:
-      Serial.println("ERROR_STATE");
-      return StateIndex::ERROR_STATE;
-    default:
-      Serial.println("UNDEFINED STATE");
-      return 0xFF;
+uint8_t InfiniteMoonshine::isPaused() {
+  if (MANUAL_MODE) {
+    if (manualPause) {
+      return manualPause;
+    }
+  }
+  return pause;
+}
+
+void InfiniteMoonshine::setPause(uint8_t value) {
+    pause = value;
+}
+
+void InfiniteMoonshine::setManualPause(uint8_t value) {
+  if (MANUAL_MODE) {
+    manualPause = value;
   }
 }
 
-void InfiniteMoonshine::clearArray() {
-  for (int i = 0; i < dataArraySize; i++) {
-    data[i] = 0;
+uint8_t InfiniteMoonshine::getStateIndex() {
+  return stateIndex;
+}
+
+void InfiniteMoonshine::setStateIndex(uint8_t value) {
+  stateIndex = value;
+  //индикатор для синхронизации.
+  //в ручном режиме при семене этапа отправляется как запрос
+  //если приходит такой же - смена подтверждена
+  //если предыдущий - нет
+}
+
+uint32_t InfiniteMoonshine::getSessionName() {
+  return sessionName;
+}
+
+void InfiniteMoonshine::setSessionName(uint32_t value) {
+  sessionName = value;
+}
+
+void InfiniteMoonshine::initWatchdog() {
+  /*
+  wdt_disable();
+  wdt_enable(rstWdtDelay);
+  */
+}
+
+void InfiniteMoonshine::restartWatchdog() {
+  /*
+  wdt_reset();
+  */
+}
+
+void InfiniteMoonshine::restartOther() {
+  digitalWrite(rstPin, HIGH);
+  delay(rstPinDelay);
+  digitalWrite(rstPin, LOW);
+  otherRestarted = true;
+  sendData();
+}
+
+void InfiniteMoonshine::sendCallsign() {
+  if (initialize) {
+    callsign = initSign;
+  } else {
+    callsign = onlineSign;
   }
-  dataIndex = 0;
+  port->print(callsign);
+  port->flush();
+  responseTime = millis();
+}
+
+void InfiniteMoonshine::addToQueue(byte number, String value) {
+  String pair = String(number) + " " + value + " ";
+  int len = queue.length() + pair.length();
+
+  if (len > bufferSize) {
+    port->print(queue);
+    port->flush();
+    queue = "";
+    delayMicroseconds(bytesArrivalTime);
+  }
+  queue += pair;
+}
+
+void InfiniteMoonshine::endQueue() {
+  queue += String(endOfTransmission);
+  port->print(queue);
+  port->flush();
+
+  queue = "";
+}
+
+float InfiniteMoonshine::calculateTemp(float pressure) {
+  return 0.038 * pressure + 49.27;
 }

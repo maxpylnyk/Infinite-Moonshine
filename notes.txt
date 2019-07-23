@@ -18,7 +18,7 @@ uno использует для записи файл на sd карте. имя
 Журнал
 
 хранит записи с меткой времени и данными сенсоров и управляющих устройств.
-запись в журнал производится по завершению синхронизации с минимально необходимой периодичностью по интерфейсу spi.
+запись в журнал производится по завершению синхронизации с минимально необходимой периодичностью.
 
 после каждого этапа подводится итог выполнения - продолжительность, средние и ключевые значения данных.
 при завершении сессии подводится общий итог.
@@ -112,8 +112,6 @@ error state active, show malfunction message
 
 
 
-
-
 common
 ссылки Class * object; oblect->method(); прототипирование
 String в библиотеках #include <Arduino.h>только в хедер
@@ -129,36 +127,22 @@ Including files from the sketch folder, and subfolders,
 
 
 
-sensors
-edit pin map
+
 measure init, request and receive time, and values in debug methods
 
-alc: init debug, measure time, optimize and calibrate levels
-hlev: init, test getsyncarray, fit resistors
-bar: debug
-therm: debug 
-mtr: calibrate maxPosition, mlToSteps, test fullstep mode
+alc: screen data wire? check heads?
+hlev: fit resistors, screen power wire?
+mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
 heater: debug calibrate, default adjStep, powerHead, powerBody
 
-
-
-pin map
-
-//bar		3.3V GND 20 21
-//tr 		2
-ssr		3
-//alc		4 a0
-//hlvl	5 a1 a2 a3
-mtr 	22-37
-spi		50-53
-reset pin 49 @ MEGA, a5 @ UNO
-megaSlaveSelect 4 @ UNO
 
 UNO
 13	SCK
 12	MISO
 11	MOSI
 10	SS
+A4	SDA
+A5	SCL
 
 MEGA
 44-46	PWM
@@ -171,6 +155,9 @@ MEGA
 
 
 control
+  heater
+  step motor loop to debug
+	init motors after sync
 
 реечная передача
 	рейка 20 см
@@ -180,11 +167,6 @@ control
 	передаточное число 2..6 кпд 95-97%
 		4
 		шаг 1.57
-
-акрил
-	коэф пуассона 0,37
-	модуль юнга (упругости) 3300 МПа
-	HRC твердость по роквеллу 95
 
 двигатель
 
@@ -236,35 +218,92 @@ if callsign incorrect -> ask again -> restart if incorrect
 fill data
 config pins @ setup
 
+transmit session name only after reboot
+transmit state after change and reboot
+blackout -> send full data
+
+change state -> send to uno, log writes summary
+in manual mode uno sends confirmation if granted
+mega add nextState field
+
+no log when paused
+
+immitate freeze
+
+i initialization	(just turned on)
+* online	(normal operation)
+> incoming data (normal operation)
+r restarted	(if other restarted)
+
+uno sends:
+
+callsigns
+if no callsign on timeout -> attempts to connect -> if success continue
+																								 -> if no answer restart, try again -> if success continue with r data
+																								 																		-> if no answer error -> log and display
+commands
+receives data
+if no data -> callsign procedure
+
+* -> 
+		 * expected
+		 i -> mega blackout error
+i -> 
+		 i  -> > data from log or stby
+		 !i -> uno blackout error
+r -> full data to restarted
+> -> cmd data
+
+mega sends:
+
+responds on callsigns. if ! i | * -> no answer
+if no callsign on timeout -> attempts to connect -> if success continue
+																								 -> if no answer restart, try again -> if success continue with r data
+																								 																		-> if no answer error -> blink
+sends > data when collected
+
+*
+i <- full data expected with >
+r -> full data to restarted
+> -> full data to log
 
 
-transfer 44B
-
-state	1B	uint8_t
-
-ONLINE					xxxxxxx1
-TRANSFER				xxxxxx1x
-RESTART					xxxxx1xx
-INITIALIZATION 	xxxx1xxx
-
-STAND_BY_STATE	0000xxxx
-HEAT_STATE			0001xxxx	returnTap
-STAB_STATE     	0010xxxx	minHeat
-HEAD_STATE     	0011xxxx	outTap, headHeat
-PRE_BODY_STATE 	0100xxxx	
-BODY_STATE     	0101xxxx	outTap, bodyHeat
-PRE_TAIL_STATE 	0110xxxx	outTap, rf, tailHeat
-FINISH_STATE		0111xxxx
-
-CANCEL_STATE		1000xxxx
-ERROR_STATE   	1111xxxx
+@ YYYY-MM-DD hh:mm:ss 255 2 5 1024 78.555 78.500 50.000 78.667 -20.000 745.00 500 50 1 255 255 6 700 1700 10 1 2 3 4
 
 
+1 2 3 4
+4 3 2 1
+
+
+
+logic
+  condenser node : therm, motor
+    receive env temp
+  extraction node : two therms, three motors, heater, hlevel, alc
+    rfratio control logic
+    receive pres, calc table temp
+    search
+
+paused state for control values measurement and manual mode
 
 
 
 
 ui
+  text only buttons
+  num keyboard
+  panes
+  graph
+
+что варим?
+
+initializing... on launch while !init
+
+подтверждение отмены
+кнопка при нажатии меняет цвет
+
+если не приходят данные для отображения - ставить прочерк
+прочерк по умолчанию
 
 utftglue::settextcursor выравнивание
 
@@ -273,8 +312,9 @@ info pane
 settings pane
 график выбранного параметра с маштабированием
 отображение значения при нажатии
+error message
 
-buttons
+buttons:
 cancel
 info
 log
@@ -289,41 +329,115 @@ right
 keyboard
 
 indicate panes and switch handle code
-fillCircle with radius==1 -> drawPixel
-
-
-управление с измеренной инерционностью
-запоминать стабильное значение
-форсировать стабильные значения при отборе тела по команде
-проследить зависимость охлаждения от температуры среды
-исследовать различие фактической температуры кипения спирта от табличной
-измерить время ответа на изменение мощности нагрева,
- скорости отбора, обратного отбора, охлаждения, выхода продукта из доохладителя
-измерить минимальную мощность нагрева кипения
-если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
-предусмотреть сообщения о выходе из строя компонентов
-
+fillCircle with radius==1 -> drawPixel ?
+indicate pause
+manual mode -> nano controls pause. mega can't cancel it with control check
+normal operation -> mega sets pause to check control values
 
 
 
 manual mode
 
+next state button
+display heads and body in % of absolute 
+display calculated values
+ui edit mode
 
 
 
+schedule
 
-sync outside classes
+* assemble and calibrate sensors and controls
+* write sync and log
+* write operating logic
+* write ui
 
-IMUNO -> receives array
-barometer
-timer
-logger 
+
+waterTap -> calibrate
+alc -> measure heads
+hlvl -> test screened wire
+
+
+
+adj doesn't work
+achieve to reconnect sensors in loop
+check thermometers status while executing
+define log line length after calbrating all nodes
+enum for log reccords
+new session from beginning to end
+and another
+error hadle flags
+test sync
+enable watchdog
+fix enums
+MEGA D53 HIGH
+определить линейный участок напряжений нагревателя
+предхвост для зерновых
+sd equal line length
 ui
+clear global variables after session finish
+частота записи в журнал должна не реже частоты смены позиции кранов
+mtr return current position when target reached
 
-IMMEGA -> transmits array
+how to handle errors?
+	BLACKOUTS и OVERFLOW решаются контроллером. сообщения только для статистики
+	для остальных вывести сообщение и перкратить работу с записью о причине
+	разрешенные ошибки удаляются из списка, неисправности остаются
 
-//debug mode : Serial.begin();
 
-alc, hlevel, therms
-heater and motors
-state -> init(), loop(), logic
+крепление плат и моторов
+шестерни
+прокладки
+резьбовая фиксация 
+
+канализация
+вытяжка
+крышка алкодатчика
+
+
+установка ноля на кранах: клавиатура, +/- и установить
+скорость отбора в float
+экран на мега
+двигать краны по очереди
+выключать питание после каждого шага
+фон соответствует режиму работы
+темный при ожидании
+заголовок в логе с подписью значений
+комментарии
+три первых строки
+class logentry
+
+
+
+debug
+
+управление с измеренной инерционностью
+запоминать стабильное значение
+форсировать стабильные значения при отборе тела по команде
+окно при дестабилизации в ручном режиме с кнопкой форсировать
+ожидая ответ, продолжать мониторинг и передачу данных
+проследить зависимость охлаждения от температуры среды
+исследовать различие фактической температуры кипения спирта от табличной
+измерить время ответа на изменение мощности нагрева,
+ скорости отбора, обратного отбора, охлаждения, выхода продукта из доохладителя
+измерить минимальную мощность нагрева кипения
+измерить минимальное время существенного изменения показателей для синхронизации и записи в журнал
+если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
+предусмотреть сообщения о выходе из строя компонентов с кнопкой продолжить если возможно
+если последняя сессия была отменена, предлагать продолжить при старте новой
+проследить зависимость мощности нагрева от температуры среды или сырья. 
+	если зависимости нет - прописать константы в классе нагревателя.
+remove serial from classes
+remove synchronizable class
+
+
+after research
+if no space -> extract usefull data to exp file and remove oldest logs
+внести изменения в печатную плату: 
+		подвинуть левое верхнее отверстие на 0.5 мм влево
+		все отверстия увеличить до 3.5 мм
+		правое верхнее и левое нижнее отверстия обойти дорожками на 1 мм
+		нужно больше места вокруг гаек
+		добавить отверстия для земли гидроуровня 4 шт, датчика алкоголя 1 шт
+		отдалить термодатчик на плате от шнуров
+

@@ -1,7 +1,9 @@
 #include "IMTimer.h"
 
-IMTimer::IMTimer() {
-  clock.begin();
+IMTimer::IMTimer() {}
+
+bool IMTimer::init() {
+  return clock.begin();
 }
 
 unsigned long IMTimer::start() {
@@ -44,4 +46,9 @@ String IMTimer::getFileName() {
   out += String(extension);
 
   return out;
+}
+
+float IMTimer::getEnvTemp() {
+    clock.forceConversion();
+    return clock.readTemperature();
 }

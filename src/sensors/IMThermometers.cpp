@@ -1,74 +1,86 @@
 #include "IMThermometers.h"
 
-IMThermometers::IMThermometers() : IMSensor(syncBytesCount, initTime, requestTime, receiveTime) {}
+IMThermometers::IMThermometers() : IMSensor(initTime, requestTime, receiveTime) {
+  for (int8_t i = 0; i < thermometersCount; i++) {
+    trms[i].setErrorList(errors);
+  }
+}
 
-bool IMThermometers::initThermometer(IMThermometer therm, uint8_t * address, float adjustment) {
-  bool online;
-
-  therm.setAddress(address);
-  therm.setAdjustment(adjustment);
-  tempSensors.setResolution(resolution);
-  online = tempSensors.isConnected(address);
-
-  return online;
+void IMThermometers::printAddress(const uint8_t * address) {
+  for (uint8_t i = 0; i < 8; i++) {
+    if (address[i] < 16) Serial.print("0");
+    Serial.print(address[i], HEX);
+  }
 }
 
 bool IMThermometers::init() {
-  bool sensorsReady = true;
-
-  tempSensors.begin();
-
-  if (!initThermometer(steamTherm, *t1Address, t1Adj)) {
-    //log steam thermometer offline
-    sensorsReady = false;
+  bool ready = true;
+  sensors.begin();
+  sensors.setResolution(resolution);
+  
+  for (int8_t i = 0; i < thermometersCount; i++) {
+    ready &= trms[i].online();
   }
-  if (!initThermometer(condTherm, *t2Address, t2Adj)) {
-    //log condenser thermometer offline
-    sensorsReady = false;
-  }
-  if (!initThermometer(pipeTherm, *t3Address, t3Adj)) {
-    //log pipe thermometer offline
-    sensorsReady = false;
-  }
-  return sensorsReady;
+  return ready;
 }
 
 void IMThermometers::debug() {
-//valid address, check adjustments
+  uint8_t deviceCount = sensors.getDeviceCount();
+  DeviceAddress addr[deviceCount];
+
+  Serial.println(String(deviceCount) + " thermometers online.");
+  stopwatch.start();
+  sensors.requestTemperatures();
+  Serial.println("request time "+String(stopwatch.check())+" ms");
+
+  for (int i = 0; i < deviceCount; i++) {
+    sensors.getAddress(addr[i], i);
+    Serial.print("trm "+String(i+1)+" addr ");
+    printAddress(addr[i]);
+    stopwatch.check();
+    Serial.print(" value "+String(sensors.getTempC(addr[i]), DEC));
+    Serial.println(" receive time "+String(stopwatch.check())+" ms");
+  }
+  Serial.println("overall measure time "+String(stopwatch.stop())+" ms");
+  Serial.println();
+}
+
+void IMThermometers::setErrorList(IMErrors * list) {
+  errors = list;
 }
 
 void IMThermometers::requestData() {
   setMeasuring(true);
-  tempSensors.requestTemperatures();
+  setMeasured(false);
+  stopwatch.start();
+  sensors.requestTemperatures();
 }
 
 void IMThermometers::receiveData() {
-  uint8_t * steamAddress = steamTherm.getAddress();
-  uint8_t * condAddress = condTherm.getAddress();
-  uint8_t * pipeAddress = pipeTherm.getAddress();
+  bool result = true;
 
-  steamTherm.setRawTemp(tempSensors.getTempC(steamAddress));
-  condTherm.setRawTemp(tempSensors.getTempC(condAddress));
-  pipeTherm.setRawTemp(tempSensors.getTempC(pipeAddress));
+  result &= steamTrm.receiveData();
+  result &= pipeTrm.receiveData();
+  result &= condTrm.receiveData();
+  result &= envTrm.receiveData();
+  result &= stopwatch.stop() >= getMeasuringTime();
+
   setMeasuring(false);
+  setMeasured(result);
 }
-
-void IMThermometers::getSyncArray(uint8_t bytes[]) {
-  toArray(getSteamTemp(), *bytes);
-  toArray(getCondTemp(), *(bytes+floatSize));
-  toArray(getPipeTemp(), *(bytes+floatSize*2));
-}
-
-void IMThermometers::sync(uint8_t bytes[]) {}
 
 float IMThermometers::getSteamTemp() {
-  return steamTherm.getTemperature();
-}
-
-float IMThermometers::getCondTemp() {
-  return condTherm.getTemperature();
+  return steamTrm.getTemperature();
 }
 
 float IMThermometers::getPipeTemp() {
-  return pipeTherm.getTemperature();
+  return pipeTrm.getTemperature();
+}
+
+float IMThermometers::getCondTemp() {
+  return condTrm.getTemperature();
+}
+
+float IMThermometers::getEnvTemp() {
+  return envTrm.getTemperature();
 }

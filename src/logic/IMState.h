@@ -4,17 +4,16 @@
 #include "stdint.h"
 
 typedef enum StateIndex : uint8_t {
-  STAND_BY_STATE = 0x00,
-  HEAT_STATE     = 0x10,
-  STAB_STATE     = 0x20,
-  HEAD_STATE     = 0x30,
-  PRE_BODY_STATE = 0x40,
-  BODY_STATE     = 0x50,
-  PRE_TAIL_STATE = 0x60,
-  FINISH_STATE   = 0x70,
-  CANCEL_STATE   = 0x80,
-  MANUAL_MODE    = 0xA0,
-  ERROR_STATE    = 0xF0
+  STAND_BY_STATE = 0,
+  HEAT_STATE,
+  STAB_STATE,
+  HEAD_STATE,
+  PRE_BODY_STATE,
+  BODY_STATE,
+  PRE_TAIL_STATE,
+  FINISH_STATE,
+  CANCEL_STATE,
+  ERROR_STATE
 };
 
 class IMState {

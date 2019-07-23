@@ -5,26 +5,19 @@
 #include "Wire.h"
 #include "SFE_BMP180.h"
 
-#define POWER_PIN 3v3
-#define GND_PIN   GND
-#define SDA_PIN   20
-#define SCL_PIN   21
-
 class IMBarometer : public IMSensor {
   private:
-    static const int8_t syncBytesCount = floatSize + floatSize;
-    static const char resolution = 1;
+    static const char resolution = 3;
     static const float treshold = 650.0;
     static const float mmHgMultiplier = 0.75;
     static const unsigned int initTime = 0;
-    static const unsigned int requestTime = 14;
+    static const unsigned int requestTime = 27;
     static const unsigned int receiveTime = 1;
     double pressure;
     double envTemp;
-    SFE_BMP180 presSensor;
+    SFE_BMP180 sensor;
 
-    void setPres(float value);
-    void setEnvTemp(float value);
+    void setPressure(double);
 
   public:
     IMBarometer();
@@ -33,11 +26,8 @@ class IMBarometer : public IMSensor {
     void debug();
     void requestData();
     void receiveData();
-    void getSyncArray(uint8_t bytes[]);
-    void sync(uint8_t bytes[]);
-    float getPres();
-    float getEnvTemp();
-    float getTableTemp();
+    double getPressure();
+    void setEnvTemp(double);
 
 };
 

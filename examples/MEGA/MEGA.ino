@@ -3,31 +3,17 @@
 IMMega mega;
 
 void setup() {
-  //add check timeout
-  Serial.begin(9600);
-  Serial.println("debug started");
   if (mega.init()) {
     mega.debug();
-    Serial.println("debug finished");
   } else {
-    Serial.println("init failure");
+    Serial.println("mega init failure");
   }
 }
 
 void loop() {
-
+  mega.loop();
 }
 
-ISR(SPI_STC_vect) {
-  mega.interruptRoutine();
+void serialEvent1() {
+  mega.receiveCallsign();
 }
-/*
-void readData() {
-  //search and run master commands from array
-}
-
-void writeData() {
-  //collect data into array
-  dataIndex = 0;
-}
-*/

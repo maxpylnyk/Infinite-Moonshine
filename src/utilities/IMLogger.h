@@ -3,22 +3,48 @@
 
 #include "Arduino.h"
 #include "utilities/IMTimer.h"
-#include <SD.h>
+#include "utilities/IMCommons.h"
+#include "utilities/IMErrors.h"
+#include "utilities/IMFile.h"
+#include "SdFat.h"
+#include "SPI.h"
+
+typedef enum LogEntry : char {
+  STATE_INIT = '<',
+  STATE_SUMMARY = '>',
+  SESSION_INIT = 'i',
+  SESSION_SUMMARY = 'd',
+  USER_ACTION = 'u',
+  ENTRY = '@',
+  COMMENT = '#'
+};
 
 class IMLogger {
   private:
-    static const int SD_CS = 10;
-
+    static const uint8_t lineLen = 128;
+    static const float megabyteMultiplier = 0.001024;
+    static const char * logDirPath = "/im/log/";
+    float avgLogSize;
     IMTimer timer;
-    String fileName;
-    File logFile;
+    char * filePath;
+    SdFat sd;
+    IMFile logFile;
+    IMErrors * errors;
+
+    bool enoughSpace();
+    void writeHeader();
+    void searchFS();
+    void setAvgSizeMB(float);
+    float getAvgSizeMB();
 
   public:
     IMLogger();
     IMLogger(String fileName);
 
     bool init();
-    bool print(String);
+    bool println(String);
+    void setFileName(String);
+    void setErrorList(IMErrors*);
 
 };
 

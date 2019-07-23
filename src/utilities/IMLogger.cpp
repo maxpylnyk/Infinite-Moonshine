@@ -1,23 +1,126 @@
 #include "IMLogger.h"
 
 IMLogger::IMLogger() {
-  fileName = timer.getFileName();
+  filePath = "";
 }
 
-IMLogger::IMLogger(String fileName) : fileName(fileName) {}
+IMLogger::IMLogger(String fileName) {
+  setFileName(fileName);
+}
+
+void IMLogger::setAvgSizeMB(float size) {
+  avgLogSize = size;
+}
+
+float IMLogger::getAvgSizeMB() {
+  return avgLogSize;
+}
 
 bool IMLogger::init() {
-  //check free space
-  return SD.begin(SD_CS);
+  float averageSize;
+
+  if (!sd.begin(PinMap::SD_CS, SPI_FULL_SPEED)) {//"SdInfo.h"
+    errors->add(IMError::NO_SD_CARD);
+    return false;
+  }
+  if (!enoughSpace()) {
+    errors->add(IMError::NO_SD_SPACE);
+    return false;
+  }
+  //init file
+  searchFS();
+  //calculate avg size
+  setAvgSizeMB(averageSize);
+  return true;
 }
 
-bool IMLogger::print(String line) {
-  logFile = SD.open(fileName, FILE_WRITE);
+bool IMLogger::enoughSpace() {
+  uint32_t freeClusters = sd.vol()->freeClusterCount() / 2;
+  float freeSpaceMB = (megabyteMultiplier * freeClusters) * sd.vol()->blocksPerCluster();
+  return freeSpaceMB > (10 * getAvgSizeMB());
+}
 
-  if (logFile) {
-    logFile.println(line);
-    logFile.close();
-    return true;
+void IMLogger::writeHeader() {
+
+}
+
+void IMLogger::searchFS() {
+  IMFile logDir = IMFile(logDirPath, (oflag_t) O_CREAT);
+  IMFile file;
+
+  if (!logDir.isDir() || logDir.getError()) {
+    return;//error?
+  }
+  logDir.rewind();
+
+  //search and create a chart of defined number of last sessions
+
+  while (file.openNext(&logDir)) {
+    if (!file.isHidden()) {
+      dir_t* dir = file.cacheDirEntry(FatCache::CACHE_FOR_READ);
+
+      if (!dir) {
+        return;//error
+      }
+      int i = 0;
+      char name[8];
+      char ext[3];//read data if ext == log
+      
+      uint32_t sizeB = dir->fileSize;
+      float sizeMB = sizeB * megabyteMultiplier;
+
+      uint32_t beginDate = FAT_YEAR(dir->creationDate) * 10000;
+      beginDate += FAT_MONTH(dir->creationDate) * 100;
+      beginDate += FAT_DAY(dir->creationDate);
+
+      uint32_t finishDate = FAT_YEAR(dir->lastWriteDate) * 10000;
+      finishDate += FAT_MONTH(dir->lastWriteDate) * 100;
+      finishDate += FAT_DAY(dir->lastWriteDate);
+
+      for (; i < 8; i++) {
+        name[i] = dir->name[i];
+      }
+      for (int j = 0; i < 11; i++, j++) {
+        ext[j] = dir->name[i];
+      }
+
+      Serial.print(name);
+      Serial.print('.');
+      Serial.print(ext);
+      Serial.print("  ");
+      Serial.print(sizeMB);
+      Serial.print(" MB  ");
+      Serial.print(beginDate);
+      Serial.print("  ");
+      Serial.println(finishDate);
+    }
+    file.close();
+  }
+}
+
+bool IMLogger::println(String line) {
+  uint8_t whitespaceCount = lineLen - line.length() - 1;
+  char buffer[whitespaceCount];
+
+  for (uint8_t i = 0; i < whitespaceCount; i++) {
+    buffer[i] = ' ';
+  }
+  line += String(buffer);
+  line += "/n";
+
+  if (logFile.open(filePath, (oflag_t) O_WRONLY)) {//errors? // O_APPEND?
+    int bytesWritten = logFile.write((char*)line.c_str(), lineLen);
+    bool closed = logFile.close();
+    return (bytesWritten == lineLen) && closed;
   }
   return false;
+}
+
+void IMLogger::setFileName(String name) {
+  String str = String(logDirPath) + name;
+  filePath = (char*) str.c_str();
+}
+
+void IMLogger::setErrorList(IMErrors * list) {
+  errors = list;
 }

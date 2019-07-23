@@ -19,11 +19,13 @@ class IMTimer {
   public:
     IMTimer();
 
+    bool init();
     unsigned long start();
     unsigned long check();
     unsigned long stop();
     String getLogStamp();
     String getFileName();
+    float getEnvTemp();
     
 };
 

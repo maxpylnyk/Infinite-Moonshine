@@ -1,7 +1,7 @@
 #include "IMSensor.h"
 
-IMSensor::IMSensor(int8_t arraySize, uint32_t initTime, uint32_t requestTime, uint32_t receiveTime) :
-  IMSynchronizable(arraySize), initTime(initTime), requestTime(requestTime), receiveTime(receiveTime) {}
+IMSensor::IMSensor(uint32_t initTime, uint32_t requestTime, uint32_t receiveTime) :
+  initTime(initTime), requestTime(requestTime), receiveTime(receiveTime) {}
 
 void IMSensor::setMeasuring(bool value) {
   measuring = value;
@@ -9,6 +9,14 @@ void IMSensor::setMeasuring(bool value) {
 
 bool IMSensor::isMeasuring() {
   return measuring;
+}
+
+void IMSensor::setMeasured(bool value) {
+  measured = value;
+}
+
+bool IMSensor::dataReady() {
+  return measured;
 }
 
 uint32_t IMSensor::getInitTime() {

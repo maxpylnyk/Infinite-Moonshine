@@ -1,51 +1,35 @@
 #include "IMBarometer.h"
 
-IMBarometer::IMBarometer() : IMSensor(syncBytesCount, initTime, requestTime, receiveTime) {}
+IMBarometer::IMBarometer() : IMSensor(initTime, requestTime, receiveTime) {}
 
-void IMBarometer::setPres(float value) {
+void IMBarometer::setPressure(double value) {
   pressure = value;
 }
 
-void IMBarometer::setEnvTemp(float value) {
+void IMBarometer::setEnvTemp(double value) {
   envTemp = value;
 }
 
 bool IMBarometer::init() {
-  return presSensor.begin();
+  return sensor.begin();
 }
 
-void IMBarometer::debug() {
-
-}
+void IMBarometer::debug() {}
 
 void IMBarometer::requestData() {
   setMeasuring(true);
-  delay(presSensor.startTemperature());
-  presSensor.getTemperature(envTemp);
-  presSensor.startPressure(resolution);
+  setMeasured(false);
+  //delay(sensor.startTemperature());
+  //sensor.getTemperature(envTemp);
+  delay(sensor.startPressure(resolution));
 }
 
 void IMBarometer::receiveData() {
-  presSensor.getPressure(pressure, envTemp);
-  setPres(pressure * mmHgMultiplier);
+  setMeasured(sensor.getPressure(pressure, envTemp));
+  setPressure(pressure * mmHgMultiplier);
   setMeasuring(false);
 }
 
-void IMBarometer::getSyncArray(uint8_t bytes[]) {
-  toArray(getPres(), *bytes);
-  toArray(getEnvTemp(), *(bytes+floatSize));
-}
-
-void IMBarometer::sync(uint8_t bytes[]) {}
-
-float IMBarometer::getPres() {
-  return (float) pressure;
-}
-
-float IMBarometer::getEnvTemp() {
-  return (float) envTemp;
-}
-
-float IMBarometer::getTableTemp() {
-  return 0.038 * getPres() + 49.27;
+double IMBarometer::getPressure() {
+  return pressure;
 }
