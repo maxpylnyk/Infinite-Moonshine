@@ -83,11 +83,11 @@ void IMHydroLevel::requestData() {
 }
 
 void IMHydroLevel::receiveData() {
-  digitalWrite(PinMap::HLVL_OUT, HIGH);
-  setDataLo(analogRead(PinMap::HLVL_LO));
-  setDataHi(analogRead(PinMap::HLVL_HI));
-  setDataOver(analogRead(PinMap::HLVL_OVR));
-  digitalWrite(PinMap::HLVL_OUT, LOW);
+  digitalWrite(HLVL_OUT_PIN, HIGH);
+  setDataLo(analogRead(HLVL_LO_PIN));
+  setDataHi(analogRead(HLVL_HI_PIN));
+  setDataOver(analogRead(HLVL_OVR_PIN));
+  digitalWrite(HLVL_OUT_PIN, LOW);
   setMeasuring(false);
 }
 

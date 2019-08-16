@@ -1,27 +1,16 @@
 #include "IMNano.h"
 
-IMNano::IMNano() : InfiniteMoonshine(PinMap::NANO_RST) {}
+IMNano::IMNano() : InfiniteMoonshine(NANO_RST_PIN) {}
 
 bool IMNano::init() {
   bool result = true;
 
   initWatchdog();
+
   port = &Serial;
   port->begin(serialSpeed);
-  /*
-  logger.setErrorList(&errors);
-  result &= logger.init();
-
-  if (!timer.init()) {
-    errors.add(IMError::NO_RTC);
-    result = false;
-  }
-  if (!bar.init()) {
-    errors.add(IMError::NO_BAR);
-    result = false;
-  }
-  */
   sendCallsign();
+
   return result;
 }
 
@@ -32,7 +21,7 @@ void IMNano::loop() {
   //read env data
   //check and handle errors. show error messages.
   //if error handled, wait to log, then remove from list
-  //restart wtd
+  restartWatchdog();
   //log
 }
 
@@ -129,8 +118,8 @@ void IMNano::sendData() {
     addToQueue(LogIndex::OUT_MTR, String(outMtrPos));
     addToQueue(LogIndex::RET_MTR, String(retMtrPos));
     addToQueue(LogIndex::EXT_ADJ, String(extMtrAdj));
-    addToQueue(LogIndex::ENV_TEMP, String(envTemp));
-    addToQueue(LogIndex::PRESSURE, String(pressure));
+    //addToQueue(LogIndex::ENV_TEMP, String(envTemp));
+    //addToQueue(LogIndex::PRESSURE, String(pressure));
     endQueue();
     logRestart();
   }

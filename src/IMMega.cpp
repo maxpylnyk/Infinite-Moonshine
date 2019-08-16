@@ -1,15 +1,34 @@
 #include "IMMega.h"
 
-IMMega::IMMega() : InfiniteMoonshine(PinMap::MEGA_RST) {}
+IMMega::IMMega() : InfiniteMoonshine(MEGA_RST_PIN) {}
+
+void IMMega::setMasterSPI() {
+  pinMode(53, OUTPUT);
+  digitalWrite(53, HIGH);
+}
 
 bool IMMega::init() {
   bool result = true;
+
   timer.start();
+  initWatchdog();
+  setMasterSPI();
 
   if (DEBUG_MODE) {
     debugPort = &Serial;
     debugPort->begin(usbSpeed);
   }
+  
+  debugPort->print("initializing screen.. ");
+
+  if (ui.init()) {
+    debugPort->println("done in "+String(timer.check())+" ms");
+  } else {
+    debugPort->println("failed");
+    timer.check();
+    result = false;
+  }
+  
   /*
   debugPort->print("initializing serial interface.. ");
   port = &Serial1;
@@ -20,12 +39,23 @@ bool IMMega::init() {
   while(!port->available());//if no transmission or delay -> error
   debugPort->println("data transfer complete in "+String(timer.check())+" ms");
   */
-  /*
+  /* 
   debugPort->print("setting state.. ");
   state = &IMStandByState();
   debugPort->println("done in "+String(timer.check())+" ms");
   */
-  /*
+  /* 
+  debugPort->print("initializing log.. ");//after receiving data
+  log.setErrorList(&errors);
+
+  if (log.init()) {
+    debugPort->println("done in "+String(timer.check())+" ms");
+  } else {
+    debugPort->println("failed");
+    timer.check();
+    result = false;
+  }
+  */
   debugPort->print("initializing thermometers.. ");
   trm.setErrorList(&errors);
 
@@ -33,22 +63,20 @@ bool IMMega::init() {
     debugPort->println("done in "+String(timer.check())+" ms");
   } else {
     debugPort->println("failed");
-    timer.check()
+    timer.check();
     result = false;
   }
-  */
-  /*
+  
   debugPort->print("initializing hydrolevel.. ");
 
   if (hlvl.init()) {
     debugPort->println("done in "+String(timer.check())+" ms");
   } else {
     debugPort->println("failed");
-    timer.check()
+    timer.check();
     result = false;
   }
-  */
-  /*
+  
   debugPort->print("initializing realtime clock.. ");
 
   if (timer.init()) {
@@ -56,7 +84,7 @@ bool IMMega::init() {
   } else {
     errors.add(IMError::NO_RTC);
     debugPort->println("failed");
-    timer.check()
+    timer.check();
     result = false;
   }
   debugPort->print("initializing barometer.. ");
@@ -66,11 +94,10 @@ bool IMMega::init() {
   } else {
     errors.add(IMError::NO_BAR);
     debugPort->println("failed");
-    timer.check()
+    timer.check();
     result = false;
   }
-  */
- /*
+  /* 
   debugPort->print("initializing alcohol sensor.. ");
 
   if (alc.init()) {
@@ -78,32 +105,27 @@ bool IMMega::init() {
   } else {
     errors.add(IMError::NO_ALC);
     debugPort->println("failed");
-    timer.check()
+    timer.check();
     result = false;
   }
   */
-  /*
-  
-
-  */
-
-
-
   //result &= !initialize;
   debugPort->println("initialization done in "+String(timer.stop())+" ms");
-
+  
   if (result) {
     debugPort->println("system is ready to use");
+    ui.drawFrontPane();
   } else {
     debugPort->println("system initialization failure");
     printErrors();
+    ui.drawErrorsPane(&errors);
   }
 
   return result;
 }
 
 void IMMega::loop() {
-  //restartWatchdog();
+  restartWatchdog();
   //check timeouts
   //if timers == 0 -> init and measure
   //check and handle errors (if possible)
@@ -111,6 +133,17 @@ void IMMega::loop() {
   //collect sensors values
   //send data
   //receive commands
+
+
+
+  ui.handleTouch();
+  /*
+  if (millis() - temp >= 3000) {
+    debugPort->println(String(millis())+" loop check");
+    temp = millis();
+  }
+  */
+  ui.refresh();
 }
 
 void IMMega::debug() {
@@ -149,7 +182,7 @@ void IMMega::debug() {
   //alc.debug();
 
 
-  outMtr.loop();
+  //outMtr.loop();
 }
 
 void IMMega::receiveCallsign() {
@@ -203,6 +236,8 @@ void IMMega::sendData() {//encapsulate
   addToQueue(LogIndex::STEAM_TEMP, String(trm.getSteamTemp(), FLOAT_PRECISION));
   addToQueue(LogIndex::COND_TEMP, String(trm.getCondTemp(), FLOAT_PRECISION));
   addToQueue(LogIndex::PIPE_TEMP, String(trm.getPipeTemp(), FLOAT_PRECISION));
+  addToQueue(LogIndex::ENV_TEMP, String(trm.getEnvTemp(), FLOAT_PRECISION));
+  addToQueue(LogIndex::PRESSURE, String(bar.getPressure()));
   addToQueue(LogIndex::COND_MTR, String(0));
   addToQueue(LogIndex::COND_MTR_ADJ, String(0));
   addToQueue(LogIndex::SW, String(0));

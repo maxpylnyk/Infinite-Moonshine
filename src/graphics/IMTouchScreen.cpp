@@ -1,5 +1,4 @@
 #include "graphics/IMTouchScreen.h"
-#include "graphics/IMUI.h"
 
 IMTouchScreen::IMTouchScreen() {}
 
@@ -122,8 +121,8 @@ IMPoint IMTouchScreen::getTouchPosition() {
         y = ySum/divisor;
         z = zSum/divisor;
         
-        x = map(y, TS_LEFT, TS_RT, 0, IMUI::WIDTH);//landscape rotation
-        y = map(x, TS_BOT, TS_TOP, 0, IMUI::HEIGHT);
+        x = map(x, TS_TOP, TS_BOT, 0, SCR_WIDTH);//landscape rotation
+        y = map(y, TS_LEFT, TS_RT, 0, SCR_HEIGHT);
     }
     return IMPoint(x, y, z);
 }

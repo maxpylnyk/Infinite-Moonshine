@@ -20,9 +20,12 @@ class IMTimer {
     IMTimer();
 
     bool init();
+    void setupTime();
     unsigned long start();
     unsigned long check();
     unsigned long stop();
+    String getTime();
+    String getDate();
     String getLogStamp();
     String getFileName();
     float getEnvTemp();

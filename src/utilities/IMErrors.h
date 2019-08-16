@@ -25,6 +25,7 @@ typedef enum IMError : uint8_t {
   NANO_BLACKOUT,//h
   MEGA_BLACKOUT,//h
   TRANSMISSION_CORRUPTED,
+  NO_LOG_DIR,
   ERRORS_COUNT
 };
 

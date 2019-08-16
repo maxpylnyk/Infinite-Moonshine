@@ -66,6 +66,7 @@ class InfiniteMoonshine {
     uint32_t sessionName = 0;
     unsigned long responseTime = 0;
     //add timers
+    unsigned long wtdRstTime;
 
     IMTimer timer = IMTimer();
     IMErrors errors = IMErrors();

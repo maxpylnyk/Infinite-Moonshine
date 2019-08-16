@@ -48,12 +48,15 @@ void InfiniteMoonshine::initWatchdog() {
   /*
   wdt_disable();
   wdt_enable(rstWdtDelay);
+  wtdRstTime = millis();
   */
 }
 
 void InfiniteMoonshine::restartWatchdog() {
   /*
-  wdt_reset();
+  if (millis() - wtdRstTime >= watchdogTimeout) {
+    wdt_reset();
+  }
   */
 }
 

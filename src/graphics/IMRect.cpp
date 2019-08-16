@@ -29,3 +29,11 @@ int IMRect::getYLo() {
 int IMRect::getYHi() {
   return yHi;
 }
+
+int IMRect::getWidth() {
+  return xHi - xLo;
+}
+
+int IMRect::getHeight() {
+  return yHi - yLo;
+}

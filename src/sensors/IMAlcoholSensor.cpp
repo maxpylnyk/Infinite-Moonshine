@@ -2,7 +2,7 @@
 
 IMAlcoholSensor::IMAlcoholSensor() :
  IMSensor(initTime, requestTime, receiveTime) {
-   pinMode(PinMap::ALC_HEAT, OUTPUT);
+   pinMode(ALC_HEAT_PIN, OUTPUT);
  }
 
 void IMAlcoholSensor::setLevel(int16_t data) {
@@ -18,16 +18,16 @@ bool IMAlcoholSensor::init() {
 }
 
 void IMAlcoholSensor::debug() {
-  digitalWrite(PinMap::ALC_HEAT, HIGH);
+  digitalWrite(ALC_HEAT_PIN, HIGH);
 
   for (int i = 1; i <= 60; i++) {
-    Serial.print(analogRead(PinMap::ALC_DATA));
+    Serial.print(analogRead(ALC_DATA_PIN));
     Serial.println(" "+String(i)+" s");
     delay(1000);
   }
   Serial.println("5 sec break");
   Serial.println();
-  digitalWrite(PinMap::ALC_HEAT, LOW);
+  digitalWrite(ALC_HEAT_PIN, LOW);
   delay(5000);
 }
 
@@ -41,10 +41,10 @@ int16_t IMAlcoholSensor::getLevel() {
 
 void IMAlcoholSensor::requestData() {
   setMeasuring(true);
-  digitalWrite(PinMap::ALC_HEAT, HIGH);
+  digitalWrite(ALC_HEAT_PIN, HIGH);
 }
 void IMAlcoholSensor::receiveData() {
-  setLevel(analogRead(PinMap::ALC_DATA));
-  digitalWrite(PinMap::ALC_HEAT, LOW);
+  setLevel(analogRead(ALC_DATA_PIN));
+  digitalWrite(ALC_HEAT_PIN, LOW);
   setMeasuring(false);
 }

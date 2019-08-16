@@ -1,6 +1,6 @@
 Синхронизация
 
-со стороны uno происходит проверка зависания, mega отвечает. 
+со стороны nano происходит проверка зависания, mega отвечает. 
 если ответ не приходит - uno перезагружает mega.
 если через ожидаемое время с uno не поступает сигнал - mega перезагружает uno
 каждый контроллер имеет встроенную проверку на случай одновременного зависания
@@ -127,15 +127,6 @@ Including files from the sketch folder, and subfolders,
 
 
 
-
-measure init, request and receive time, and values in debug methods
-
-alc: screen data wire? check heads?
-hlev: fit resistors, screen power wire?
-mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
-heater: debug calibrate, default adjStep, powerHead, powerBody
-
-
 UNO
 13	SCK
 12	MISO
@@ -188,6 +179,16 @@ control
 Диаметр окружности впадин колеса = 50.25
 Толщина зуба по дуге делительной окружности = 2.356194
 Межосевое расстояние = 33.75
+
+const int XP=6,XM=A2,YP=A1,YM=7; //240x320 ID=0x9325
+const int TS_LEFT=184,TS_RT=932,TS_TOP=939,TS_BOT=203;
+PORTRAIT CALIBRATION     240 x 320
+x = map(p.x, LEFT=184, RT=932, 0, 240)
+y = map(p.y, TOP=939, BOT=203, 0, 320)
+Touch Pin Wiring XP=6 XM=A2 YP=A1 YM=7
+LANDSCAPE CALIBRATION    320 x 240
+x = map(p.y, LEFT=939, RT=203, 0, 320)
+y = map(p.x, TOP=932, BOT=184, 0, 240)
 
 
 
@@ -295,17 +296,12 @@ ui
   panes
   graph
 
-что варим?
-
-initializing... on launch while !init
-
 подтверждение отмены
 кнопка при нажатии меняет цвет
 
 если не приходят данные для отображения - ставить прочерк
 прочерк по умолчанию
 
-utftglue::settextcursor выравнивание
 
 numeric keyboard and input pane
 info pane
@@ -329,7 +325,6 @@ right
 keyboard
 
 indicate panes and switch handle code
-fillCircle with radius==1 -> drawPixel ?
 indicate pause
 manual mode -> nano controls pause. mega can't cancel it with control check
 normal operation -> mega sets pause to check control values
@@ -357,7 +352,13 @@ waterTap -> calibrate
 alc -> measure heads
 hlvl -> test screened wire
 
+measure init, request and receive time, and values in debug methods
 
+mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
+heater: debug calibrate, default adjStep, powerHead, powerBody
+
+get set to mega
+button class
 
 adj doesn't work
 achieve to reconnect sensors in loop
@@ -370,13 +371,12 @@ error hadle flags
 test sync
 enable watchdog
 fix enums
-MEGA D53 HIGH
 определить линейный участок напряжений нагревателя
 предхвост для зерновых
 sd equal line length
 ui
 clear global variables after session finish
-частота записи в журнал должна не реже частоты смены позиции кранов
+частота записи в журнал должна быть не реже частоты смены позиции кранов
 mtr return current position when target reached
 
 how to handle errors?
@@ -390,9 +390,7 @@ how to handle errors?
 прокладки
 резьбовая фиксация 
 
-канализация
-вытяжка
-крышка алкодатчика
+крышка алкодатчика - эпоксидная смола
 
 
 установка ноля на кранах: клавиатура, +/- и установить

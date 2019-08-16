@@ -18,6 +18,8 @@ class IMRect {
     int getXHi();
     int getYLo();
     int getYHi();
+    int getWidth();
+    int getHeight();
 
 };
 

@@ -33,7 +33,7 @@ class IMStepMotor {
   public:
     IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4);
 
-    static unsigned long getPauseUS();
+    unsigned long getPauseUS();
     bool increase();
     bool decrease();
     bool onPosition();

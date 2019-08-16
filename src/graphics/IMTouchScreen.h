@@ -4,6 +4,7 @@
 #define NUMSAMPLES 3
 
 #include "utilities/IMPoint.h"
+#include "graphics/IMTFT.h"
 #include "Arduino.h"
 
 class IMTouchScreen {
@@ -14,12 +15,12 @@ class IMTouchScreen {
     static const uint8_t XP = 6;
     static const uint16_t RX = 300;
 
-    static const uint16_t TS_LEFT = 942;
-    static const uint16_t TS_RT  = 186;
-    static const uint16_t TS_TOP = 927;
-    static const uint16_t TS_BOT = 183;
+    static const uint16_t TS_LEFT = 184;
+    static const uint16_t TS_RT  = 932;
+    static const uint16_t TS_TOP = 939;
+    static const uint16_t TS_BOT = 203;
 
-    static const int16_t LO_TRESHOLD = 20;
+    static const int16_t LO_TRESHOLD = 200;
     static const int16_t HI_TRESHOLD = 1000;
 
     IMPoint getPoint();

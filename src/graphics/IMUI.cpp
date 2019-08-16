@@ -1,40 +1,54 @@
 #include "IMUI.h"
 
-IMUI::IMUI() {}
+IMUI::IMUI(Language locale, IMCaptions * captions, IMTimer * timer) : 
+  locale(locale), captions(captions), timer(timer) {}
 
 bool IMUI::init() {
   bool result = tft.init();
   result &= ts.init();
-  currentPane->draw();
+  initPanes();
+  initPane.draw();
+  activePane = Panes::INIT;
   return result;
+}
+
+void IMUI::initPanes() {
+
 }
 
 void IMUI::handleTouch() {
   IMPoint touch = ts.getTouchPosition();
 
   if (touch.hasValue()) {
-    
+    //Serial.println(String(touch.x)+" "+String(touch.y));
 
-    Serial.println(String(touch.x)+" "+String(touch.y));
-    /*
-    int buttonWidth = tft.width() * BUTTONS_WIDTH_MULTIPLIER;
-    int infoXStart = tft.width() - buttonWidth;
-    int cancelXEnd = buttonWidth;
-    int topYStart = tft.height() - buttonWidth;
-    int barYEnd = tft.height() * BAR_HEIGHT_MULTIPLIER;
-
-    if (touch.y < barYEnd) {
-      bottomBarPressed();
-    } else if (touch.y > topYStart) {
-      if (touch.x < cancelXEnd) {
-        cancelPressed();
-      } else if (touch.x > infoXStart) {
-        infoPressed();
-      }
-    }*/
+    switch(activePane) {
+      case FRONT:
+        frontPane.handleTouch();
+        break;
+    }
   }
 }
 
 IMTFT * IMUI::getTFT() {
   return &tft;
+}
+
+void IMUI::refresh() {
+  switch(activePane) {
+    case FRONT:
+      frontPane.refresh();
+      break;
+  }
+}
+
+void IMUI::drawFrontPane() {
+  frontPane.draw();
+  activePane = Panes::FRONT;
+}
+
+void IMUI::drawErrorsPane(IMErrors * list) {
+  errorsPane.setErrors(list);
+  errorsPane.draw();
+  activePane = Panes::ERROR;
 }

@@ -2,10 +2,6 @@
 #define IM_NANO_H
 
 #include "InfiniteMoonshine.h"
-#include "utilities/IMTimer.h"
-#include "utilities/IMLogger.h"
-#include "sensors/IMBarometer.h"
-#include "graphics/IMUI.h"
 
 class IMNano : public InfiniteMoonshine { //manual pause only
   private:
@@ -26,11 +22,11 @@ class IMNano : public InfiniteMoonshine { //manual pause only
     float steamTemp;
     float condTemp;
     float pipeTemp;
-    float envTemp; //from BAR or RTC?
+    float envTemp;
     float pressure;
 
-    IMLogger logger = IMLogger();
-    IMBarometer bar = IMBarometer();
+    //IMLogger logger = IMLogger();
+    //IMBarometer bar = IMBarometer();
 
     void readPrevLog();
     void logRestart();

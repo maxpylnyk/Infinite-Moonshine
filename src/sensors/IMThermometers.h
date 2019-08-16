@@ -27,7 +27,7 @@ class IMThermometers : public IMSensor {
     DeviceAddress condAddr = {0x28, 0xFF, 0x7E, 0x00, 0x34, 0x18, 0x01, 0x03};
     DeviceAddress envAddr = {0x28, 0xFF, 0x43, 0xD6, 0x33, 0x18, 0x01, 0x19};
 
-    OneWire wire = OneWire(PinMap::TRM);
+    OneWire wire = OneWire(TRM_PIN);
     DallasTemperature sensors = DallasTemperature(&wire);
     IMErrors * errors;
     IMThermometer steamTrm = IMThermometer(&sensors, steamAddr, steamAdj, IMError::NO_STEAM_TRM);

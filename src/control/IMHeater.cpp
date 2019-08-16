@@ -1,7 +1,7 @@
 #include "IMHeater.h"
 
 IMHeater::IMHeater() {
-  pinMode(PinMap::SSR, OUTPUT);
+  pinMode(SSR_PIN, OUTPUT);
   setAdjStep(16);
   off();
 }
@@ -19,7 +19,7 @@ bool IMHeater::setAdjStep(uint8_t value) {
 }
 
 void IMHeater::setPower(uint8_t value) {
-  analogWrite(PinMap::SSR, power);
+  analogWrite(SSR_PIN, power);
   power = value;
 }
 

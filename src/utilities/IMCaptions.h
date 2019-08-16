@@ -29,6 +29,10 @@ class IMCaptions {
       NANO_BLACKOUT = "Control MCU blackout";
       MEGA_BLACKOUT = "Main MCU blackout";
       TRANSMISSION_CORRUPTED = "Transmission corrupted";
+      NO_LOG_DIR = "Log dir unavailable";
+      STARTING = "Starting..";
+      WELCOME = "Welcome!";
+      ERRORS = "Errors:";
     }
 
     void initRussianCaptions() {
@@ -53,6 +57,10 @@ class IMCaptions {
       NANO_BLACKOUT = "Контрольный МК отключился";
       MEGA_BLACKOUT = "Главный МК отключился";
       TRANSMISSION_CORRUPTED = "Повреждение передачи данных";
+      NO_LOG_DIR = "Каталог журналов недоступен";
+      STARTING = "Запуск..";
+      WELCOME = "Что варим?";
+      ERRORS = "Ошибки:";
     }
 
   public:
@@ -77,6 +85,10 @@ class IMCaptions {
     char * NANO_BLACKOUT;
     char * MEGA_BLACKOUT;
     char * TRANSMISSION_CORRUPTED;
+    char * NO_LOG_DIR;
+    char * STARTING;
+    char * WELCOME;
+    char * ERRORS;
 
     IMCaptions(Language l = Language::ENGLISH) {
       locale = l;

@@ -2,6 +2,7 @@
 
 IMLogger::IMLogger() {
   filePath = "";
+  Serial.println("log constructed");
 }
 
 IMLogger::IMLogger(String fileName) {
@@ -18,38 +19,43 @@ float IMLogger::getAvgSizeMB() {
 
 bool IMLogger::init() {
   float averageSize;
-
-  if (!sd.begin(PinMap::SD_CS, SPI_FULL_SPEED)) {//"SdInfo.h"
+  /* 
+  if (!sd.begin(SD_CS_PIN, SPI_FULL_SPEED)) {//"SdInfo.h"
     errors->add(IMError::NO_SD_CARD);
     return false;
   }
+  
   if (!enoughSpace()) {
     errors->add(IMError::NO_SD_SPACE);
     return false;
   }
+  */
   //init file
-  searchFS();
+  //searchFS();
   //calculate avg size
-  setAvgSizeMB(averageSize);
+  //setAvgSizeMB(averageSize);
+  setAvgSizeMB(1);
   return true;
 }
-
+/* 
 bool IMLogger::enoughSpace() {
   uint32_t freeClusters = sd.vol()->freeClusterCount() / 2;
   float freeSpaceMB = (megabyteMultiplier * freeClusters) * sd.vol()->blocksPerCluster();
   return freeSpaceMB > (10 * getAvgSizeMB());
 }
-
+*/
 void IMLogger::writeHeader() {
 
 }
-
+/*
 void IMLogger::searchFS() {
   IMFile logDir = IMFile(logDirPath, (oflag_t) O_CREAT);
   IMFile file;
 
   if (!logDir.isDir() || logDir.getError()) {
-    return;//error?
+    Serial.println("accessing log dir error code "+String(logDir.getError()));
+    errors->add(IMError::NO_LOG_DIR);
+    return;
   }
   logDir.rewind();
 
@@ -97,22 +103,24 @@ void IMLogger::searchFS() {
     file.close();
   }
 }
-
+*/
 bool IMLogger::println(String line) {
   uint8_t whitespaceCount = lineLen - line.length() - 1;
   char buffer[whitespaceCount];
+  //IMFile logFile;
 
   for (uint8_t i = 0; i < whitespaceCount; i++) {
     buffer[i] = ' ';
   }
   line += String(buffer);
   line += "/n";
-
+  /* 
   if (logFile.open(filePath, (oflag_t) O_WRONLY)) {//errors? // O_APPEND?
     int bytesWritten = logFile.write((char*)line.c_str(), lineLen);
     bool closed = logFile.close();
     return (bytesWritten == lineLen) && closed;
   }
+  */
   return false;
 }
 
