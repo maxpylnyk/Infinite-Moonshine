@@ -10,6 +10,9 @@ class IMSensor {
   private:
     bool measuring;
     bool measured;
+    unsigned long lastRequestTime;
+    unsigned long lastMeasureTime;
+    unsigned long timeout;
     uint32_t initTime;
     uint32_t requestTime;
     uint32_t receiveTime;
@@ -21,7 +24,8 @@ class IMSensor {
     void setMeasured(bool);
 
   public:
-    IMSensor(uint32_t initTime, uint32_t requestTime, uint32_t receiveTime);
+    IMSensor(uint32_t initTime, uint32_t requestTime, 
+      uint32_t receiveTime, unsigned long timeout);
     
     virtual bool init() = 0;
     virtual void debug();
@@ -33,6 +37,8 @@ class IMSensor {
     unsigned long getMeasuringTime();
     virtual void requestData();
     virtual void receiveData();
+    bool collectReadings();
+    void prepareToCollect();
 
 };
 

@@ -2,23 +2,15 @@
 #define IM_MEGA_H
 
 #include "InfiniteMoonshine.h"
-#include "sensors/IMAlcoholSensor.h"
-#include "sensors/IMHydroLevel.h"
-#include "sensors/IMThermometers.h"
-#include "sensors/IMBarometer.h"
-#include "control/IMHeater.h"
-#include "control/IMStepMotor.h"
+#include "logic/IMCondenserNode.h"
+#include "logic/IMExtractionNode.h"
+#include "logic/IMSwitchNode.h"
 #include "graphics/IMUI.h"
-#include "utilities/IMLogger.h"
+//#include "utilities/IMLogger.h"
+#include "utilities/IMValuesHolder.h"
 
 class IMMega : public InfiniteMoonshine {
   private:
-    float pressure;
-    float envTemp;
-
-    unsigned long temp;
-
-    //IMState * state;
     Language locale = Language::RUSSIAN;
     IMCaptions captions = IMCaptions(locale);
 
@@ -32,13 +24,21 @@ class IMMega : public InfiniteMoonshine {
     IMStepMotor retMtr = IMStepMotor(MTR2_1_PIN, MTR2_2_PIN, MTR2_3_PIN, MTR2_4_PIN);
     IMStepMotor condMtr = IMStepMotor(MTR3_1_PIN, MTR3_2_PIN, MTR3_3_PIN, MTR3_4_PIN);
     IMStepMotor swMtr = IMStepMotor(MTR4_1_PIN, MTR4_2_PIN, MTR4_3_PIN, MTR4_4_PIN);
+
+    IMCondenserNode condNode = IMCondenserNode(&trm, &condMtr);
+    IMExtractionNode extNode = IMExtractionNode(&hlvl, &bar, &trm, &heater, &outMtr, &retMtr);
+    IMSwitchNode swNode = IMSwitchNode(&alc, &swMtr);
+    IMValuesHolder host = IMValuesHolder(&condNode, &extNode, &swNode, &trm);
     
-    IMUI ui = IMUI(locale, &captions, &timer);
+    IMUI ui = IMUI(locale, &captions, &timer, &host);
     //IMLogger log = IMLogger();
 
     void setMasterSPI();
     void sendData();
     void receiveData();
+    void showErrors();
+    bool handleErrors();
+    void moveMotors();
 
   public:
     IMMega();
@@ -47,22 +47,7 @@ class IMMega : public InfiniteMoonshine {
     void loop();
     void debug();
     void receiveCallsign();
-    void printErrors();
-  /*
-    String getState();
-    IMLevel getHydroLevel();
-    String getAlcLevel();
-    String getSteamTemp();
-    String getCondTemp();
-    String getPipeTemp();
-    String getEnvTemp();
-    String getPressure();
-    String getCondMtr();
-    String getSwitch();
-    String getHeat();
-    String getOutMtr();
-    String getRetMtr();
-  */
+
 };
 
 #endif

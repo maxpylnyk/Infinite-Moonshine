@@ -3,13 +3,6 @@
 
 #include "sensors/IMSensor.h"
 
-typedef enum IMLevel : uint8_t {
-  LO      = 0x0,
-  OK      = 0x1,
-  HI      = 0x3,
-  OVR     = 0x7
-};
-
 class IMHydroLevel : public IMSensor {
   private:
     static const int treshold = 400;

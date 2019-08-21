@@ -12,14 +12,10 @@ class IMPane {
   private:
     IMTFT * tft;
     IMCaptions * captions;
-/*
+
   protected:
-    unsigned long refreshTime;
-    unsigned long refreshTimeout;
-    
-    IMRect topBar = IMRect(0, SCR_HEIGHT-BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
-    IMRect bottomBar = IMRect(0, 0, SCR_WIDTH, BAR_HEIGHT);
-*/
+    bool refreshRequired;
+
   public:
     IMPane(IMTFT * tft, IMCaptions * captions) : tft(tft), captions(captions) {};
 
@@ -33,6 +29,10 @@ class IMPane {
 
     IMCaptions * getCaptions() {
       return captions;
+    }
+
+    void requireRefresh() {
+      refreshRequired = true;
     }
 
 };

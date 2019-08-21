@@ -1,6 +1,6 @@
 #include "IMBarometer.h"
 
-IMBarometer::IMBarometer() : IMSensor(initTime, requestTime, receiveTime) {}
+IMBarometer::IMBarometer() : IMSensor(initTime, requestTime, receiveTime, BAR_TIMEOUT) {}
 
 void IMBarometer::setPressure(double value) {
   pressure = value;

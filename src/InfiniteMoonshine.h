@@ -4,22 +4,17 @@
 #include "Arduino.h"
 #include <avr/wdt.h>
 #include "stdint.h"
-#include "logic/IMStates.h"
+#include "logic/states/IMStates.h"
 #include "utilities/IMTimer.h"
 #include "utilities/IMErrors.h"
 #include "utilities/IMCommons.h"
 #include "utilities/IMCaptions.h"
-//#include "control/IMHeater.h"
-//#include "sensors/IMHydroLevel.h"
-//#include "sensors/IMAlcoholSensor.h"
-//#include "sensors/IMThermometers.h"
-//#include "control/IMStepMotor.h"
 
 #define DEBUG_MODE                1
-#define MANUAL_MODE               0
+#define MANUAL_MODE               1
 #define UNSTABLE_PRESSURE_REGION  0
 
-#define VERSION                   "beta"
+#define VERSION                   "0.1"
 
 class InfiniteMoonshine {
   protected:

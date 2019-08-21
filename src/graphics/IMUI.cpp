@@ -1,7 +1,8 @@
 #include "IMUI.h"
 
-IMUI::IMUI(Language locale, IMCaptions * captions, IMTimer * timer) : 
-  locale(locale), captions(captions), timer(timer) {}
+IMUI::IMUI(Language locale, IMCaptions * captions, IMTimer * timer,
+  IMValuesHolder * host) : locale(locale), captions(captions), 
+  timer(timer), host(host) {}
 
 bool IMUI::init() {
   bool result = tft.init();
@@ -38,6 +39,14 @@ void IMUI::refresh() {
   switch(activePane) {
     case FRONT:
       frontPane.refresh();
+      break;
+  }
+}
+
+void IMUI::requireRefresh() {
+  switch(activePane) {
+    case FRONT:
+      frontPane.requireRefresh();
       break;
   }
 }

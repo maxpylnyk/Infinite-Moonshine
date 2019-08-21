@@ -12,7 +12,7 @@ bool IMMega::init() {
 
   timer.start();
   initWatchdog();
-  setMasterSPI();
+  //setMasterSPI();
 
   if (DEBUG_MODE) {
     debugPort = &Serial;
@@ -97,7 +97,7 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  /* 
+  
   debugPort->print("initializing alcohol sensor.. ");
 
   if (alc.init()) {
@@ -108,7 +108,7 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  */
+  
   //result &= !initialize;
   debugPort->println("initialization done in "+String(timer.stop())+" ms");
   
@@ -117,8 +117,7 @@ bool IMMega::init() {
     ui.drawFrontPane();
   } else {
     debugPort->println("system initialization failure");
-    printErrors();
-    ui.drawErrorsPane(&errors);
+    showErrors();
   }
 
   return result;
@@ -126,63 +125,123 @@ bool IMMega::init() {
 
 void IMMega::loop() {
   restartWatchdog();
-  //check timeouts
-  //if timers == 0 -> init and measure
-  //check and handle errors (if possible)
+  moveMotors();
 
-  //collect sensors values
-  //send data
-  //receive commands
+  if (!errors.isEmpty()) {
+    if (!handleErrors()) {
+      showErrors();
+    }
+  }
 
-
-
-  ui.handleTouch();
+  if (host.collectValues()) {
+    //send to logic
+    //sendData();
+    //logData();
+    ui.requireRefresh();
+    host.prepareToCollect();
+  }
   /*
+  //freeze check
   if (millis() - temp >= 3000) {
     debugPort->println(String(millis())+" loop check");
     temp = millis();
   }
   */
+  //ui.blink();
+  ui.handleTouch();
   ui.refresh();
 }
 
-void IMMega::debug() {
-  /*
-  timer.start();
-  trm.requestData();
-  trm.receiveData();
+void IMMega::debug() {}
 
-  if (trm.dataReady()) {
-    
-    debugPort->print("trm ");
-    debugPort->print(String(trm.getCondTemp(), DEC));
-    debugPort->print(" ");
-    debugPort->print(String(timer.check()));
-    debugPort->println(" ms");
-    
-    bar.requestData();
-    bar.setEnvTemp(trm.getCondTemp());
-    bar.receiveData();
+void IMMega::moveMotors() {
+  outMtr.loop();
+  retMtr.loop();
+  condMtr.loop();
+  swMtr.loop();
+}
 
-    debugPort->print("bar ");
-    debugPort->print(String(bar.getPressure(), DEC));
-    debugPort->print(" ");
-    debugPort->print(String(timer.check()));
-    debugPort->println(" ms");
+bool IMMega::handleErrors() {
+  bool result = true;
+  //todo
+  return result;
+}
 
-    debugPort->print("clc ");
-    debugPort->println(String(calculateTemp(bar.getPressure()), DEC));
+void IMMega::showErrors() {
+  uint8_t count = errors.getCount();
 
-    debugPort->println();
+  if (count) {
+    for (int i = 0; i < count; i++) {
+      IMError error = (IMError) errors.get(i);
+
+      switch(error) {
+        case OVERFLOW :
+          debugPort->println(captions.OVERFLOW);
+          break;
+        case NO_HLVL :
+          debugPort->println(captions.NO_HLVL);
+          break;
+        case NO_CONNECTION :
+          debugPort->println(captions.NO_CONNECTION);
+          break;
+        case NO_SD_CARD :
+          debugPort->println(captions.NO_SD_CARD);
+          break;
+        case NO_SD_SPACE :
+          debugPort->println(captions.NO_SD_SPACE);
+          break;
+        case NO_OUT_MTR :
+          debugPort->println(captions.NO_OUT_MTR);
+          break;
+        case NO_RET_MTR :
+          debugPort->println(captions.NO_RET_MTR);
+          break;
+        case NO_COND_MTR :
+          debugPort->println(captions.NO_COND_MTR);
+          break;
+        case NO_SW :
+          debugPort->println(captions.NO_SW);
+          break;
+        case NO_ALC :
+          debugPort->println(captions.NO_ALC);
+          break;
+        case NO_BAR :
+          debugPort->println(captions.NO_BAR);
+          break;
+        case NO_RTC :
+          debugPort->println(captions.NO_RTC);
+          break;
+        case NO_STEAM_TRM :
+          debugPort->println(captions.NO_STEAM_TRM);
+          break;
+        case NO_PIPE_TRM :
+          debugPort->println(captions.NO_PIPE_TRM);
+          break;
+        case NO_COND_TRM :
+          debugPort->println(captions.NO_COND_TRM);
+          break;
+        case NO_ENV_TRM :
+          debugPort->println(captions.NO_ENV_TRM);
+          break;
+        case NO_HEAT :
+          debugPort->println(captions.NO_HEAT);
+          break;
+        case NANO_BLACKOUT :
+          debugPort->println(captions.NANO_BLACKOUT);
+          break;
+        case MEGA_BLACKOUT :
+          debugPort->println(captions.MEGA_BLACKOUT);
+          break;
+        case TRANSMISSION_CORRUPTED :
+          debugPort->println(captions.TRANSMISSION_CORRUPTED);
+          break;
+      }
+    }
+  } else {
+    debugPort->println(captions.NO_ERROR);
   }
-  */
-  
-  //trm.debug();
-  //hlvl.debug();
-  //alc.debug();
 
-
-  //outMtr.loop();
+  ui.drawErrorsPane(&errors);
 }
 
 void IMMega::receiveCallsign() {
@@ -306,17 +365,15 @@ void IMMega::receiveData() {//encapsulate
         debugPort->print("parsed pipe temp ");
         debugPort->println(fTemp);
         break;
-      case LogIndex::ENV_TEMP :
+      case LogIndex::ENV_TEMP ://remove
         fTemp = port->parseFloat();
         debugPort->print("parsed env temp ");
         debugPort->println(fTemp);
-        envTemp = fTemp;
         break;
-      case LogIndex::PRESSURE :
+      case LogIndex::PRESSURE ://remove
         fTemp = port->parseFloat();
         debugPort->print("parsed pressure ");
         debugPort->println(fTemp);
-        pressure = fTemp;
         break;
       case LogIndex::COND_MTR ://class
         iTemp = port->parseInt();
@@ -429,80 +486,5 @@ void IMMega::receiveData() {//encapsulate
         debugPort->print(" value ");
         debugPort->println(port->parseFloat());
     }
-  }
-}
-
-void IMMega::printErrors() {
-  uint8_t count = errors.getCount();
-
-  if (count) {
-    for (int i = 0; i < count; i++) {
-      IMError error = (IMError) errors.get(i);
-
-      switch(error) {
-        case OVERFLOW :
-          debugPort->println(captions.OVERFLOW);
-          break;
-        case NO_HLVL :
-          debugPort->println(captions.NO_HLVL);
-          break;
-        case NO_CONNECTION :
-          debugPort->println(captions.NO_CONNECTION);
-          break;
-        case NO_SD_CARD :
-          debugPort->println(captions.NO_SD_CARD);
-          break;
-        case NO_SD_SPACE :
-          debugPort->println(captions.NO_SD_SPACE);
-          break;
-        case NO_OUT_MTR :
-          debugPort->println(captions.NO_OUT_MTR);
-          break;
-        case NO_RET_MTR :
-          debugPort->println(captions.NO_RET_MTR);
-          break;
-        case NO_COND_MTR :
-          debugPort->println(captions.NO_COND_MTR);
-          break;
-        case NO_SW :
-          debugPort->println(captions.NO_SW);
-          break;
-        case NO_ALC :
-          debugPort->println(captions.NO_ALC);
-          break;
-        case NO_BAR :
-          debugPort->println(captions.NO_BAR);
-          break;
-        case NO_RTC :
-          debugPort->println(captions.NO_RTC);
-          break;
-        case NO_STEAM_TRM :
-          debugPort->println(captions.NO_STEAM_TRM);
-          break;
-        case NO_PIPE_TRM :
-          debugPort->println(captions.NO_PIPE_TRM);
-          break;
-        case NO_COND_TRM :
-          debugPort->println(captions.NO_COND_TRM);
-          break;
-        case NO_ENV_TRM :
-          debugPort->println(captions.NO_ENV_TRM);
-          break;
-        case NO_HEAT :
-          debugPort->println(captions.NO_HEAT);
-          break;
-        case NANO_BLACKOUT :
-          debugPort->println(captions.NANO_BLACKOUT);
-          break;
-        case MEGA_BLACKOUT :
-          debugPort->println(captions.MEGA_BLACKOUT);
-          break;
-        case TRANSMISSION_CORRUPTED :
-          debugPort->println(captions.TRANSMISSION_CORRUPTED);
-          break;
-      }
-    }
-  } else {
-    debugPort->println(captions.NO_ERROR);
   }
 }

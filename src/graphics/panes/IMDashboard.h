@@ -2,6 +2,7 @@
 #define IM_DASHBOARD_H
 
 #include "IMPane.h"
+#include "utilities/IMValuesHolder.h"
 
 class IMDashboard : public IMPane {
   protected:
@@ -26,8 +27,10 @@ class IMDashboard : public IMPane {
     const IMRect data22 = IMRect(slot22.getXLo(), slot22.getYLo()+DASH_LBL_HEIGHT, slot22.getXHi(), slot22.getYHi());
     const IMRect data23 = IMRect(slot23.getXLo(), slot23.getYLo()+DASH_LBL_HEIGHT, slot23.getXHi(), slot23.getYHi());
 
+    IMValuesHolder * host;
+
   public:
-    IMDashboard(IMTFT * tft, IMCaptions * captions) : IMPane(tft, captions) {}
+    IMDashboard(IMTFT * tft, IMCaptions * captions, IMValuesHolder * host) : IMPane(tft, captions), host(host) {}
 
     virtual void draw() = 0;
     virtual void handleTouch();

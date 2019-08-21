@@ -64,6 +64,19 @@ const uint16_t BACKGROUND_COLOR  = 0x0000;
 const uint16_t TEXT_COLOR        = MAIN_COLOR;
 const uint16_t ERROR_COLOR       = STAB_COLOR;
 
+const unsigned long SENSORS_UPD_TIMEOUT = (unsigned long) 5 * 1000;
+const unsigned long ALC_TIMEOUT = (unsigned long) 30 * 60 * 1000;
+const unsigned long TRM_TIMEOUT = SENSORS_UPD_TIMEOUT;
+const unsigned long BAR_TIMEOUT = SENSORS_UPD_TIMEOUT;
+const unsigned long HLVL_TIMEOUT = 0;
+
+typedef enum IMLevel : uint8_t {
+  LO      = 0x0,
+  OK      = 0x1,
+  HI      = 0x3,
+  OVR     = 0x7
+};
+
 typedef enum Panes : uint8_t {
   INIT = 0,
   ERROR,

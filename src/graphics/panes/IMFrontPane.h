@@ -35,6 +35,7 @@ class IMFrontPane : public IMPane {
       getTFT()->print("СТАТУС", HDR_FONT_SIZE, BACKGROUND_COLOR, bottomBar);
       
       refreshTime = millis();
+      refreshRequired = false;
     }
 
     void handleTouch() {
@@ -42,7 +43,7 @@ class IMFrontPane : public IMPane {
     }
 
     void refresh() {
-      if (millis() - refreshTime >= refreshTimeout) {
+      if (millis() - refreshTime >= refreshTimeout || refreshRequired) {
         draw();
       }
     }

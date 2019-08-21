@@ -117,6 +117,8 @@ common
 String в библиотеках #include <Arduino.h>только в хедер
 int -> int32_t, int16_t -> int, #include <stdint.h>
 все расчеты с промежуточными переменными
+не объявлять константы в виртуальных классах
+полиморфизм не работает
 
 Including files from the libraries folder, and subfolders,
  uses <> around the path/file name.
@@ -224,7 +226,7 @@ transmit state after change and reboot
 blackout -> send full data
 
 change state -> send to uno, log writes summary
-in manual mode uno sends confirmation if granted
+in manual mode nano sends confirmation if granted
 mega add nextState field
 
 no log when paused
@@ -236,7 +238,7 @@ i initialization	(just turned on)
 > incoming data (normal operation)
 r restarted	(if other restarted)
 
-uno sends:
+nano sends:
 
 callsigns
 if no callsign on timeout -> attempts to connect -> if success continue
@@ -297,18 +299,12 @@ ui
   graph
 
 подтверждение отмены
-кнопка при нажатии меняет цвет
 
 если не приходят данные для отображения - ставить прочерк
 прочерк по умолчанию
 
-
-numeric keyboard and input pane
-info pane
-settings pane
 график выбранного параметра с маштабированием
 отображение значения при нажатии
-error message
 
 buttons:
 cancel
@@ -357,8 +353,11 @@ measure init, request and receive time, and values in debug methods
 mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
 heater: debug calibrate, default adjStep, powerHead, powerBody
 
-get set to mega
+blink pixel and disable debug
+
 button class
+keyboard
+
 
 adj doesn't work
 achieve to reconnect sensors in loop

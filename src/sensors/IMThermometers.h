@@ -51,6 +51,10 @@ class IMThermometers : public IMSensor {
     float getPipeTemp();
     float getCondTemp();
     float getEnvTemp();
+    IMThermometer* getSteamTrm();
+    IMThermometer* getCondTrm();
+    IMThermometer* getPipeTrm();
+    IMThermometer* getEnvTrm();
 
 };
 

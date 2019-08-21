@@ -1,6 +1,6 @@
 #include "IMHydroLevel.h"
 
-IMHydroLevel::IMHydroLevel() : IMSensor(initTime, requestTime, receiveTime) {}
+IMHydroLevel::IMHydroLevel() : IMSensor(initTime, requestTime, receiveTime, HLVL_TIMEOUT) {}
 
 bool IMHydroLevel::init() {
   //test for false output?

@@ -1,7 +1,7 @@
 #include "IMAlcoholSensor.h"
 
 IMAlcoholSensor::IMAlcoholSensor() :
- IMSensor(initTime, requestTime, receiveTime) {
+ IMSensor(initTime, requestTime, receiveTime, ALC_TIMEOUT) {
    pinMode(ALC_HEAT_PIN, OUTPUT);
  }
 

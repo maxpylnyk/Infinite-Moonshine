@@ -1,7 +1,8 @@
 #include "IMSensor.h"
 
-IMSensor::IMSensor(uint32_t initTime, uint32_t requestTime, uint32_t receiveTime) :
-  initTime(initTime), requestTime(requestTime), receiveTime(receiveTime) {}
+IMSensor::IMSensor(uint32_t initTime, uint32_t requestTime, 
+  uint32_t receiveTime, unsigned long timeout) : initTime(initTime), 
+  requestTime(requestTime), receiveTime(receiveTime), timeout(timeout) {}
 
 void IMSensor::setMeasuring(bool value) {
   measuring = value;
@@ -38,4 +39,31 @@ unsigned long IMSensor::getMeasuringTime() {
   out += getReceiveTime();
 
   return out;
+}
+
+bool IMSensor::collectReadings() {
+  if (millis() - lastMeasureTime >= timeout) {
+    if (!isMeasuring()) {
+      lastRequestTime = millis();
+      requestData();
+      return false;
+    } else {
+      if (millis() - lastRequestTime >= getRequestTime()) {
+        receiveData();
+
+        if (dataReady()) {
+          lastMeasureTime = millis();
+        } else {
+          //error?
+        }
+        return dataReady();
+      }
+      return false;
+    }
+  }
+  return dataReady();
+}
+
+void IMSensor::prepareToCollect() {
+  setMeasured(false);
 }

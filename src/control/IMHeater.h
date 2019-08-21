@@ -27,8 +27,6 @@ class IMHeater {
     uint8_t adjStep;
     uint8_t power;
 
-    void setPower(uint8_t);
-    bool setAdjStep(uint8_t);
     bool tuneAdjStep();
 
   public:
@@ -42,6 +40,9 @@ class IMHeater {
     uint8_t getAdjStep();
     void setInitPower(uint8_t);
     void setInitAdj(uint8_t);
+    //public for debug and manual mode
+    void setPower(uint8_t);
+    bool setAdjStep(uint8_t);
 
 };
 

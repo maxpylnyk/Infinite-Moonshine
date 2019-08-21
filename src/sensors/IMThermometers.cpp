@@ -1,6 +1,6 @@
 #include "IMThermometers.h"
 
-IMThermometers::IMThermometers() : IMSensor(initTime, requestTime, receiveTime) {
+IMThermometers::IMThermometers() : IMSensor(initTime, requestTime, receiveTime, TRM_TIMEOUT) {
   for (int8_t i = 0; i < thermometersCount; i++) {
     trms[i].setErrorList(errors);
   }
@@ -83,4 +83,20 @@ float IMThermometers::getCondTemp() {
 
 float IMThermometers::getEnvTemp() {
   return envTrm.getTemperature();
+}
+
+IMThermometer* IMThermometers::getSteamTrm() {
+  return &steamTrm;
+}
+
+IMThermometer* IMThermometers::getCondTrm() {
+  return &condTrm;
+}
+
+IMThermometer* IMThermometers::getPipeTrm() {
+  return &pipeTrm;
+}
+
+IMThermometer* IMThermometers::getEnvTrm() {
+  return &envTrm;
 }

@@ -7,6 +7,7 @@
 #include "graphics/buttons/IMButtons.h"
 #include "utilities/IMCaptions.h"
 #include "utilities/IMTimer.h"
+#include "utilities/IMValuesHolder.h"
 
 class IMPane;
 class IMInitPane;
@@ -17,6 +18,7 @@ class IMUI {
     Language locale;
     IMCaptions * captions;
     IMTimer * timer;
+    IMValuesHolder * host;
 
     IMTouchScreen ts;
     IMTFT tft = IMTFT(locale);
@@ -28,16 +30,17 @@ class IMUI {
     void initPanes();
 
   public:
-    IMUI(Language locale, IMCaptions * captions, IMTimer * timer);
+    IMUI(Language, IMCaptions*, IMTimer*, IMValuesHolder*);
 
     bool init();
     void handleTouch();
     IMTFT * getTFT();
 
     void drawFrontPane();
-    void drawErrorsPane(IMErrors * list);
+    void drawErrorsPane(IMErrors*);
 
     void refresh();
+    void requireRefresh();
 
 };
 
