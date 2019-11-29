@@ -7,10 +7,18 @@ void IMMega::setMasterSPI() {
   digitalWrite(53, HIGH);
 }
 
+bool IMMega::initUI() {
+  bool result = tft.init();
+  result &= ts.init();
+  drawInitPane();
+  return result;
+}
+
 bool IMMega::init() {
   bool result = true;
 
   timer.start();
+  //timer.setupTime();
   initWatchdog();
   //setMasterSPI();
 
@@ -21,7 +29,7 @@ bool IMMega::init() {
   
   debugPort->print("initializing screen.. ");
 
-  if (ui.init()) {
+  if (initUI()) {
     debugPort->println("done in "+String(timer.check())+" ms");
   } else {
     debugPort->println("failed");
@@ -115,8 +123,7 @@ bool IMMega::init() {
   
   if (result) {
     debugPort->println("system is ready to use");
-    //ui.drawFrontPane();
-    ui.drawDash3();
+    drawFrontPane();
   } else {
     debugPort->println("system initialization failure");
     showErrors();
@@ -140,17 +147,27 @@ void IMMega::loop() {
     //send to logic
     //sendData();
     //logData();
-    ui.requireRefresh();
+    requireRefresh();
     host.prepareToCollect();//place after refresh
   }
-  //ui.blink();
-  ui.handleTouch();
-  ui.refresh();
+  //blink();
+  handleTouch();
+  refresh();
 }
 
 void IMMega::debug() {
   //hlvl.debug();
   //delay(2000);
+}
+
+bool IMMega::sessionIsActive() {
+  return (int8_t)currentState > 0;
+}
+
+bool IMMega::setState(State newState) {
+  currentState = newState;
+  //apply changes
+  return true;
 }
 
 void IMMega::moveMotors() {
@@ -240,7 +257,7 @@ void IMMega::showErrors() {
     debugPort->println(captions.NO_ERROR);
   }
 
-  ui.drawErrorsPane(&errors);
+  drawErrorsPane();
 }
 
 void IMMega::receiveCallsign() {
@@ -486,4 +503,451 @@ void IMMega::receiveData() {//encapsulate
         debugPort->println(port->parseFloat());
     }
   }
+}
+
+void IMMega::handleTouch() {
+  IMPoint touch = ts.getTouchPosition();
+
+  if (touch.hasValue()) {
+    //Serial.println(String(touch.x)+" "+String(touch.y));
+    /*
+    if (MANUAL_MODE && sessionIsActive()) {
+      if (bottomLeftRect.hasPoint(touch)) {
+        switch(currentState) {
+          case STAB_STATE:
+            setState(HEAT_STATE);
+            break;
+          case HEAD_STATE:
+            setState(STAB_STATE);
+            break;
+          case PRE_BODY_STATE:
+            setState(HEAD_STATE);
+            break;
+          case BODY_STATE:
+            setState(PRE_BODY_STATE);
+            break;
+          case PRE_TAIL_STATE:
+            setState(BODY_STATE);
+            break;
+        }
+      }
+      if (bottomRightRect.hasPoint(touch)) {
+        switch(currentState) {
+          case HEAT_STATE:
+            setState(STAB_STATE);
+            break;
+          case STAB_STATE:
+            setState(HEAD_STATE);
+            break;
+          case HEAD_STATE:
+            setState(PRE_BODY_STATE);
+            break;
+          case PRE_BODY_STATE:
+            setState(BODY_STATE);
+            break;
+          case BODY_STATE:
+            setState(PRE_TAIL_STATE);
+            break;
+          case PRE_TAIL_STATE:
+            setState(FINISH_STATE);
+            break;
+        }
+      }
+    }
+    */
+    switch(activePane) {
+      case FRONT_PANE:
+        if (topLeftRect.hasPoint(touch)) {
+          if (sessionIsActive()) {
+            //abort session -> confirm dialog
+          } else {
+            //start session
+          }
+        }
+        if (topL2Rect.hasPoint(touch) && MANUAL_MODE) {
+          //pause session
+        }
+        if (topRightRect.hasPoint(touch)) {
+          drawDash1();
+        }
+        break;
+      case DASH1_PANE:
+        if (topLeftRect.hasPoint(touch)) {
+          drawFrontPane();
+        }
+        if (topRightRect.hasPoint(touch)) {
+          drawDash2();
+        }
+        break;
+      case DASH2_PANE:
+        if (topLeftRect.hasPoint(touch)) {
+          drawDash1();
+        }
+        if (topRightRect.hasPoint(touch)) {
+          drawDash3();
+        }
+        if (MANUAL_MODE) {
+          //allow edit first 4 values
+        }
+        break;
+      case DASH3_PANE:
+        if (topLeftRect.hasPoint(touch)) {
+          drawDash2();
+        }
+        if (MANUAL_MODE) {
+          //allow edit all 5 values
+        }
+        break;
+      case ERROR_PANE:
+        drawFrontPane();
+        break;
+      case KEYBOARD:
+        
+        break;
+    }
+    prevActivePane = activePane;
+  }
+}
+
+void IMMega::drawBottomBar() {
+  /*
+  if (MANUAL_MODE && sessionIsActive()) {
+    if ((int8_t)currentState > 1) {
+      tft.print(captions.ARROW_LEFT, HDR_FONT_SIZE, BACKGROUND_COLOR, bottomLeftRect);
+    }
+    tft.print(captions.ARROW_RIGHT, HDR_FONT_SIZE, BACKGROUND_COLOR, bottomRightRect);
+  }
+  */
+
+  tft.print(String(captions.getStateString(currentState)), HDR_FONT_SIZE, BACKGROUND_COLOR, bottomBar);
+}
+
+void IMMega::drawInitPane() {
+  tft.paintBackground();
+  tft.print(captions.STARTING, PLAIN_FONT_SIZE, MAIN_COLOR, fullScr);
+
+  activePane = Panes::INIT_PANE;
+  prevActivePane = activePane;
+  refreshTimeout = 0;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawFrontPane() {
+  tft.paintBackground();
+  tft.setColor(MAIN_COLOR);
+  tft.fillRect(topBar);
+  tft.fillRect(bottomBar);
+
+  if (sessionIsActive()) {
+    tft.print(captions.ABORT_SESSION, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
+    if (MANUAL_MODE) {
+      tft.print(captions.PAUSE_SESSION, HDR_FONT_SIZE, BACKGROUND_COLOR, topL2Rect);
+    }
+  } else {
+    tft.print(captions.NEW_SESSION, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
+  }
+  tft.print(captions.INFO, HDR_FONT_SIZE, BACKGROUND_COLOR, topRightRect);
+
+  tft.printNum(timer.getTime(), timeRect);
+  tft.print("Тип сырья объём", 2, MAIN_COLOR, srcBar);
+  drawBottomBar();
+
+  prevActivePane = activePane;
+  activePane = Panes::FRONT_PANE;
+  refreshTimeout = FRONT_PANE_TIMEOUT;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawErrorsPane() {
+  uint8_t count = errors.getCount();
+  uint8_t offset = WIDTH_MULT * ERR_FONT_SIZE / 2;
+  int x0 = 0;
+  int y0 = SCR_HEIGHT - BAR_HEIGHT;
+  IMRect header = IMRect(x0, y0, SCR_WIDTH, SCR_HEIGHT);
+  tft.paintBackground();
+  tft.setColor(ERROR_COLOR);
+  tft.fillRect(header);
+  tft.fillRect(bottomBar);
+  tft.print(captions.ERRORS, HDR_FONT_SIZE, BACKGROUND_COLOR, header);
+  drawBottomBar();
+  x0 += offset;
+
+  if (count) {
+    for (int i = 0; i < count; i++) {
+      IMError error = (IMError) errors.get(i);
+      y0 += HEIGHT_MULT * ERR_FONT_SIZE + offset;
+
+      switch(error) {
+        case OVERFLOW :
+          tft.print(captions.OVERFLOW, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_HLVL :
+          tft.print(captions.NO_HLVL, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_CONNECTION :
+          tft.print(captions.NO_CONNECTION, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_SD_CARD :
+          tft.print(captions.NO_SD_CARD, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_SD_SPACE :
+          tft.print(captions.NO_SD_SPACE, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_OUT_MTR :
+          tft.print(captions.NO_OUT_MTR, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_RET_MTR :
+          tft.print(captions.NO_RET_MTR, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_COND_MTR :
+          tft.print(captions.NO_COND_MTR, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_SW :
+          tft.print(captions.NO_SW, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_ALC :
+          tft.print(captions.NO_ALC, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_BAR :
+          tft.print(captions.NO_BAR, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_RTC :
+          tft.print(captions.NO_RTC, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_STEAM_TRM :
+          tft.print(captions.NO_STEAM_TRM, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_PIPE_TRM :
+          tft.print(captions.NO_PIPE_TRM, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_COND_TRM :
+          tft.print(captions.NO_COND_TRM, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_ENV_TRM :
+          tft.print(captions.NO_ENV_TRM, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NO_HEAT :
+          tft.print(captions.NO_HEAT, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case NANO_BLACKOUT :
+          tft.print(captions.NANO_BLACKOUT, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case MEGA_BLACKOUT :
+          tft.print(captions.MEGA_BLACKOUT, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+        case TRANSMISSION_CORRUPTED :
+          tft.print(captions.TRANSMISSION_CORRUPTED, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+          break;
+      }
+    }
+  } else {
+    tft.print(captions.NO_ERROR, ERR_FONT_SIZE, TEXT_COLOR, x0, y0);
+  }
+  prevActivePane = activePane;
+  activePane = Panes::ERROR_PANE;
+  refreshTimeout = 0;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawDash1Data() {
+  tft.setColor(BACKGROUND_COLOR);
+  tft.fillRect(IMRect(0, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT));
+
+  tft.print(String(host.getSteamTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data11);
+  tft.print(String(host.getPipeTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data12);
+  tft.print(String(host.getAlcLvl()), DATA_FONT_SIZE, MAIN_COLOR, data13);
+  tft.print(String(host.getCalcTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data21);
+  tft.print(String(host.getEnvTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data22);
+  tft.print(String((int)host.getPressure()), DATA_FONT_SIZE, MAIN_COLOR, data23);
+
+  tft.print(captions.STEAM_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label11);
+  tft.print(captions.PIPE_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label12);
+  tft.print(captions.ALC_LVL_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label13);
+  tft.print(captions.CALC_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label21);
+  tft.print(captions.ENV_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label22);
+  tft.print(captions.PRES_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label23);
+}
+
+void IMMega::drawDash1() {
+  tft.paintBackground();
+  tft.setColor(MAIN_COLOR);
+  tft.fillRect(topBar);
+  tft.fillRect(bottomBar);
+
+  tft.print(captions.DASH1_HDR, HDR_FONT_SIZE, BACKGROUND_COLOR, topBar);
+  tft.print(captions.ARROW_LEFT, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
+  tft.print(captions.ARROW_RIGHT, HDR_FONT_SIZE, BACKGROUND_COLOR, topRightRect);
+
+  drawDash1Data();
+  drawBottomBar();
+  
+  prevActivePane = activePane;
+  activePane = Panes::DASH1_PANE;
+  refreshTimeout = DASHBOARD_TIMEOUT;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawDash2Data() {
+  tft.setColor(BACKGROUND_COLOR);
+  tft.fillRect(IMRect(0, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT));
+
+  tft.print(String(host.getOutMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data11);
+  tft.print(String(host.getRetMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data12);
+  tft.print(String(host.getCondMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data13);
+  tft.print(String(host.getHeatPwr()), DATA_FONT_SIZE, MAIN_COLOR, data21);
+  tft.print(host.getHydroLvlString(), DATA_FONT_SIZE, MAIN_COLOR, data22);
+  tft.print(String(host.getCondTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data23);
+
+  tft.print(captions.OUT_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label11);
+  tft.print(captions.RET_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label12);
+  tft.print(captions.COND_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label13);
+  tft.print(captions.HEAT_PWR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label21);
+  tft.print(captions.HLVL_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label22);
+  tft.print(captions.COND_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label23);
+}
+
+void IMMega::drawDash2() {
+  tft.paintBackground();
+  tft.setColor(MAIN_COLOR);
+  tft.fillRect(topBar);
+  tft.fillRect(bottomBar);
+
+  tft.print(captions.DASH2_HDR, HDR_FONT_SIZE, BACKGROUND_COLOR, topBar);
+  tft.print(captions.ARROW_LEFT, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
+  tft.print(captions.ARROW_RIGHT, HDR_FONT_SIZE, BACKGROUND_COLOR, topRightRect);
+
+  drawDash2Data();
+  drawBottomBar();
+  
+  prevActivePane = activePane;
+  activePane = Panes::DASH2_PANE;
+  refreshTimeout = DASHBOARD_TIMEOUT;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawDash3Data() {
+  tft.setColor(BACKGROUND_COLOR);
+  tft.fillRect(IMRect(0, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT));
+
+  tft.print(String(host.getExtAdj()), DATA_FONT_SIZE, MAIN_COLOR, data11);
+  tft.print(String(host.getCondMtrAdj()), DATA_FONT_SIZE, MAIN_COLOR, data12);
+  tft.print(String(host.getHeatAdj()), DATA_FONT_SIZE, MAIN_COLOR, data13);
+  tft.print(host.getSwitchPosString(), DATA_FONT_SIZE, MAIN_COLOR, data21);
+  tft.print(String(host.getRefluxRatio(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data22);
+
+  tft.print(captions.EXT_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label11);
+  tft.print(captions.COND_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label12);
+  tft.print(captions.HEAT_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label13);
+  tft.print(captions.SW_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label21);
+  tft.print(captions.RF_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label22);
+}
+
+void IMMega::drawDash3() {
+  tft.paintBackground();
+  tft.setColor(MAIN_COLOR);
+  tft.fillRect(topBar);
+  tft.fillRect(bottomBar);
+
+  tft.print(captions.DASH3_HDR, HDR_FONT_SIZE, BACKGROUND_COLOR, topBar);
+  tft.print(captions.ARROW_LEFT, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
+
+  drawDash3Data();
+  drawBottomBar();
+  
+  prevActivePane = activePane;
+  activePane = Panes::DASH3_PANE;
+  refreshTimeout = DASHBOARD_TIMEOUT;
+
+  refreshTime = millis();
+  refreshRequired = false;
+}
+
+void IMMega::drawKeyboardData(int num) {
+
+}
+
+void IMMega::drawKeyboard(int num) {
+  tft.paintBackground();
+  tft.setColor(MAIN_COLOR);
+}
+
+bool IMMega::refresh(bool full) {
+  if (refreshRequired && (millis() - refreshTime >= refreshTimeout)) {
+    if (full) {
+      switch(activePane) {
+        case FRONT_PANE:
+          drawFrontPane();
+          break;
+        case DASH1_PANE:
+          drawDash1();
+          break;
+        case DASH2_PANE:
+          drawDash2();
+          break;
+        case DASH3_PANE:
+          drawDash3();
+          break;
+        case ERROR_PANE:
+          drawErrorsPane();
+          break;
+        case KEYBOARD:
+          //drawKeyboard();
+          break;
+      }
+    } else {
+      switch(activePane) {
+        case DASH1_PANE:
+          drawDash1Data();
+          break;
+        case DASH2_PANE:
+          drawDash2Data();
+          break;
+        case DASH3_PANE:
+          drawDash3Data();
+          break;
+        case KEYBOARD:
+          //drawKeyboardData();
+          break;
+        default:
+          return refresh(true);
+      }
+    }
+    refreshTime = millis();
+    refreshRequired = false;
+    return true;
+  }
+  return false;
+}
+
+bool IMMega::refresh() {
+  return refresh(prevActivePane != activePane);
+}
+
+void IMMega::requireRefresh() {
+  refreshRequired = true;
+}
+
+void IMMega::blink() {
+  if (millis() - lastBlinkTime < blinkTimeout) {
+    return;
+  }
+
+  if (blinkVisible) {
+    tft.setColor(MAIN_COLOR);
+  } else {
+    tft.setColor(BACKGROUND_COLOR);
+  }
+  tft.fillRect(blinkRect);
+  blinkVisible = !blinkVisible;
+  lastBlinkTime = millis();
 }

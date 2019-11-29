@@ -80,19 +80,20 @@ typedef enum IMLevel : uint8_t {
   OK      = 0x1,
   HI      = 0x3,
   OVR     = 0x7
-};
+} IMLevel;
 
 typedef enum Panes : uint8_t {
-  INIT = 0,
-  ERROR,
-  FRONT,
-  DASH1,
-  DASH2,
-  DASH3,
-  LOG,
-  PREF,
-  PLOT
-};
+  INIT_PANE = 0,
+  ERROR_PANE,
+  FRONT_PANE,
+  DASH1_PANE,
+  DASH2_PANE,
+  DASH3_PANE,
+  KEYBOARD,
+  LOG_PANE,
+  PREF_PANE,
+  PLOT_PANE
+} Panes;
 
 typedef enum LogIndex : uint8_t {
   SESSION_NAME = 1,
@@ -116,7 +117,7 @@ typedef enum LogIndex : uint8_t {
   RET_MTR,
   EXT_ADJ,
   ERROR_CODES
-};
+} LogIndex;
 
 typedef enum SrcType : uint8_t {
   SUGAR = 0,
@@ -127,22 +128,35 @@ typedef enum SrcType : uint8_t {
   PEACH,
   PLUM,
   CHERRY
-};
+} SrcType;
 
 typedef enum Pause : uint8_t {
   RESUME = 0,
   CONTROL,
   MANUAL
-};
+} Pause;
 
 typedef enum Board : uint8_t {
   MEGA = 0,
   NANO
-};
+} Board;
 
 typedef enum Language : uint8_t {
   ENGLISH = 0,
   RUSSIAN
-};
+} Language;
+
+typedef enum State : int8_t {
+  FINISH_STATE = -3,
+  CANCEL_STATE,
+  ERROR_STATE,
+  STAND_BY_STATE,
+  HEAT_STATE,
+  STAB_STATE,
+  HEAD_STATE,
+  PRE_BODY_STATE,
+  BODY_STATE,
+  PRE_TAIL_STATE
+} State;
 
 #endif

@@ -4,7 +4,6 @@
 #include "Arduino.h"
 #include <avr/wdt.h>
 #include "stdint.h"
-#include "logic/states/IMStates.h"
 #include "utilities/IMTimer.h"
 #include "utilities/IMErrors.h"
 #include "utilities/IMCommons.h"

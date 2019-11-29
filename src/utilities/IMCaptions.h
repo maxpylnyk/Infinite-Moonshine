@@ -51,6 +51,17 @@ class IMCaptions {
       HEAT_ADJ_LBL = "heat. adj.";
       SW_LBL = "switch";
       RF_LBL = "rf. ratio";
+
+      STAND_BY_LBL = "STANDING BY";
+      HEAT_LBL = "HEATING";
+      STAB_LBL = "STABILIZING";
+      HEAD_LBL = "EXTRACTING HEADS";
+      PRE_BODY_LBL = "PRE BODY";
+      BODY_LBL = "EXTRACTING BODY";
+      PRE_TAIL_LBL = "PRE TAIL";
+      FINISH_LBL = "FINISHED";
+      CANCEL_LBL = "CANCELED";
+      ERROR_LBL = "ERROR";
     }
 
     void initRussianCaptions() {
@@ -97,6 +108,17 @@ class IMCaptions {
       HEAT_ADJ_LBL = "шаг нагрева";
       SW_LBL = "приёмник";
       RF_LBL = "фл. число";
+
+      STAND_BY_LBL = "ПРОСТОЙ";
+      HEAT_LBL = "НАГРЕВ";
+      STAB_LBL = "СТАБИЛИЗАЦИЯ";
+      HEAD_LBL = "ОТБОР ГОЛОВ";
+      PRE_BODY_LBL = "ПОДГОЛОВНИКИ";
+      BODY_LBL = "ОТБОР ТЕЛА";
+      PRE_TAIL_LBL = "ПРЕДХВОСТ";
+      FINISH_LBL = "ЗАКОНЧЕНО";
+      CANCEL_LBL = "ОТМЕНЕНО";
+      ERROR_LBL = "ОШИБКА";
     }
 
   public:
@@ -127,6 +149,10 @@ class IMCaptions {
     char * STARTING;
     char * WELCOME;
     char * ERRORS;
+    char * INFO = "i";
+    char * NEW_SESSION = "+";
+    char * PAUSE_SESSION = "||";
+    char * ABORT_SESSION = "X";
     char * ARROW_LEFT = "<-";
     char * ARROW_RIGHT = "->";
     char * DASH1_HDR = "@ * *";
@@ -150,6 +176,17 @@ class IMCaptions {
     char * SW_LBL;
     char * RF_LBL;
 
+    char * STAND_BY_LBL;
+    char * HEAT_LBL;
+    char * STAB_LBL;
+    char * HEAD_LBL;
+    char * PRE_BODY_LBL;
+    char * BODY_LBL;
+    char * PRE_TAIL_LBL;
+    char * FINISH_LBL;
+    char * CANCEL_LBL;
+    char * ERROR_LBL;
+
     IMCaptions(Language l = Language::ENGLISH) {
       locale = l;
 
@@ -161,6 +198,30 @@ class IMCaptions {
           initRussianCaptions();
           break;
       } 
+    }
+
+    char * getStateString(State s) {
+      switch(s) {
+        case STAND_BY_STATE:
+          return STAND_BY_LBL;
+        case HEAT_STATE:
+          return HEAT_LBL;
+        case STAB_STATE:
+          return STAB_LBL;
+        case HEAD_STATE:
+          return HEAD_LBL;
+        case PRE_BODY_STATE:
+          return PRE_BODY_LBL;
+        case BODY_STATE:
+          return BODY_LBL;
+        case PRE_TAIL_STATE:
+          return PRE_TAIL_LBL;
+        case FINISH_STATE:
+          return FINISH_LBL;
+        case CANCEL_STATE:
+          return CANCEL_LBL;
+      }
+      return ERROR_LBL;
     }
 
 };

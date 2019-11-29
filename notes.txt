@@ -112,7 +112,9 @@ error state active, show malfunction message
 
 
 
-common
+
+****	common	****
+
 ссылки Class * object; oblect->method(); прототипирование
 String в библиотеках #include <Arduino.h>только в хедер
 int -> int32_t, int16_t -> int, #include <stdint.h>
@@ -125,8 +127,6 @@ Including files from the libraries folder, and subfolders,
 
 Including files from the sketch folder, and subfolders,
  uses "" around the path/file name.
-
-
 
 
 UNO
@@ -143,8 +143,6 @@ MEGA
 51	MOSI
 52	SCK
 53	SS
-
-
 
 
 control
@@ -195,7 +193,8 @@ y = map(p.x, TOP=932, BOT=184, 0, 240)
 
 
 
-sync
+****	sync	****
+
 timer - provides log stamp and time measurements. 
 logger - serial @ mega and writes file @ uno
 
@@ -279,7 +278,9 @@ r -> full data to restarted
 
 
 
-logic
+
+****	logic	****
+
   condenser node : therm, motor
     receive env temp
   extraction node : two therms, three motors, heater, hlevel, alc
@@ -289,13 +290,22 @@ logic
 
 paused state for control values measurement and manual mode
 
+indicate panes and switch handle code
+indicate pause
+manual mode -> nano controls pause. mega can't cancel it with control check
+normal operation -> mega sets pause to check control values
 
 
 
-ui
+
+****	ui	****
+
+edit mode + keyboard
+
+фон соответствует режиму работы
+темный при ожидании
   text only buttons
   num keyboard
-  panes
   graph
 
 подтверждение отмены
@@ -307,31 +317,23 @@ ui
 отображение значения при нажатии
 
 
-keyboard
-
-indicate panes and switch handle code
-indicate pause
-manual mode -> nano controls pause. mega can't cancel it with control check
-normal operation -> mega sets pause to check control values
 
 
+****	log	****
 
-manual mode
-
-next state button
-display heads and body in % of absolute
-display calculated values
-ui edit mode
+заголовок в логе с подписью значений
+комментарии
+три первых строки
+class logentry
+define log line length after calbrating all nodes
+enum for log records
+sd equal line length
+частота записи в журнал должна быть не реже частоты смены позиции кранов
 
 
 
-schedule
 
-* assemble and calibrate sensors and controls
-* write sync and log
-* write operating logic
-* write ui
-
+****	debug	****
 
 waterTap -> calibrate
 
@@ -339,29 +341,24 @@ measure init, request and receive time, and values in debug methods
 
 mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
 heater: debug calibrate, default adjStep, powerHead, powerBody
-
-
-button class
-keyboard
+определить линейный участок напряжений нагревателя
 
 
 adj doesn't work
 achieve to reconnect sensors in loop
 check thermometers status while executing
-define log line length after calbrating all nodes
-enum for log reccords
+
+
 new session from beginning to end
 and another
+
 error hadle flags
 test sync
 enable watchdog
-fix enums
-определить линейный участок напряжений нагревателя
-предхвост для зерновых
-sd equal line length
-ui
+
+
 clear global variables after session finish
-частота записи в журнал должна быть не реже частоты смены позиции кранов
+
 mtr return current position when target reached
 
 how to handle errors?
@@ -375,23 +372,9 @@ how to handle errors?
 прокладки
 резьбовая фиксация 
 
-крышка алкодатчика - эпоксидная смола
 
-
-установка ноля на кранах: клавиатура, +/- и установить
-экран на мега
 двигать краны по очереди
 выключать питание после каждого шага
-фон соответствует режиму работы
-темный при ожидании
-заголовок в логе с подписью значений
-комментарии
-три первых строки
-class logentry
-
-
-
-debug
 
 управление с измеренной инерционностью
 запоминать стабильное значение
@@ -409,11 +392,15 @@ debug
 если последняя сессия была отменена, предлагать продолжить при старте новой
 проследить зависимость мощности нагрева от температуры среды или сырья. 
 	если зависимости нет - прописать константы в классе нагревателя.
+предхвост для зерновых
+крышка алкодатчика - эпоксидная смола
 remove serial from classes
 remove synchronizable class
+display heads and body in % of absolute
 
 
-after research
+****	after research	****
+
 if no space -> extract usefull data to exp file and remove oldest logs
 внести изменения в печатную плату: 
 		подвинуть левое верхнее отверстие на 0.5 мм влево
