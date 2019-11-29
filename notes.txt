@@ -306,17 +306,6 @@ ui
 график выбранного параметра с маштабированием
 отображение значения при нажатии
 
-buttons:
-cancel
-info
-log
-settings
-plus
-minus
-up
-down
-left
-right
 
 keyboard
 
@@ -330,7 +319,7 @@ normal operation -> mega sets pause to check control values
 manual mode
 
 next state button
-display heads and body in % of absolute 
+display heads and body in % of absolute
 display calculated values
 ui edit mode
 
@@ -345,15 +334,12 @@ schedule
 
 
 waterTap -> calibrate
-alc -> measure heads
-hlvl -> test screened wire
 
 measure init, request and receive time, and values in debug methods
 
 mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
 heater: debug calibrate, default adjStep, powerHead, powerBody
 
-blink pixel and disable debug
 
 button class
 keyboard
@@ -393,7 +379,6 @@ how to handle errors?
 
 
 установка ноля на кранах: клавиатура, +/- и установить
-скорость отбора в float
 экран на мега
 двигать краны по очереди
 выключать питание после каждого шага

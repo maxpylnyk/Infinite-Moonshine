@@ -17,6 +17,7 @@ typedef enum IMError : uint8_t {
   NO_ALC,
   NO_BAR,
   NO_RTC,
+  NO_TRM,
   NO_STEAM_TRM,
   NO_PIPE_TRM,
   NO_COND_TRM,

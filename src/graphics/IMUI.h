@@ -10,11 +10,16 @@
 #include "utilities/IMValuesHolder.h"
 
 class IMPane;
-class IMInitPane;
 
 class IMUI {
   private:
+    bool blinkVisible;
+    unsigned long blinkTimeout = 1000;
+    unsigned long lastBlinkTime;
+    IMRect blinkRect = IMRect(0, 115, 10, 125);
+
     Panes activePane;
+    Panes prevActivePane;
     Language locale;
     IMCaptions * captions;
     IMTimer * timer;
@@ -26,8 +31,9 @@ class IMUI {
     IMInitPane initPane = IMInitPane(&tft, captions);
     IMFrontPane frontPane = IMFrontPane(&tft, captions, timer);
     IMErrorsPane errorsPane = IMErrorsPane(&tft, captions);
-
-    void initPanes();
+    IMDashboard1 dash1 = IMDashboard1(&tft, captions, host);
+    IMDashboard2 dash2 = IMDashboard2(&tft, captions, host);
+    IMDashboard3 dash3 = IMDashboard3(&tft, captions, host);
 
   public:
     IMUI(Language, IMCaptions*, IMTimer*, IMValuesHolder*);
@@ -35,12 +41,18 @@ class IMUI {
     bool init();
     void handleTouch();
     IMTFT * getTFT();
+    IMTouchScreen * getTS();
 
     void drawFrontPane();
     void drawErrorsPane(IMErrors*);
+    void drawDash1();
+    void drawDash2();
+    void drawDash3();
 
     void refresh();
     void requireRefresh();
+
+    void blink();
 
 };
 

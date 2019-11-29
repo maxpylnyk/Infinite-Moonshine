@@ -5,7 +5,7 @@
 
 class IMHydroLevel : public IMSensor {
   private:
-    static const int treshold = 400;
+    static const int treshold = 350;
     static const unsigned int initTime = 0;
     static const unsigned int requestTime = 0;
     static const unsigned int receiveTime = 0;
@@ -37,7 +37,7 @@ class IMHydroLevel : public IMSensor {
     void requestData();
     void receiveData();
     IMLevel getLevel();
-    bool isOverflowing();   
+    bool isOverflowing();
 
 };
 

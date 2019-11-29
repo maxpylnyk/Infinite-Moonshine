@@ -41,10 +41,12 @@ int16_t IMAlcoholSensor::getLevel() {
 
 void IMAlcoholSensor::requestData() {
   setMeasuring(true);
+  setMeasured(false);
   digitalWrite(ALC_HEAT_PIN, HIGH);
 }
 void IMAlcoholSensor::receiveData() {
   setLevel(analogRead(ALC_DATA_PIN));
   digitalWrite(ALC_HEAT_PIN, LOW);
   setMeasuring(false);
+  setMeasured(true);
 }

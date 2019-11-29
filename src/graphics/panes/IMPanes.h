@@ -6,5 +6,8 @@
 #include "IMFrontPane.h"
 #include "IMErrorsPane.h"
 #include "IMDashboard.h"
+#include "IMDashboard1.h"
+#include "IMDashboard2.h"
+#include "IMDashboard3.h"
 
 #endif

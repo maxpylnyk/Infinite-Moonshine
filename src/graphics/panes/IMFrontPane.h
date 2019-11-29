@@ -8,21 +8,13 @@ class IMFrontPane : public IMPane {
   private:
     IMTimer * timer;
 
-    unsigned long refreshTime;
-    unsigned long refreshTimeout;
-    
-    IMRect topBar = IMRect(0, SCR_HEIGHT-BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
-    IMRect bottomBar = IMRect(0, 0, SCR_WIDTH, BAR_HEIGHT);
-
     IMRect srcBar = IMRect(0, BAR_HEIGHT, SCR_WIDTH, 2*BAR_HEIGHT);
     IMRect timeRect = IMRect(0, 2*BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT);
 
 
   public:
     IMFrontPane(IMTFT * tft, IMCaptions * captions, IMTimer * timer) : 
-      IMPane(tft, captions), timer(timer) {
-        refreshTimeout = (unsigned long) 60 * 1000;
-      }
+      IMPane(tft, captions, FRONT_PANE_TIMEOUT), timer(timer) {};
 
     void draw() {
       getTFT()->paintBackground();

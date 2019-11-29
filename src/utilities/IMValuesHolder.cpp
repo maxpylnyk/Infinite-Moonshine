@@ -7,7 +7,7 @@ IMValuesHolder::IMValuesHolder(IMCondenserNode * condNode, IMExtractionNode * ex
 bool IMValuesHolder::collectValues() {
   bool result = true;
 
-  result &= swNode->getAlc()->collectReadings();
+  //result &= swNode->getAlc()->collectReadings();
   result &= trm->collectReadings();
   result &= extNode->getBar()->collectReadings();
   result &= extNode->getHydroLvl()->collectReadings();
@@ -16,7 +16,7 @@ bool IMValuesHolder::collectValues() {
 }
 
 void IMValuesHolder::prepareToCollect() {
-  swNode->getAlc()->prepareToCollect();
+  //swNode->getAlc()->prepareToCollect();
   trm->prepareToCollect();
   extNode->getBar()->prepareToCollect();
   extNode->getHydroLvl()->prepareToCollect();
@@ -62,6 +62,13 @@ uint8_t IMValuesHolder::getSwitchPos() {
   return swNode->getSwitch()->getSwitchPos();
 }
 
+String IMValuesHolder::getSwitchPosString() {
+  if (getSwitchPos()) {
+    return "BODY";
+  }
+  return "HEAD";
+}
+
 uint8_t IMValuesHolder::getHeatPwr() {
   return extNode->getHeater()->getPower();
 }
@@ -74,8 +81,22 @@ IMLevel IMValuesHolder::getHydroLvl() {
   return extNode->getHydroLvl()->getLevel();
 }
 
+String IMValuesHolder::getHydroLvlString() {
+  switch(getHydroLvl()) {
+    case IMLevel::OVR :
+      return "OVR";
+    case IMLevel::HI :
+      return "HI";
+    case IMLevel::OK :
+      return "OK";
+    default:
+      return "LO";
+  }
+}
+
 uint16_t IMValuesHolder::getAlcLvl() {
-  return swNode->getAlc()->getLevel();
+  //return swNode->getAlc()->getLevel();
+  return 0;
 }
 
 int16_t IMValuesHolder::getCondMtrPos() {
@@ -124,4 +145,8 @@ float IMValuesHolder::getPressure() {
 
 float IMValuesHolder::getRefluxRatio() {
   return extNode->getRefluxRatio();
+}
+
+String IMValuesHolder::getStateString() {
+  return "РУЧНОЙ РЕЖИМ";
 }

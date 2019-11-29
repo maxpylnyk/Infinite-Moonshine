@@ -33,6 +33,7 @@ const int MEGA_RST_PIN  = 43;
 const int SSR_PIN       = 45;
 const int TRM_PIN       = 47;
 
+const int DATA_PRECISION = 2;
 const int HEIGHT_MULT = 7;
 const int WIDTH_MULT = 6;
 const int TEXT1_HEIGHT = HEIGHT_MULT;
@@ -42,14 +43,15 @@ const int NUM_FONT_SIZE = 6;
 const int LBL_FONT_SIZE = 1;
 const int DATA_FONT_SIZE = 3;
 const int ERR_FONT_SIZE = 1;
-const int HDR_FONT_SIZE = 3;
+const int HDR_FONT_SIZE = 2;
 const int SCR_HEIGHT = 240;
 const int SCR_WIDTH = 320;
 const int BAR_HEIGHT = 42;
 const int DASH_SLOT_HEIGHT = (SCR_HEIGHT - 2 * BAR_HEIGHT) / 2;
 const int DASH_SLOT_WIDTH = SCR_WIDTH / 3;
-const int DASH_LBL_HEIGHT = TEXT2_HEIGHT;
+const int DASH_LBL_HEIGHT = LBL_FONT_SIZE * HEIGHT_MULT;
 const int DASH_DATA_HEIGHT = DASH_SLOT_HEIGHT - DASH_LBL_HEIGHT;
+const int BTN_WIDTH = 50;
 
 const uint16_t MAIN_COLOR        = 0x97fc;
 const uint16_t MAIN_COLOR_FLAT   = 0x3b4c;
@@ -69,6 +71,9 @@ const unsigned long ALC_TIMEOUT = (unsigned long) 30 * 60 * 1000;
 const unsigned long TRM_TIMEOUT = SENSORS_UPD_TIMEOUT;
 const unsigned long BAR_TIMEOUT = SENSORS_UPD_TIMEOUT;
 const unsigned long HLVL_TIMEOUT = 0;
+
+const unsigned long FRONT_PANE_TIMEOUT = 60000;
+const unsigned long DASHBOARD_TIMEOUT = SENSORS_UPD_TIMEOUT;
 
 typedef enum IMLevel : uint8_t {
   LO      = 0x0,

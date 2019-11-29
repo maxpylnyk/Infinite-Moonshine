@@ -38,9 +38,11 @@ class IMValuesHolder {
     void setRefluxRatio(float);
 
     uint8_t getSwitchPos();
+    String getSwitchPosString();
     uint8_t getHeatPwr();
     uint8_t getHeatAdj();
     IMLevel getHydroLvl();
+    String getHydroLvlString();
     uint16_t getAlcLvl();
     int16_t getCondMtrPos();
     int16_t getCondMtrAdj();
@@ -54,6 +56,8 @@ class IMValuesHolder {
     float getCalcTemp();
     float getPressure();
     float getRefluxRatio();
+
+    String getStateString();
 
 };
 

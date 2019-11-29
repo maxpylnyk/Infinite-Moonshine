@@ -49,10 +49,7 @@ float IMExtractionNode::getRefluxRatio() {
 }
 
 float IMExtractionNode::getCalcTemp() {
-  if (bar->dataReady()) {
-    return 0.038 * bar->getPressure() + 49.27;
-  }
-  return 0;
+  return 0.038 * bar->getPressure() + 49.27;
 }
   
 void IMExtractionNode::setAdj(int16_t value) {

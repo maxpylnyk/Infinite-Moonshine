@@ -13,8 +13,8 @@ class IMBarometer : public IMSensor {
     static const unsigned int initTime = 0;
     static const unsigned int requestTime = 27;
     static const unsigned int receiveTime = 1;
-    double pressure;
-    double envTemp;
+    float pressure;
+    double p, t;
     SFE_BMP180 sensor;
 
     void setPressure(double);
@@ -26,8 +26,7 @@ class IMBarometer : public IMSensor {
     void debug();
     void requestData();
     void receiveData();
-    double getPressure();
-    void setEnvTemp(double);
+    float getPressure();
 
 };
 

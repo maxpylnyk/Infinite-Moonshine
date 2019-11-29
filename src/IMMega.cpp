@@ -62,6 +62,7 @@ bool IMMega::init() {
   if (trm.init()) {
     debugPort->println("done in "+String(timer.check())+" ms");
   } else {
+    errors.add(IMError::NO_TRM);
     debugPort->println("failed");
     timer.check();
     result = false;
@@ -97,7 +98,7 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  
+  /*
   debugPort->print("initializing alcohol sensor.. ");
 
   if (alc.init()) {
@@ -108,13 +109,14 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  
+  */
   //result &= !initialize;
   debugPort->println("initialization done in "+String(timer.stop())+" ms");
   
   if (result) {
     debugPort->println("system is ready to use");
-    ui.drawFrontPane();
+    //ui.drawFrontPane();
+    ui.drawDash3();
   } else {
     debugPort->println("system initialization failure");
     showErrors();
@@ -125,7 +127,7 @@ bool IMMega::init() {
 
 void IMMega::loop() {
   restartWatchdog();
-  moveMotors();
+  //moveMotors();
 
   if (!errors.isEmpty()) {
     if (!handleErrors()) {
@@ -133,26 +135,23 @@ void IMMega::loop() {
     }
   }
 
+  
   if (host.collectValues()) {
     //send to logic
     //sendData();
     //logData();
     ui.requireRefresh();
-    host.prepareToCollect();
+    host.prepareToCollect();//place after refresh
   }
-  /*
-  //freeze check
-  if (millis() - temp >= 3000) {
-    debugPort->println(String(millis())+" loop check");
-    temp = millis();
-  }
-  */
   //ui.blink();
   ui.handleTouch();
   ui.refresh();
 }
 
-void IMMega::debug() {}
+void IMMega::debug() {
+  //hlvl.debug();
+  //delay(2000);
+}
 
 void IMMega::moveMotors() {
   outMtr.loop();

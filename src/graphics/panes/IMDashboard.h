@@ -13,12 +13,12 @@ class IMDashboard : public IMPane {
     const IMRect slot22 = IMRect(DASH_SLOT_WIDTH, BAR_HEIGHT, DASH_SLOT_WIDTH*2, SCR_HEIGHT/2);
     const IMRect slot23 = IMRect(DASH_SLOT_WIDTH*2, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT/2);
 
-    const IMRect label11 = IMRect(slot11.getXLo(), slot11.getYLo(), slot11.getXHi(), slot11.getYLo()+DASH_LBL_HEIGHT);
-    const IMRect label12 = IMRect(slot12.getXLo(), slot12.getYLo(), slot12.getXHi(), slot12.getYLo()+DASH_LBL_HEIGHT);
-    const IMRect label13 = IMRect(slot13.getXLo(), slot13.getYLo(), slot13.getXHi(), slot13.getYLo()+DASH_LBL_HEIGHT);
-    const IMRect label21 = IMRect(slot21.getXLo(), slot21.getYLo(), slot21.getXHi(), slot21.getYLo()+DASH_LBL_HEIGHT);
-    const IMRect label22 = IMRect(slot22.getXLo(), slot22.getYLo(), slot22.getXHi(), slot22.getYLo()+DASH_LBL_HEIGHT);
-    const IMRect label23 = IMRect(slot23.getXLo(), slot23.getYLo(), slot23.getXHi(), slot23.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label11 = IMRect(slot11.getXLo(), slot11.getYLo(), slot11.getXHi(), slot11.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label12 = IMRect(slot12.getXLo(), slot12.getYLo(), slot12.getXHi(), slot12.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label13 = IMRect(slot13.getXLo(), slot13.getYLo(), slot13.getXHi(), slot13.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label21 = IMRect(slot21.getXLo(), slot21.getYLo(), slot21.getXHi(), slot21.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label22 = IMRect(slot22.getXLo(), slot22.getYLo(), slot22.getXHi(), slot22.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label23 = IMRect(slot23.getXLo(), slot23.getYLo(), slot23.getXHi(), slot23.getYLo()+DASH_LBL_HEIGHT*5);
 
     const IMRect data11 = IMRect(slot11.getXLo(), slot11.getYLo()+DASH_LBL_HEIGHT, slot11.getXHi(), slot11.getYHi());
     const IMRect data12 = IMRect(slot12.getXLo(), slot12.getYLo()+DASH_LBL_HEIGHT, slot12.getXHi(), slot12.getYHi());
@@ -30,11 +30,33 @@ class IMDashboard : public IMPane {
     IMValuesHolder * host;
 
   public:
-    IMDashboard(IMTFT * tft, IMCaptions * captions, IMValuesHolder * host) : IMPane(tft, captions), host(host) {}
+    IMDashboard(IMTFT * tft, IMCaptions * captions, IMValuesHolder * host)
+      : IMPane(tft, captions, DASHBOARD_TIMEOUT), host(host) {}
 
     virtual void draw() = 0;
     virtual void handleTouch();
-    virtual void refresh();
+
+    void refresh() {
+      if (refreshRequired) {
+        draw();
+      }
+    }
+
+    bool refresh(bool full) {
+      if (refreshRequired && (millis() - refreshTime >= refreshTimeout)) {
+        if (full) {
+          draw();
+        } else {
+          refreshNumbers();
+        }
+        refreshTime = millis();
+        refreshRequired = false;
+        return true;
+      }
+      return false;
+    }
+
+    virtual void refreshNumbers();
 
 };
 

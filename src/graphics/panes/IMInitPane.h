@@ -1,11 +1,11 @@
 #ifndef IM_INIT_PANE_H
-#define IN_INIT_PANE_H
+#define IM_INIT_PANE_H
 
 #include "IMPane.h"
 
 class IMInitPane : public IMPane {
   public:
-    IMInitPane(IMTFT * tft, IMCaptions * captions) : IMPane(tft, captions) {}
+    IMInitPane(IMTFT * tft, IMCaptions * captions) : IMPane(tft, captions, 0) {}
 
     void draw() {
         IMRect r = IMRect(0, 0, SCR_WIDTH, SCR_HEIGHT);

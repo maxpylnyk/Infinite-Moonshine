@@ -9,7 +9,8 @@ class IMErrorsPane : public IMPane {
     IMErrors * errors;
 
   public:
-    IMErrorsPane(IMTFT * tft, IMCaptions * captions) : IMPane(tft, captions) {};
+    IMErrorsPane(IMTFT * tft, IMCaptions * captions)
+      : IMPane(tft, captions, 0) {};
 
     void setErrors(IMErrors * list) {
       errors = list;

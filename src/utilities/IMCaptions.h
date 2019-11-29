@@ -21,6 +21,7 @@ class IMCaptions {
       NO_ALC = "Alcohol sensor disconnected";
       NO_BAR = "Barometer disconnected";
       NO_RTC = "Clock disconnected";
+      NO_TRM = "Thermometers disconnected";
       NO_STEAM_TRM = "Steam thermometer disconnected";
       NO_PIPE_TRM = "Pipe thermometer disconnected";
       NO_COND_TRM = "Condenser thermometer disconnected";
@@ -33,6 +34,23 @@ class IMCaptions {
       STARTING = "Starting..";
       WELCOME = "Welcome!";
       ERRORS = "Errors:";
+      STEAM_TEMP_LBL = "steam, *C";
+      PIPE_TEMP_LBL = "2/3 pipe, *C";
+      ALC_LVL_LBL = "alcohol";
+      CALC_TEMP_LBL = "calc, *C";
+      ENV_TEMP_LBL = "room, *C";
+      PRES_LBL = "pres., mm Hg";
+      OUT_MTR_LBL = "out flow, ml/h";
+      RET_MTR_LBL = "ret. flow, ml/h";
+      COND_MTR_LBL = "cond. flow, ml/h";
+      HEAT_PWR_LBL = "heater, %";
+      HLVL_LBL = "hydrolevel";
+      COND_TEMP_LBL = "cond, *C";
+      EXT_ADJ_LBL = "extr. adj.";
+      COND_ADJ_LBL = "cond. adj.";
+      HEAT_ADJ_LBL = "heat. adj.";
+      SW_LBL = "switch";
+      RF_LBL = "rf. ratio";
     }
 
     void initRussianCaptions() {
@@ -49,6 +67,7 @@ class IMCaptions {
       NO_ALC = "Датчик алкоголя не подключён";
       NO_BAR = "Барометр не подключён";
       NO_RTC = "Часы не подключены";
+      NO_TRM = "Термометры не подключены";
       NO_STEAM_TRM = "Паровой термометр не подключён";
       NO_PIPE_TRM = "Царговый термометр не подключён";
       NO_COND_TRM = "Термометр охлаждения не подключён";
@@ -61,6 +80,23 @@ class IMCaptions {
       STARTING = "Запуск..";
       WELCOME = "Что варим?";
       ERRORS = "Ошибки:";
+      STEAM_TEMP_LBL = "пар, *С";
+      PIPE_TEMP_LBL = "2/3 царги, *С";
+      ALC_LVL_LBL = "алкоголь";
+      CALC_TEMP_LBL = "теор. пар, *С";
+      ENV_TEMP_LBL = "комната, *С ";
+      PRES_LBL = "давл., мм.р.ст.";
+      OUT_MTR_LBL = "отбор, мл/ч";
+      RET_MTR_LBL = "возврат, мл/ч";
+      COND_MTR_LBL = "охл., мл/ч";
+      HEAT_PWR_LBL = "нагрев, %";
+      HLVL_LBL = "гидроуровень";
+      COND_TEMP_LBL = "вода, *С";
+      EXT_ADJ_LBL = "шаг отбора";
+      COND_ADJ_LBL = "шаг охл.";
+      HEAT_ADJ_LBL = "шаг нагрева";
+      SW_LBL = "приёмник";
+      RF_LBL = "фл. число";
     }
 
   public:
@@ -77,6 +113,7 @@ class IMCaptions {
     char * NO_ALC;
     char * NO_BAR;
     char * NO_RTC;
+    char * NO_TRM;
     char * NO_STEAM_TRM;
     char * NO_PIPE_TRM;
     char * NO_COND_TRM;
@@ -86,9 +123,32 @@ class IMCaptions {
     char * MEGA_BLACKOUT;
     char * TRANSMISSION_CORRUPTED;
     char * NO_LOG_DIR;
+
     char * STARTING;
     char * WELCOME;
     char * ERRORS;
+    char * ARROW_LEFT = "<-";
+    char * ARROW_RIGHT = "->";
+    char * DASH1_HDR = "@ * *";
+    char * DASH2_HDR = "* @ *";
+    char * DASH3_HDR = "* * @";
+    char * STEAM_TEMP_LBL;
+    char * PIPE_TEMP_LBL;
+    char * ALC_LVL_LBL;
+    char * CALC_TEMP_LBL;
+    char * ENV_TEMP_LBL;
+    char * PRES_LBL;
+    char * OUT_MTR_LBL;
+    char * RET_MTR_LBL;
+    char * COND_MTR_LBL;
+    char * HEAT_PWR_LBL;
+    char * HLVL_LBL;
+    char * COND_TEMP_LBL;
+    char * EXT_ADJ_LBL;
+    char * COND_ADJ_LBL;
+    char * HEAT_ADJ_LBL;
+    char * SW_LBL;
+    char * RF_LBL;
 
     IMCaptions(Language l = Language::ENGLISH) {
       locale = l;

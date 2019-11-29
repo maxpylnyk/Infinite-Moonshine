@@ -78,6 +78,11 @@ int getNonLetterCount(String text) {
       case ':':
       case '˚':
       case '/':
+      case '*':
+      case '@':
+      case '-':
+      case '<':
+      case '>':
         count += 1;
         break;
     }

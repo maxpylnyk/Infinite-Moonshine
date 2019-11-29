@@ -80,6 +80,7 @@ void IMHydroLevel::debug() {
 
 void IMHydroLevel::requestData() {
   setMeasuring(true);
+  setMeasured(false);
 }
 
 void IMHydroLevel::receiveData() {
@@ -89,9 +90,11 @@ void IMHydroLevel::receiveData() {
   setDataOver(analogRead(HLVL_OVR_PIN));
   digitalWrite(HLVL_OUT_PIN, LOW);
   setMeasuring(false);
+  setMeasured(true);
 }
 
 IMLevel IMHydroLevel::getLevel() {
+  Serial.println("hlvl "+String(getDataLo())+" "+String(getDataHi())+" "+String(getDataOver()));
   if (overReached()) {
     return IMLevel::OVR;
   }

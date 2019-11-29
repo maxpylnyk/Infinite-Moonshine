@@ -6,10 +6,6 @@ void IMBarometer::setPressure(double value) {
   pressure = value;
 }
 
-void IMBarometer::setEnvTemp(double value) {
-  envTemp = value;
-}
-
 bool IMBarometer::init() {
   return sensor.begin();
 }
@@ -19,17 +15,18 @@ void IMBarometer::debug() {}
 void IMBarometer::requestData() {
   setMeasuring(true);
   setMeasured(false);
-  //delay(sensor.startTemperature());
-  //sensor.getTemperature(envTemp);
+  delay(sensor.startTemperature());
+  sensor.getTemperature(t);
   delay(sensor.startPressure(resolution));
 }
 
 void IMBarometer::receiveData() {
-  setMeasured(sensor.getPressure(pressure, envTemp));
-  setPressure(pressure * mmHgMultiplier);
+  bool result = sensor.getPressure(p, t);
+  setPressure(p * mmHgMultiplier);
   setMeasuring(false);
+  setMeasured(result);
 }
 
-double IMBarometer::getPressure() {
+float IMBarometer::getPressure() {
   return pressure;
 }
