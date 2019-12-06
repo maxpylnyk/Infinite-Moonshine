@@ -8,7 +8,7 @@
 class IMTimer {
   private:
     static const char * extension = ".LOG";
-    
+    bool active;
     unsigned long startTime;
     unsigned long checkTime;
     unsigned long prevTime;
@@ -23,6 +23,7 @@ class IMTimer {
     void setupTime();
     unsigned long start();
     unsigned long check();
+    unsigned long getElapsedTime();
     unsigned long stop();
     String getTime();
     String getDate();

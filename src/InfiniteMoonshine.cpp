@@ -1,7 +1,6 @@
 #include "InfiniteMoonshine.h"
 
 InfiniteMoonshine::InfiniteMoonshine(int rstPin) : rstPin(rstPin) {
-  setSessionName(0);
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -24,40 +23,20 @@ void InfiniteMoonshine::setManualPause(uint8_t value) {
   }
 }
 
-uint8_t InfiniteMoonshine::getStateIndex() {
-  return stateIndex;
-}
-
-void InfiniteMoonshine::setStateIndex(uint8_t value) {
-  stateIndex = value;
-  //индикатор для синхронизации.
-  //в ручном режиме при семене этапа отправляется как запрос
-  //если приходит такой же - смена подтверждена
-  //если предыдущий - нет
-}
-
-uint32_t InfiniteMoonshine::getSessionName() {
-  return sessionName;
-}
-
-void InfiniteMoonshine::setSessionName(uint32_t value) {
-  sessionName = value;
-}
-
 void InfiniteMoonshine::initWatchdog() {
-  /*
   wdt_disable();
   wdt_enable(rstWdtDelay);
   wtdRstTime = millis();
-  */
+}
+
+void InfiniteMoonshine::disableWatchdog() {
+  wdt_disable();
 }
 
 void InfiniteMoonshine::restartWatchdog() {
-  /*
   if (millis() - wtdRstTime >= watchdogTimeout) {
     wdt_reset();
   }
-  */
 }
 
 void InfiniteMoonshine::restartOther() {
@@ -76,7 +55,8 @@ void InfiniteMoonshine::sendCallsign() {
   }
   port->print(callsign);
   port->flush();
-  responseTime = millis();
+  callsignReceived = false;
+  waitingTimer.start();
 }
 
 void InfiniteMoonshine::addToQueue(byte number, String value) {
@@ -96,7 +76,7 @@ void InfiniteMoonshine::endQueue() {
   queue += String(endOfTransmission);
   port->print(queue);
   port->flush();
-
+  debugText += "\n" + queue;
   queue = "";
 }
 

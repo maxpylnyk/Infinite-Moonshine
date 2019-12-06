@@ -44,7 +44,7 @@ int16_t IMExtractionNode::getAdj() {
   return adj;
 }
 
-float IMExtractionNode::getRefluxRatio() {
+uint8_t IMExtractionNode::getRefluxRatio() {
   return refluxRatio;
 }
 
@@ -57,7 +57,15 @@ void IMExtractionNode::setAdj(int16_t value) {
   //upd motors
 }
 
-void IMExtractionNode::setRefluxRatio(float value) {
+void IMExtractionNode::setRefluxRatio(uint8_t value) {
   refluxRatio = value;
   //upd motors
+}
+
+void IMExtractionNode::setOutCurPos(uint16_t value) {
+  outMtr->setCurrentPosition(value);
+}
+
+void IMExtractionNode::setRetCurPos(uint16_t value) {
+  retMtr->setCurrentPosition(value);
 }

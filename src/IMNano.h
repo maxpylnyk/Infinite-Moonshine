@@ -7,32 +7,6 @@ class IMNano : public InfiniteMoonshine { //manual pause only
   private:
     bool resumePrevSession = false;
 
-    uint8_t hydroLevel;
-    uint8_t heatPower;      //ctrl
-    uint8_t heatAdjStep;    //ctrl set 0 for no adj (debug and manual modes)
-    uint8_t refluxRatio;    //ctrl
-    uint16_t alcLevel;
-    int16_t condMtrAdj;
-    int16_t extMtrAdj;  //ctrl
-    int32_t outMtrPos;  //ctrl
-    int32_t retMtrPos;  //ctrl
-    int32_t condMtrPos;
-    uint32_t switchPosition; //ctrl debug and manul modes
-    
-    float steamTemp;
-    float condTemp;
-    float pipeTemp;
-    float envTemp;
-    float pressure;
-
-    //IMLogger logger = IMLogger();
-    //IMBarometer bar = IMBarometer();
-
-    void readPrevLog();
-    void logRestart();
-    void logRestart(Board);
-    void logStateChange();
-    void logData();
     void sendData();
     void receiveData();
 

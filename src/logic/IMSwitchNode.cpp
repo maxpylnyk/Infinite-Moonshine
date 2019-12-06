@@ -13,3 +13,12 @@ IMSwitch * IMSwitchNode::getSwitch() {
 IMAlcoholSensor * IMSwitchNode::getAlc() {
   return alc;
 }
+
+void IMSwitchNode::setMtrCurPos(uint16_t value) {
+  if (value) {
+    swMtr->setCurrentPosition(BODY_POS);
+  } else {
+    swMtr->setCurrentPosition(HEAD_POS);
+  }
+  
+}

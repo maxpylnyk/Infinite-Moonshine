@@ -52,7 +52,7 @@ uno использует для записи файл на sd карте. имя
 скачки температуры пара свидетельствуют о переохлаждении флегмы. температура холодильника 50°С.
 уровень флегмы держится между отметками гидроуровня. контролируется нагревом. начальный нагрев минимален.
 условие перехода на следующий этап - показания датчика алкоголя
-кран отбора закрыт. дождаться вытока конденсата в приемную тару.
+переход - кран отбора закрыт. дождаться вытока конденсата в приемную тару.
 
 подготовка к отбору продукта
 
@@ -144,12 +144,6 @@ MEGA
 52	SCK
 53	SS
 
-
-control
-  heater
-  step motor loop to debug
-	init motors after sync
-
 реечная передача
 	рейка 20 см
 	скорость 6 мм/с
@@ -195,68 +189,45 @@ y = map(p.x, TOP=932, BOT=184, 0, 240)
 
 ****	sync	****
 
-timer - provides log stamp and time measurements. 
-logger - serial @ mega and writes file @ uno
-
-init & restart logic
-
-normal operation
-0000	offline
-0001	online
-0011	transfer required
-
-restart
-0111	other restarted and transfer required
-
-initialization
-1001	initialization // uno after turning on
-1011	init and transfer required // mega waiting for cmd after turning on
-
-
-
-
-introduce waitdog
-if callsign incorrect -> ask again -> restart if incorrect
-fill data
-config pins @ setup
-
-transmit session name only after reboot
-transmit state after change and reboot
-blackout -> send full data
-
-change state -> send to uno, log writes summary
-in manual mode nano sends confirmation if granted
-mega add nextState field
-
-no log when paused
-
-immitate freeze
-
 i initialization	(just turned on)
 * online	(normal operation)
 > incoming data (normal operation)
 r restarted	(if other restarted)
 
-nano sends:
+if callsign incorrect -> ask again -> restart if incorrect
+
+transmit session name only after reboot
+transmit state after change and reboot
+blackout -> send full data
+
+nano sends - mega answers
+* - * online
+* - i mega blackout -> restart
+
+
+i - * nano blackout -> restart
+i - i power on
+
+> - no answer required
+r - no answer required
+
+
+**** nano sends:
 
 callsigns
 if no callsign on timeout -> attempts to connect -> if success continue
 																								 -> if no answer restart, try again -> if success continue with r data
 																								 																		-> if no answer error -> log and display
-commands
-receives data
-if no data -> callsign procedure
 
-* -> 
-		 * expected
+* -> * expected
 		 i -> mega blackout error
-i -> 
-		 i  -> > data from log or stby
-		 !i -> uno blackout error
-r -> full data to restarted
-> -> cmd data
+i -> i  -> stby
+		!i -> nano blackout error
+r -> data to restarted
 
-mega sends:
+
+
+**** mega sends:
 
 responds on callsigns. if ! i | * -> no answer
 if no callsign on timeout -> attempts to connect -> if success continue
@@ -267,14 +238,7 @@ sends > data when collected
 *
 i <- full data expected with >
 r -> full data to restarted
-> -> full data to log
 
-
-@ YYYY-MM-DD hh:mm:ss 255 2 5 1024 78.555 78.500 50.000 78.667 -20.000 745.00 500 50 1 255 255 6 700 1700 10 1 2 3 4
-
-
-1 2 3 4
-4 3 2 1
 
 
 
@@ -286,35 +250,8 @@ r -> full data to restarted
   extraction node : two therms, three motors, heater, hlevel, alc
     rfratio control logic
     receive pres, calc table temp
-    search
+    search optimal values
 
-paused state for control values measurement and manual mode
-
-indicate panes and switch handle code
-indicate pause
-manual mode -> nano controls pause. mega can't cancel it with control check
-normal operation -> mega sets pause to check control values
-
-
-
-
-****	ui	****
-
-edit mode + keyboard
-
-фон соответствует режиму работы
-темный при ожидании
-  text only buttons
-  num keyboard
-  graph
-
-подтверждение отмены
-
-если не приходят данные для отображения - ставить прочерк
-прочерк по умолчанию
-
-график выбранного параметра с маштабированием
-отображение значения при нажатии
 
 
 
@@ -328,53 +265,23 @@ class logentry
 define log line length after calbrating all nodes
 enum for log records
 sd equal line length
+no log when paused
 частота записи в журнал должна быть не реже частоты смены позиции кранов
+если последняя сессия была отменена, предлагать продолжить при старте новой
 
+@ YYYY-MM-DD hh:mm:ss 255 2 5 1024 78.555 78.500 50.000 78.667 -20.000 745.00 500 50 1 255 255 6 700 1700 10 1 2 3 4
 
 
 
 ****	debug	****
 
-waterTap -> calibrate
-
-measure init, request and receive time, and values in debug methods
-
-mtr: calibrate maxPosition, mlToSteps, test fullstep mode, extSpeed refluxSpeed waterSpeed
-heater: debug calibrate, default adjStep, powerHead, powerBody
-определить линейный участок напряжений нагревателя
-
-
-adj doesn't work
-achieve to reconnect sensors in loop
-check thermometers status while executing
-
-
-new session from beginning to end
-and another
-
 error hadle flags
-test sync
-enable watchdog
-
-
-clear global variables after session finish
-
-mtr return current position when target reached
 
 how to handle errors?
 	BLACKOUTS и OVERFLOW решаются контроллером. сообщения только для статистики
 	для остальных вывести сообщение и перкратить работу с записью о причине
 	разрешенные ошибки удаляются из списка, неисправности остаются
 
-
-крепление плат и моторов
-шестерни
-прокладки
-резьбовая фиксация 
-
-
-двигать краны по очереди
-выключать питание после каждого шага
 
 управление с измеренной инерционностью
 запоминать стабильное значение
@@ -389,14 +296,16 @@ how to handle errors?
 измерить минимальное время существенного изменения показателей для синхронизации и записи в журнал
 если в течение расчетного времени + задержка не появляется нагрев - вывести ошибку no heat
 предусмотреть сообщения о выходе из строя компонентов с кнопкой продолжить если возможно
-если последняя сессия была отменена, предлагать продолжить при старте новой
 проследить зависимость мощности нагрева от температуры среды или сырья. 
 	если зависимости нет - прописать константы в классе нагревателя.
 предхвост для зерновых
 крышка алкодатчика - эпоксидная смола
 remove serial from classes
-remove synchronizable class
 display heads and body in % of absolute
+график выбранного параметра с маштабированием
+отображение значения при нажатии
+фон соответствует режиму работы
+темный при ожидании
 
 
 ****	after research	****
@@ -409,4 +318,81 @@ if no space -> extract usefull data to exp file and remove oldest logs
 		нужно больше места вокруг гаек
 		добавить отверстия для земли гидроуровня 4 шт, датчика алкоголя 1 шт
 		отдалить термодатчик на плате от шнуров
+
+
+
+
+
+**** schedule ****
+
+sync. test restart. test no connection
+	работает только при перезагрузке мега
+errors
+calibrate mtr
+ui 
+	отображать конечную позицию кранов.
+	при изменении фч изменять конечную позицию крана возврата
+	следить за температурой охлаждения автоматически
+	отладить обновление
+
+logic
+switch states
+
+имитировать ситуацию когда нано онлайн, а мега инит.
+	нано присылает данные при инициализации мега
+	проверить как они пройдут
+отладить механизм обработки ошибок
+transfer start and current time and counters to nano
+process values in loop: data to send, refresh ui
+dash with counters
+
+move pause to session?
+paused state for control values measurement and manual mode
+manual mode -> nano controls pause. mega can't cancel it with control check
+normal operation -> mega sets pause to check control values
+
+calibrate motors, convert steps to ml (approx)
+mtr return current position when target reached
+mtr: extSpeed refluxSpeed waterSpeed
+двигать краны по очереди
+выключать питание после каждого шага
+отображать конечное и текущее положение кранов
+отображать остаточный объём
+
+heater: debug calibrate, default adjStep, powerHead, powerBody
+определить линейный участок напряжений нагревателя
+
+крепление плат и моторов
+шестерни
+прокладки
+резьбовая фиксация 
+
+new session from begining to end
+warn about state borders
+
+warnings and confirmation dialogs
+
+adj doesn't work
+achieve to reconnect sensors in loop
+check thermometers status while executing
+
+
+
+
+**** refresh algorithm ****
+
+pane inited -> assign prev and current pane
+
+init pane -> front pane
+
+front pane -> refresh clock (if changed, partly) 
+	minutes and hours separately
+
+common -> refresh bottom bar if state is changed
+
+dashboards -> refresh each block separately
+							each value separately if changed
+
+
+
 

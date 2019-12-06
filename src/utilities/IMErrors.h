@@ -25,10 +25,10 @@ typedef enum IMError : uint8_t {
   NO_HEAT,
   NANO_BLACKOUT,//h
   MEGA_BLACKOUT,//h
-  TRANSMISSION_CORRUPTED,
+  TRANSMISSION_CORRUPTED,//h
   NO_LOG_DIR,
   ERRORS_COUNT
-};
+} IMError;
 
 class IMErrors {
   private:

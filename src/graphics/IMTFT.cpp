@@ -9,6 +9,14 @@ bool IMTFT::init() {
   return true;
 }
 
+uint8_t IMTFT::getFontSize() {
+  return fontSize;
+}
+
+uint16_t IMTFT::getColor() {
+  return color;
+}
+
 void IMTFT::setColor(uint32_t color) {
   byte r, g, b;
 
@@ -19,8 +27,14 @@ void IMTFT::setColor(uint32_t color) {
   tft.setColor(r, g, b);
 }
 
-void IMTFT::setColor(uint16_t color) {
+void IMTFT::setColor(uint16_t c) {
+  color = c;
   tft.setColor(color);
+}
+
+void IMTFT::setFontSize(int size) {
+  fontSize = size;
+  tft.setTextSize(size);
 }
 
 void IMTFT::paintBackground(uint16_t color) {
@@ -52,8 +66,8 @@ void IMTFT::fillCircle(int x0, int y0, int r) {
 }
 
 void IMTFT::print(String text, int textSize, uint16_t color, int x, int y) {
-  tft.setTextColor(color);
-  tft.setTextSize(textSize);
+  setColor(color);
+  setFontSize(textSize);
   tft.print(text, x, SCR_HEIGHT - y);
 }
 
@@ -62,30 +76,8 @@ int getNonLetterCount(String text) {
   int len = text.length();
 
   for (uint8_t i = 0; i < len; i++) {
-    switch(text.charAt(i)) {
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-      case ' ':
-      case '%':
-      case ':':
-      case '˚':
-      case '/':
-      case '*':
-      case '@':
-      case '-':
-      case '<':
-      case '>':
-      case '+':
-        count += 1;
-        break;
+    if (text.charAt(i) >= 32 && text.charAt(i) < 128) {
+      count += 1;
     }
   }
   return count;
@@ -112,6 +104,10 @@ void IMTFT::print(String text, int textSize, uint16_t color, IMRect r) {
   print(text, textSize, color, x, y);
 }
 
-void IMTFT::printNum(String num, IMRect r) {
-  print(num, NUM_FONT_SIZE, MAIN_COLOR, r);
+void IMTFT::print(String text, IMRect place) {
+  print(text, getFontSize(), getColor(), place);
+}
+
+void IMTFT::printNum(String num, IMRect place) {
+  print(num, NUM_FONT_SIZE, MAIN_COLOR, place);
 }

@@ -11,7 +11,7 @@
 class IMExtractionNode {
   private:
     int16_t adj;
-    float refluxRatio;
+    uint8_t refluxRatio;
     IMHydroLevel * hlvl;
     IMHeater * heater;
     IMStepMotor * outMtr;
@@ -34,11 +34,13 @@ class IMExtractionNode {
     IMThermometer * getPipeTrm();
     IMThermometer * getEnvTrm();
     int16_t getAdj();
-    float getRefluxRatio();
+    uint8_t getRefluxRatio();
     float getCalcTemp();
 
     void setAdj(int16_t);
-    void setRefluxRatio(float);
+    void setRefluxRatio(uint8_t);
+    void setOutCurPos(uint16_t);
+    void setRetCurPos(uint16_t);
 
 };
 

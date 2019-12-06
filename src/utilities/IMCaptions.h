@@ -32,7 +32,6 @@ class IMCaptions {
       TRANSMISSION_CORRUPTED = "Transmission corrupted";
       NO_LOG_DIR = "Log dir unavailable";
       STARTING = "Starting..";
-      WELCOME = "Welcome!";
       ERRORS = "Errors:";
       STEAM_TEMP_LBL = "steam, *C";
       PIPE_TEMP_LBL = "2/3 pipe, *C";
@@ -52,7 +51,7 @@ class IMCaptions {
       SW_LBL = "switch";
       RF_LBL = "rf. ratio";
 
-      STAND_BY_LBL = "STANDING BY";
+      STAND_BY_LBL = "LET'S COOK!";
       HEAT_LBL = "HEATING";
       STAB_LBL = "STABILIZING";
       HEAD_LBL = "EXTRACTING HEADS";
@@ -62,6 +61,17 @@ class IMCaptions {
       FINISH_LBL = "FINISHED";
       CANCEL_LBL = "CANCELED";
       ERROR_LBL = "ERROR";
+
+      LO_LVL = "LO";
+      OK_LVL = "OK";
+      HI_LVL = "HI";
+      OVR_LVL = "OVR";
+      HEAD_POS = "HEAD";
+      BODY_POS = "BODY";
+      YES_KEY = "YES";
+      NO_KEY = "NO";
+      CLR_KEY = "CLR";
+
     }
 
     void initRussianCaptions() {
@@ -89,7 +99,6 @@ class IMCaptions {
       TRANSMISSION_CORRUPTED = "Повреждение передачи данных";
       NO_LOG_DIR = "Каталог журналов недоступен";
       STARTING = "Запуск..";
-      WELCOME = "Что варим?";
       ERRORS = "Ошибки:";
       STEAM_TEMP_LBL = "пар, *С";
       PIPE_TEMP_LBL = "2/3 царги, *С";
@@ -109,7 +118,7 @@ class IMCaptions {
       SW_LBL = "приёмник";
       RF_LBL = "фл. число";
 
-      STAND_BY_LBL = "ПРОСТОЙ";
+      STAND_BY_LBL = "ЧТО ВАРИМ?";
       HEAT_LBL = "НАГРЕВ";
       STAB_LBL = "СТАБИЛИЗАЦИЯ";
       HEAD_LBL = "ОТБОР ГОЛОВ";
@@ -119,6 +128,17 @@ class IMCaptions {
       FINISH_LBL = "ЗАКОНЧЕНО";
       CANCEL_LBL = "ОТМЕНЕНО";
       ERROR_LBL = "ОШИБКА";
+
+      LO_LVL = "НИЗ";
+      OK_LVL = "НОРМ";
+      HI_LVL = "ВЕРХ";
+      OVR_LVL = "ПЕРЕ";
+      HEAD_POS = "ГОЛ";
+      BODY_POS = "ТЕЛО";
+      YES_KEY = "ДА";
+      NO_KEY = "НЕТ";
+      CLR_KEY = "СБР";
+
     }
 
   public:
@@ -147,7 +167,6 @@ class IMCaptions {
     char * NO_LOG_DIR;
 
     char * STARTING;
-    char * WELCOME;
     char * ERRORS;
     char * INFO = "i";
     char * NEW_SESSION = "+";
@@ -186,6 +205,16 @@ class IMCaptions {
     char * FINISH_LBL;
     char * CANCEL_LBL;
     char * ERROR_LBL;
+
+    char * LO_LVL;
+    char * OK_LVL;
+    char * HI_LVL;
+    char * OVR_LVL;
+    char * HEAD_POS;
+    char * BODY_POS;
+    char * YES_KEY;
+    char * NO_KEY;
+    char * CLR_KEY;
 
     IMCaptions(Language l = Language::ENGLISH) {
       locale = l;

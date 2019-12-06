@@ -3,15 +3,19 @@
 
 #include <stdint.h>
 
-#define FLOAT_PRECISION  3
+#define FLOAT_PRECISION           3
+#define DISABLE_ALC_METER         1
+#define DEBUG_MODE                1
+#define MANUAL_MODE               1
+#define UNSTABLE_PRESSURE_REGION  0
 
-#define NANO_RST_PIN   A7
-#define ALC_HEAT_PIN   A10
-#define ALC_DATA_PIN   A11
-#define HLVL_OUT_PIN   A12
-#define HLVL_LO_PIN    A13
-#define HLVL_HI_PIN    A14
-#define HLVL_OVR_PIN   A15
+const int NANO_RST_PIN  = 61;//A7 (54+num)
+const int ALC_HEAT_PIN  = 64;//A10
+const int ALC_DATA_PIN  = 65;//A11
+const int HLVL_OUT_PIN  = 66;//A12
+const int HLVL_LO_PIN   = 67;//A13
+const int HLVL_HI_PIN   = 68;//A14
+const int HLVL_OVR_PIN  = 69;//A15
 const int SD_CS_PIN     = 10;
 const int MTR1_1_PIN    = 22;
 const int MTR1_2_PIN    = 23;
@@ -52,6 +56,8 @@ const int DASH_SLOT_WIDTH = SCR_WIDTH / 3;
 const int DASH_LBL_HEIGHT = LBL_FONT_SIZE * HEIGHT_MULT;
 const int DASH_DATA_HEIGHT = DASH_SLOT_HEIGHT - DASH_LBL_HEIGHT;
 const int BTN_WIDTH = 50;
+const int KEY_WIDTH = SCR_WIDTH / 5;
+const int KEY_HEIGHT = SCR_HEIGHT / 4; 
 
 const uint16_t MAIN_COLOR        = 0x97fc;
 const uint16_t MAIN_COLOR_FLAT   = 0x3b4c;
@@ -75,6 +81,8 @@ const unsigned long HLVL_TIMEOUT = 0;
 const unsigned long FRONT_PANE_TIMEOUT = 60000;
 const unsigned long DASHBOARD_TIMEOUT = SENSORS_UPD_TIMEOUT;
 
+const unsigned long KEY_DIGIT_LIMIT = 99999;
+
 typedef enum IMLevel : uint8_t {
   LO      = 0x0,
   OK      = 0x1,
@@ -90,6 +98,7 @@ typedef enum Panes : uint8_t {
   DASH2_PANE,
   DASH3_PANE,
   KEYBOARD,
+  CONFIRM_DIALOG,
   LOG_PANE,
   PREF_PANE,
   PLOT_PANE

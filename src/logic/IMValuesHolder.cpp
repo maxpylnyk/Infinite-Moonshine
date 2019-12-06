@@ -7,7 +7,9 @@ IMValuesHolder::IMValuesHolder(IMCondenserNode * condNode, IMExtractionNode * ex
 bool IMValuesHolder::collectValues() {
   bool result = true;
 
-  //result &= swNode->getAlc()->collectReadings();
+  if (!DISABLE_ALC_METER) {
+    result &= swNode->getAlc()->collectReadings();
+  }
   result &= trm->collectReadings();
   result &= extNode->getBar()->collectReadings();
   result &= extNode->getHydroLvl()->collectReadings();
@@ -16,7 +18,9 @@ bool IMValuesHolder::collectValues() {
 }
 
 void IMValuesHolder::prepareToCollect() {
-  //swNode->getAlc()->prepareToCollect();
+  if (!DISABLE_ALC_METER) {
+    swNode->getAlc()->prepareToCollect();
+  }
   trm->prepareToCollect();
   extNode->getBar()->prepareToCollect();
   extNode->getHydroLvl()->prepareToCollect();
@@ -24,6 +28,10 @@ void IMValuesHolder::prepareToCollect() {
 
 void IMValuesHolder::setSwitchPos(uint8_t value) {
   swNode->getSwitch()->setSwitchPos(value);
+}
+
+void IMValuesHolder::setRefluxRatio(uint8_t value) {
+  extNode->setRefluxRatio(value);
 }
 
 void IMValuesHolder::setHeatPwr(uint8_t value) {
@@ -34,39 +42,48 @@ void IMValuesHolder::setHeatAdj(uint8_t value) {
   extNode->getHeater()->setAdjStep(value);
 }
 
-void IMValuesHolder::setCondMtrPos(int16_t value) {
+void IMValuesHolder::setCondMtrPos(uint16_t value) {
   condNode->getMtr()->setTargetPosition(value);
 }
 
-void IMValuesHolder::setCondMtrAdj(int16_t value) {
+void IMValuesHolder::setCondMtrAdj(uint16_t value) {
   condNode->setAdj(value);
 }
 
-void IMValuesHolder::setOutMtrPos(int16_t value) {
+void IMValuesHolder::setOutMtrPos(uint16_t value) {
   extNode->getOutMtr()->setTargetPosition(value);
 }
 
-void IMValuesHolder::setRetMtrPos(int16_t value) {
+void IMValuesHolder::setRetMtrPos(uint16_t value) {
   extNode->getRetMtr()->setTargetPosition(value);
 }
 
-void IMValuesHolder::setExtAdj(int16_t value) {
+void IMValuesHolder::setExtAdj(uint16_t value) {
   extNode->setAdj(value);
 }
 
-void IMValuesHolder::setRefluxRatio(float value) {
-  extNode->setRefluxRatio(value);
+void IMValuesHolder::setCondCurPos(uint16_t value) {
+  condNode->setMtrCurPos(value);
+}
+
+void IMValuesHolder::setOutCurPos(uint16_t value) {
+  extNode->setOutCurPos(value);
+}
+
+void IMValuesHolder::setRetCurPos(uint16_t value) {
+  extNode->setRetCurPos(value);
+}
+
+void IMValuesHolder::setSwCurPos(uint16_t value) {
+  swNode->setMtrCurPos(value);
 }
 
 uint8_t IMValuesHolder::getSwitchPos() {
   return swNode->getSwitch()->getSwitchPos();
 }
 
-String IMValuesHolder::getSwitchPosString() {
-  if (getSwitchPos()) {
-    return "BODY";
-  }
-  return "HEAD";
+uint8_t IMValuesHolder::getRefluxRatio() {
+  return extNode->getRefluxRatio();
 }
 
 uint8_t IMValuesHolder::getHeatPwr() {
@@ -81,41 +98,30 @@ IMLevel IMValuesHolder::getHydroLvl() {
   return extNode->getHydroLvl()->getLevel();
 }
 
-String IMValuesHolder::getHydroLvlString() {
-  switch(getHydroLvl()) {
-    case IMLevel::OVR :
-      return "OVR";
-    case IMLevel::HI :
-      return "HI";
-    case IMLevel::OK :
-      return "OK";
-    default:
-      return "LO";
-  }
-}
-
 uint16_t IMValuesHolder::getAlcLvl() {
-  //return swNode->getAlc()->getLevel();
-  return 0;
+  if (DISABLE_ALC_METER) {
+    return 0;
+  }
+  return swNode->getAlc()->getLevel();
 }
 
-int16_t IMValuesHolder::getCondMtrPos() {
+uint16_t IMValuesHolder::getCondMtrPos() {
   return condNode->getMtr()->getCurrentPosition();
 }
 
-int16_t IMValuesHolder::getCondMtrAdj() {
+uint16_t IMValuesHolder::getCondMtrAdj() {
   return condNode->getAdj();
 }
 
-int16_t IMValuesHolder::getOutMtrPos() {
+uint16_t IMValuesHolder::getOutMtrPos() {
   return extNode->getOutMtr()->getCurrentPosition();
 }
 
-int16_t IMValuesHolder::getRetMtrPos() {
+uint16_t IMValuesHolder::getRetMtrPos() {
   return extNode->getRetMtr()->getCurrentPosition();
 }
 
-int16_t IMValuesHolder::getExtAdj() {
+uint16_t IMValuesHolder::getExtAdj() {
   return extNode->getAdj();
 }
 
@@ -141,12 +147,4 @@ float IMValuesHolder::getCalcTemp() {
 
 float IMValuesHolder::getPressure() {
   return extNode->getBar()->getPressure();
-}
-
-float IMValuesHolder::getRefluxRatio() {
-  return extNode->getRefluxRatio();
-}
-
-String IMValuesHolder::getStateString() {
-  return "РУЧНОЙ РЕЖИМ";
 }

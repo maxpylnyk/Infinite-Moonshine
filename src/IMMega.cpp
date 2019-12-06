@@ -17,10 +17,12 @@ bool IMMega::initUI() {
 bool IMMega::init() {
   bool result = true;
 
+  //init timer?
   timer.start();
   //timer.setupTime();
-  initWatchdog();
   //setMasterSPI();
+  //initWatchdog();
+  disableWatchdog();
 
   if (DEBUG_MODE) {
     debugPort = &Serial;
@@ -36,24 +38,8 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  
-  /*
-  debugPort->print("initializing serial interface.. ");
-  port = &Serial1;
-  port->begin(serialSpeed);
-  debugPort->println("done in "+String(timer.check())+" ms");
-  
-  debugPort->println("waiting for callsign");
-  while(!port->available());//if no transmission or delay -> error
-  debugPort->println("data transfer complete in "+String(timer.check())+" ms");
-  */
   /* 
-  debugPort->print("setting state.. ");
-  state = &IMStandByState();
-  debugPort->println("done in "+String(timer.check())+" ms");
-  */
-  /* 
-  debugPort->print("initializing log.. ");//after receiving data
+  debugPort->print("initializing log.. ");
   log.setErrorList(&errors);
 
   if (log.init()) {
@@ -64,6 +50,7 @@ bool IMMega::init() {
     result = false;
   }
   */
+
   debugPort->print("initializing thermometers.. ");
   trm.setErrorList(&errors);
 
@@ -106,19 +93,42 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  /*
-  debugPort->print("initializing alcohol sensor.. ");
+  if (!DISABLE_ALC_METER) {
+    debugPort->print("initializing alcohol sensor.. ");
 
-  if (alc.init()) {
-    debugPort->println("done in "+String(timer.check())+" ms");
-  } else {
-    errors.add(IMError::NO_ALC);
-    debugPort->println("failed");
+    if (alc.init()) {
+      debugPort->println("done in "+String(timer.check())+" ms");
+    } else {
+      errors.add(IMError::NO_ALC);
+      debugPort->println("failed");
     timer.check();
-    result = false;
+      result = false;
+    }
+  }
+  /*
+  debugPort->print("initializing serial interface.. ");
+  port = &Serial1;
+  port->begin(serialSpeed);
+  debugPort->println("done in "+String(timer.check())+" ms");
+  
+  debugPort->print("waiting for nano.. ");
+  waitingTimer.start();
+
+  while(!port->available()) {
+    if (waitingTimer.getElapsedTime() > callsignTimeout) {
+      errors.add(IMError::NO_CONNECTION);
+      result = false;
+      break;
+    }
+  }
+  waitingTimer.stop();
+
+  if (errors.contains(IMError::NO_CONNECTION)) {
+    debugPort->println("timeout reached. "+String(timer.check())+" ms");
+  } else {
+    debugPort->println("connection established in "+String(timer.check())+" ms");
   }
   */
-  //result &= !initialize;
   debugPort->println("initialization done in "+String(timer.stop())+" ms");
   
   if (result) {
@@ -126,7 +136,8 @@ bool IMMega::init() {
     drawFrontPane();
   } else {
     debugPort->println("system initialization failure");
-    showErrors();
+    printErrors();
+    drawErrorsPane();
   }
 
   return result;
@@ -134,40 +145,43 @@ bool IMMega::init() {
 
 void IMMega::loop() {
   restartWatchdog();
-  //moveMotors();
-
+  /*
+  if (millis() - responseTime >= callsignTimeout) {
+    restartOther();
+    responseTime = millis();
+  }
+  */
   if (!errors.isEmpty()) {
     if (!handleErrors()) {
-      showErrors();
+      //printErrors();
+
+      if (activePane != ERROR_PANE) {
+        drawErrorsPane();//refresh errors list
+      }
     }
   }
-
+  moveMotors();
   
   if (host.collectValues()) {
-    //send to logic
-    //sendData();
-    //logData();
-    requireRefresh();
+    //write to current session, check if changed
+    //if data changed -> sendData() and refresh dashes partly
+    //logData(), send to logic
+    if (activePane == DASH1_PANE 
+    || activePane == DASH2_PANE 
+    || activePane == DASH3_PANE
+    || activePane == FRONT_PANE) {
+      requireRefresh();
+    }
     host.prepareToCollect();//place after refresh
   }
-  //blink();
   handleTouch();
   refresh();
+  blink();
 }
 
 void IMMega::debug() {
   //hlvl.debug();
   //delay(2000);
-}
-
-bool IMMega::sessionIsActive() {
-  return (int8_t)currentState > 0;
-}
-
-bool IMMega::setState(State newState) {
-  currentState = newState;
-  //apply changes
-  return true;
 }
 
 void IMMega::moveMotors() {
@@ -178,13 +192,15 @@ void IMMega::moveMotors() {
 }
 
 bool IMMega::handleErrors() {
-  bool result = true;
-  //todo
+  bool result = false;
+  //todo reconnect sensors
   return result;
 }
 
-void IMMega::showErrors() {
+void IMMega::printErrors() {
   uint8_t count = errors.getCount();
+
+  debugPort->println("errors count: "+String(count));
 
   if (count) {
     for (int i = 0; i < count; i++) {
@@ -256,38 +272,57 @@ void IMMega::showErrors() {
   } else {
     debugPort->println(captions.NO_ERROR);
   }
-
-  drawErrorsPane();
 }
 
 void IMMega::receiveCallsign() {
   char message = port->read();
 
+  debugText = "\nincoming callsign: "+String(message);
+
   switch(message) {
     case initSign:
-      sendCallsign();
-
       if (callsign == onlineSign) {
         errors.add(IMError::NANO_BLACKOUT);
+        debugText += "\nnano blackout. sending data:";
         sendData();
+        responseTime = millis();
+        logRestart();
+      } else {
+        readPrevLog();
+        //if session incomplete (power failure) -> load from log 
+        //as if restarted (mtr cur pos), sendData() and resume
+        debugText += "\npower on. sending init data:";
+        sendData();
+        initialize = false;
+        responseTime = millis();
       }
       break;
     case onlineSign:
+      debugText += "\nsending response: "+String(callsign);
       sendCallsign();
+      responseTime = millis();
       break;
     case restartSign:
       thisRestarted = true;
+      debugText += "\nmega blackout. receiving data:";
+      receiveData();
+      responseTime = millis();
+      logRestart();
+      break;
     case dataSign:
       receiveData();
+      responseTime = millis();
       break;
     default:
       errors.add(IMError::TRANSMISSION_CORRUPTED);
-      debugPort->print("unknown callsign received: ");
-      debugPort->println(message);
+      debugText += "\nunknown callsign. transmission corrupted error.";
+      //repeat transfer, attempts += 1; then if fails -> error
   }
+  debugPort->println(debugText);
+  //printDebugText();
 }
 
-void IMMega::sendData() {//encapsulate
+void IMMega::sendData() {
   if (otherRestarted) {
     callsign = restartSign;
   } else {
@@ -295,37 +330,24 @@ void IMMega::sendData() {//encapsulate
   }
   queue = String(callsign);
 
-  if (errors.contains(IMError::NANO_BLACKOUT || otherRestarted)) {
-    addToQueue(LogIndex::SESSION_NAME, String(getSessionName()));
-  }
-
-  for (int i = 0; i < errors.getCount(); i++) {
-    addToQueue(LogIndex::ERROR_CODES, String(errors.get(i)));
-  }
-  errors.clear();
-
-  addToQueue(LogIndex::STATE, String(getStateIndex()));//if changed
+  addToQueue(LogIndex::SESSION_NAME, String(session.getName()));
+  addToQueue(LogIndex::STATE, String(session.getState()));
   addToQueue(LogIndex::PAUSE, String(isPaused()));
-  addToQueue(LogIndex::HYDRO_LEVEL, String(hlvl.getLevel()));
-  addToQueue(LogIndex::ALC_LEVEL, String(alc.getLevel()));
-  addToQueue(LogIndex::STEAM_TEMP, String(trm.getSteamTemp(), FLOAT_PRECISION));
-  addToQueue(LogIndex::COND_TEMP, String(trm.getCondTemp(), FLOAT_PRECISION));
-  addToQueue(LogIndex::PIPE_TEMP, String(trm.getPipeTemp(), FLOAT_PRECISION));
-  addToQueue(LogIndex::ENV_TEMP, String(trm.getEnvTemp(), FLOAT_PRECISION));
-  addToQueue(LogIndex::PRESSURE, String(bar.getPressure()));
-  addToQueue(LogIndex::COND_MTR, String(0));
-  addToQueue(LogIndex::COND_MTR_ADJ, String(0));
-  addToQueue(LogIndex::SW, String(0));
-  addToQueue(LogIndex::HEAT, String(heater.getPower()));
-  addToQueue(LogIndex::HEAT_ADJ, String(heater.getAdjStep()));
-  addToQueue(LogIndex::RF, String(0));
-  addToQueue(LogIndex::OUT_MTR, String(0));
-  addToQueue(LogIndex::RET_MTR, String(0));
-  addToQueue(LogIndex::EXT_ADJ, String(0));
+  addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
+  addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
+  addToQueue(LogIndex::SW, String(session.getSwitchPos()));
+  addToQueue(LogIndex::HEAT, String(session.getHeatPwr()));
+  addToQueue(LogIndex::HEAT_ADJ, String(session.getHeatAdj()));
+  addToQueue(LogIndex::RF, String(session.getRefluxRatio()));
+  addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrPos()));
+  addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
+  addToQueue(LogIndex::EXT_ADJ, String(session.getExtMtrAdj()));
   endQueue();
 }
 
-void IMMega::receiveData() {//encapsulate
+void IMMega::receiveData() {
+  transfering = true;
+
   while (port->available()) {
     int index = port->parseInt();
     long iTemp;
@@ -334,174 +356,144 @@ void IMMega::receiveData() {//encapsulate
     switch(index) {
       case LogIndex::SESSION_NAME :
         iTemp = port->parseInt();
-        debugPort->print("parsed session name ");
-        debugPort->println(iTemp);
-        setSessionName(iTemp);
+        debugText += "\n"+String(index)+" (session name) "+String(iTemp);
+        session.setName(iTemp);
         break;
       case LogIndex::STATE :
         iTemp = port->parseInt();
-        debugPort->print("parsed status ");
-        debugPort->println(iTemp);
-        setStateIndex(iTemp);
+        debugText += "\n"+String(index)+" (state) "+String(iTemp);
+        session.setState(iTemp);
         break;
       case LogIndex::PAUSE :
         iTemp = port->parseInt();
-        debugPort->print("parsed pause ");
-        debugPort->println(iTemp);
+        debugText += "\n"+String(index)+" (pause) "+String(iTemp);
         setManualPause(iTemp);
         break;
       case LogIndex::ERROR_CODES :
         iTemp = port->parseInt();
-        debugPort->print("parsed error code ");
-        debugPort->println(iTemp);
+        debugText += "\n"+String(index)+" (error) "+String(iTemp);
         errors.add(iTemp);
         break;
-      case LogIndex::HYDRO_LEVEL ://remove
+      case LogIndex::COND_MTR :
         iTemp = port->parseInt();
-        debugPort->print("parsed hydro level ");
-        debugPort->println(iTemp);
+        debugText += "\n"+String(index)+" (cond mtr pos) "+String(iTemp);
+        session.setCondMtrPos(iTemp);
+        host.setCondCurPos(iTemp);
         break;
-      case LogIndex::ALC_LEVEL ://remove
+      case LogIndex::COND_MTR_ADJ :
         iTemp = port->parseInt();
-        debugPort->print("parsed alcohol level ");
-        debugPort->println(iTemp);
+        debugText += "\n"+String(index)+" (cond mtr adj) "+String(iTemp);
+        session.setCondMtrAdj(iTemp);
+        host.setCondMtrAdj(iTemp);
         break;
-      case LogIndex::STEAM_TEMP ://remove
-        fTemp = port->parseFloat();
-        debugPort->print("parsed steam temp ");
-        debugPort->println(fTemp);
-        break;
-      case LogIndex::COND_TEMP ://remove
-        fTemp = port->parseFloat();
-        debugPort->print("parsed cond temp ");
-        debugPort->println(fTemp);
-        break;
-      case LogIndex::PIPE_TEMP ://remove
-        fTemp = port->parseFloat();
-        debugPort->print("parsed pipe temp ");
-        debugPort->println(fTemp);
-        break;
-      case LogIndex::ENV_TEMP ://remove
-        fTemp = port->parseFloat();
-        debugPort->print("parsed env temp ");
-        debugPort->println(fTemp);
-        break;
-      case LogIndex::PRESSURE ://remove
-        fTemp = port->parseFloat();
-        debugPort->print("parsed pressure ");
-        debugPort->println(fTemp);
-        break;
-      case LogIndex::COND_MTR ://class
+      case LogIndex::SW :
         iTemp = port->parseInt();
-        debugPort->print("parsed comd mtr ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        }
+        debugText += "\n"+String(index)+" (switch pos) "+String(iTemp);
+        session.setSwitchPos(iTemp);
+        host.setSwCurPos(iTemp);
         break;
-      case LogIndex::COND_MTR_ADJ ://class
+      case LogIndex::HEAT :
         iTemp = port->parseInt();
-        debugPort->print("parsed cond mtr adj ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        }
+        debugText += "\n"+String(index)+" (heat pwr) "+String(iTemp);
+        session.setHeatPwr(iTemp);
+        host.setHeatPwr(iTemp);
         break;
-      case LogIndex::SW ://class
+      case LogIndex::HEAT_ADJ :
         iTemp = port->parseInt();
-        debugPort->print("parsed switch position ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
+        debugText += "\n"+String(index)+" (heat adj) "+String(iTemp);
+        session.setHeatAdj(iTemp);
+        host.setHeatAdj(iTemp);
         break;
-      case LogIndex::HEAT ://class
+      case LogIndex::RF :
         iTemp = port->parseInt();
-        debugPort->print("parsed heating power ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
+        debugText += "\n"+String(index)+" (reflux ratio) "+String(iTemp);
+        session.setRefluxRatio(iTemp);
+        host.setRefluxRatio(iTemp);
         break;
-      case LogIndex::HEAT_ADJ ://class
+      case LogIndex::OUT_MTR :
         iTemp = port->parseInt();
-        debugPort->print("parsed heating adj step ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
+        debugText += "\n"+String(index)+" (out mtr pos) "+String(iTemp);
+        session.setOutMtrPos(iTemp);
+        host.setOutCurPos(iTemp);
         break;
-      case LogIndex::RF ://class
+      case LogIndex::RET_MTR :
         iTemp = port->parseInt();
-        debugPort->print("parsed reflux ratio ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
+        debugText += "\n"+String(index)+" (ret mtr pos) "+String(iTemp);
+        session.setRetMtrPos(iTemp);
+        host.setRetCurPos(iTemp);
         break;
-      case LogIndex::OUT_MTR ://class
+      case LogIndex::EXT_ADJ :
         iTemp = port->parseInt();
-        debugPort->print("parsed out mtr ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //setCurrentPosition
-        } else {
-          //setTargetPosition
-        }
-        break;
-      case LogIndex::RET_MTR ://class
-        iTemp = port->parseInt();
-        debugPort->print("parsed ret mtr ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
-        break;
-      case LogIndex::EXT_ADJ ://class
-        iTemp = port->parseInt();
-        debugPort->print("parsed ext adj ");
-        debugPort->println(iTemp);
-
-        if (initialize) {
-          //create object and set itemp as init value
-        } else {
-          //set object to change value to itemp
-        }
+        debugText += "\n"+String(index)+" (ext adj) "+String(iTemp);
+        session.setExtMtrAdj(iTemp);
+        host.setExtAdj(iTemp);
         break;
       case endOfTransmission:
-        debugPort->print("end of transmission");
-
-        if (thisRestarted) {
-          thisRestarted = false;
-        }
+        debugText += "\n"+String(index)+" (eot)";
+        transfering = false;
         if (initialize) {
           initialize = false;
+          debugText += "\ninit done.";
+        }
+        if (errors.contains(IMError::TRANSMISSION_CORRUPTED)) {
+          errors.remove(IMError::TRANSMISSION_CORRUPTED);
         }
         break;
       default:
-        debugPort->print("unknown id ");
-        debugPort->print(index);
-        debugPort->print(" value ");
-        debugPort->println(port->parseFloat());
+       debugText += "\n"+String(index)+" (unknown) "+String(port->parseInt());
     }
+  }
+  if (transfering) {
+    errors.add(IMError::TRANSMISSION_CORRUPTED);
+    debugText += "\ntransfer incomplete.";
+    transfering = false;
+  }
+}
+
+void IMMega::applyEditing() {
+  if (KEY_DIGIT_LIMIT > INT16_MAX) {
+    if (editValue > INT16_MAX) {
+      editValue = INT16_MAX;
+    }
+  }
+  if (editLabel == captions.OUT_MTR_LBL) {
+    host.setOutMtrPos(editValue);
+  }
+  if (editLabel == captions.RET_MTR_LBL) {
+    host.setRetMtrPos(editValue);
+  }
+  if (editLabel == captions.COND_MTR_LBL) {
+    host.setCondMtrPos(editValue);
+  }
+  if (editLabel == captions.HEAT_PWR_LBL) {
+    if (editValue > UINT8_MAX) {
+      editValue = UINT8_MAX;
+    }
+    host.setHeatPwr(editValue);
+  }
+  if (editLabel == captions.EXT_ADJ_LBL) {
+    host.setExtAdj(editValue);
+  }
+  if (editLabel == captions.COND_ADJ_LBL) {
+    host.setCondMtrAdj(editValue);
+  }
+  if (editLabel == captions.HEAT_ADJ_LBL) {
+    if (editValue > UINT8_MAX) {
+      editValue = UINT8_MAX;
+    }
+    host.setHeatAdj(editValue);
+  }
+  if (editLabel == captions.SW_LBL) {
+    if (editValue) {
+      editValue = 1;
+    }
+    host.setSwitchPos(editValue);
+  }
+  if (editLabel == captions.RF_LBL) {
+    if (editValue > UINT8_MAX) {
+      editValue = UINT8_MAX;
+    }
+    host.setRefluxRatio(editValue);
   }
 }
 
@@ -558,7 +550,7 @@ void IMMega::handleTouch() {
     switch(activePane) {
       case FRONT_PANE:
         if (topLeftRect.hasPoint(touch)) {
-          if (sessionIsActive()) {
+          if (session.isActive()) {
             //abort session -> confirm dialog
           } else {
             //start session
@@ -569,6 +561,9 @@ void IMMega::handleTouch() {
         }
         if (topRightRect.hasPoint(touch)) {
           drawDash1();
+        }
+        if (bottomBar.hasPoint(touch) && session.getState() == STAND_BY_STATE) {
+          //start session
         }
         break;
       case DASH1_PANE:
@@ -587,7 +582,18 @@ void IMMega::handleTouch() {
           drawDash3();
         }
         if (MANUAL_MODE) {
-          //allow edit first 4 values
+          if (slot11.hasPoint(touch)) {
+            drawKeyboard(host.getOutMtrPos(), captions.OUT_MTR_LBL);
+          }
+          if (slot12.hasPoint(touch)) {
+            drawKeyboard(host.getRetMtrPos(), captions.RET_MTR_LBL);
+          }
+          if (slot13.hasPoint(touch)) {
+            drawKeyboard(host.getCondMtrPos(), captions.COND_MTR_LBL);
+          }
+          if (slot21.hasPoint(touch)) {
+            drawKeyboard(host.getHeatPwr(), captions.HEAT_PWR_LBL);
+          }
         }
         break;
       case DASH3_PANE:
@@ -595,17 +601,108 @@ void IMMega::handleTouch() {
           drawDash2();
         }
         if (MANUAL_MODE) {
-          //allow edit all 5 values
+          if (slot11.hasPoint(touch)) {
+            drawKeyboard(host.getExtAdj(), captions.EXT_ADJ_LBL);
+          }
+          if (slot12.hasPoint(touch)) {
+            drawKeyboard(host.getCondMtrAdj(), captions.COND_ADJ_LBL);
+          }
+          if (slot13.hasPoint(touch)) {
+            drawKeyboard(host.getHeatAdj(), captions.HEAT_ADJ_LBL);
+          }
+          if (slot21.hasPoint(touch)) {
+            drawKeyboard(host.getSwitchPos(), captions.SW_LBL);
+          }
+          if (slot22.hasPoint(touch)) {
+            drawKeyboard(host.getRefluxRatio(), captions.RF_LBL);
+          }
         }
         break;
       case ERROR_PANE:
-        drawFrontPane();
+        //drawFrontPane();
         break;
       case KEYBOARD:
-        
+      appendAllowed = !(editValue / KEY_DIGIT_LIMIT);
+
+        if (key1.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 1;
+          drawKeyboardData();
+        }
+        if (key2.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 2;
+          drawKeyboardData();
+        }
+        if (key3.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 3;
+          drawKeyboardData();
+        }
+        if (key4.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 4;
+          drawKeyboardData();
+        }
+        if (key5.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 5;
+          drawKeyboardData();
+        }
+        if (key6.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 6;
+          drawKeyboardData();
+        }
+        if (key7.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 7;
+          drawKeyboardData();
+        }
+        if (key8.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 8;
+          drawKeyboardData();
+        }
+        if (key9.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          editValue += 9;
+          drawKeyboardData();
+        }
+        if (key0.hasPoint(touch) && appendAllowed) {
+          editValue *= 10;
+          drawKeyboardData();
+        }
+        if (keyPlus.hasPoint(touch)) {
+          if (editValue < KEY_DIGIT_LIMIT) {
+            editValue += 1;
+            drawKeyboardData();
+          }
+        }
+        if (keyMinus.hasPoint(touch)) {
+          if (editValue > 0) {
+            editValue -= 1;
+            drawKeyboardData();
+          }
+        }
+        if (keyBackspace.hasPoint(touch)) {
+          editValue /= 10;
+          drawKeyboardData();
+        }
+        if (keyClear.hasPoint(touch)) {
+          editValue = 0;
+          drawKeyboardData();
+        }
+        if (keyCancel.hasPoint(touch)) {
+          drawPrevPane();
+        }
+        if (keyOK.hasPoint(touch)) {
+          applyEditing();
+          drawPrevPane();
+        }
         break;
     }
-    prevActivePane = activePane;
+    //prevActivePane = activePane;
   }
 }
 
@@ -619,7 +716,24 @@ void IMMega::drawBottomBar() {
   }
   */
 
-  tft.print(String(captions.getStateString(currentState)), HDR_FONT_SIZE, BACKGROUND_COLOR, bottomBar);
+  tft.print(String(captions.getStateString(session.getState())), HDR_FONT_SIZE, BACKGROUND_COLOR, bottomBar);
+}
+
+void IMMega::drawPrevPane() {
+  switch(prevActivePane) {
+    case FRONT_PANE:
+      drawFrontPane();
+      break;
+    case DASH1_PANE:
+      drawDash1();
+      break;
+    case DASH2_PANE:
+      drawDash2();
+      break;
+    case DASH3_PANE:
+      drawDash3();
+      break;
+  }
 }
 
 void IMMega::drawInitPane() {
@@ -640,7 +754,7 @@ void IMMega::drawFrontPane() {
   tft.fillRect(topBar);
   tft.fillRect(bottomBar);
 
-  if (sessionIsActive()) {
+  if (session.isActive()) {
     tft.print(captions.ABORT_SESSION, HDR_FONT_SIZE, BACKGROUND_COLOR, topLeftRect);
     if (MANUAL_MODE) {
       tft.print(captions.PAUSE_SESSION, HDR_FONT_SIZE, BACKGROUND_COLOR, topL2Rect);
@@ -651,7 +765,7 @@ void IMMega::drawFrontPane() {
   tft.print(captions.INFO, HDR_FONT_SIZE, BACKGROUND_COLOR, topRightRect);
 
   tft.printNum(timer.getTime(), timeRect);
-  tft.print("Тип сырья объём", 2, MAIN_COLOR, srcBar);
+  //tft.print("Тип сырья объём", 2, MAIN_COLOR, srcBar);
   drawBottomBar();
 
   prevActivePane = activePane;
@@ -798,20 +912,38 @@ void IMMega::drawDash1() {
 void IMMega::drawDash2Data() {
   tft.setColor(BACKGROUND_COLOR);
   tft.fillRect(IMRect(0, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT));
+  tft.setColor(MAIN_COLOR);
+  tft.setFontSize(DATA_FONT_SIZE);
 
-  tft.print(String(host.getOutMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data11);
-  tft.print(String(host.getRetMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data12);
-  tft.print(String(host.getCondMtrPos()), DATA_FONT_SIZE, MAIN_COLOR, data13);
-  tft.print(String(host.getHeatPwr()), DATA_FONT_SIZE, MAIN_COLOR, data21);
-  tft.print(host.getHydroLvlString(), DATA_FONT_SIZE, MAIN_COLOR, data22);
-  tft.print(String(host.getCondTemp(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data23);
+  tft.print(String(host.getOutMtrPos()), data11);
+  tft.print(String(host.getRetMtrPos()), data12);
+  tft.print(String(host.getCondMtrPos()), data13);
+  tft.print(String(host.getHeatPwr()), data21);
 
-  tft.print(captions.OUT_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label11);
-  tft.print(captions.RET_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label12);
-  tft.print(captions.COND_MTR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label13);
-  tft.print(captions.HEAT_PWR_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label21);
-  tft.print(captions.HLVL_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label22);
-  tft.print(captions.COND_TEMP_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label23);
+  switch (host.getHydroLvl()) {
+    case OVR:
+      tft.print(captions.OVR_LVL, data22);
+      break;
+    case HI:
+      tft.print(captions.HI_LVL, data22);
+      break;
+    case OK:
+      tft.print(captions.OK_LVL, data22);
+      break;
+    default:
+      tft.print(captions.LO_LVL, data22);
+      break;
+  }
+  tft.print(String(host.getCondTemp(), DATA_PRECISION), data23);
+
+  tft.setColor(MAIN_COLOR_FLAT);
+  tft.setFontSize(LBL_FONT_SIZE);
+  tft.print(captions.OUT_MTR_LBL, label11);
+  tft.print(captions.RET_MTR_LBL, label12);
+  tft.print(captions.COND_MTR_LBL, label13);
+  tft.print(captions.HEAT_PWR_LBL, label21);
+  tft.print(captions.HLVL_LBL, label22);
+  tft.print(captions.COND_TEMP_LBL, label23);
 }
 
 void IMMega::drawDash2() {
@@ -838,18 +970,27 @@ void IMMega::drawDash2() {
 void IMMega::drawDash3Data() {
   tft.setColor(BACKGROUND_COLOR);
   tft.fillRect(IMRect(0, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT));
+  tft.setColor(MAIN_COLOR);
+  tft.setFontSize(DATA_FONT_SIZE);
 
-  tft.print(String(host.getExtAdj()), DATA_FONT_SIZE, MAIN_COLOR, data11);
-  tft.print(String(host.getCondMtrAdj()), DATA_FONT_SIZE, MAIN_COLOR, data12);
-  tft.print(String(host.getHeatAdj()), DATA_FONT_SIZE, MAIN_COLOR, data13);
-  tft.print(host.getSwitchPosString(), DATA_FONT_SIZE, MAIN_COLOR, data21);
-  tft.print(String(host.getRefluxRatio(), DATA_PRECISION), DATA_FONT_SIZE, MAIN_COLOR, data22);
+  tft.print(String(host.getExtAdj()), data11);
+  tft.print(String(host.getCondMtrAdj()), data12);
+  tft.print(String(host.getHeatAdj()), data13);
 
-  tft.print(captions.EXT_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label11);
-  tft.print(captions.COND_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label12);
-  tft.print(captions.HEAT_ADJ_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label13);
-  tft.print(captions.SW_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label21);
-  tft.print(captions.RF_LBL, LBL_FONT_SIZE, MAIN_COLOR_FLAT, label22);
+  if (host.getSwitchPos()) {
+    tft.print(captions.BODY_POS, data21);
+  } else {
+    tft.print(captions.HEAD_POS, data21);
+  }
+  tft.print(String(host.getRefluxRatio()), data22);
+
+  tft.setColor(MAIN_COLOR_FLAT);
+  tft.setFontSize(LBL_FONT_SIZE);
+  tft.print(captions.EXT_ADJ_LBL, label11);
+  tft.print(captions.COND_ADJ_LBL, label12);
+  tft.print(captions.HEAT_ADJ_LBL, label13);
+  tft.print(captions.SW_LBL, label21);
+  tft.print(captions.RF_LBL, label22);
 }
 
 void IMMega::drawDash3() {
@@ -872,13 +1013,52 @@ void IMMega::drawDash3() {
   refreshRequired = false;
 }
 
-void IMMega::drawKeyboardData(int num) {
-
+void IMMega::drawKeyboardData() {
+  tft.setColor(BACKGROUND_COLOR);
+  tft.fillRect(keyData);
+  tft.print(String(editValue), DATA_FONT_SIZE, MAIN_COLOR, keyDisplay);
 }
 
-void IMMega::drawKeyboard(int num) {
+void IMMega::drawKeyboard(int num, String label) {
   tft.paintBackground();
   tft.setColor(MAIN_COLOR);
+  tft.setFontSize(DATA_FONT_SIZE);
+
+  tft.drawLine(0, KEY_HEIGHT, SCR_WIDTH, KEY_HEIGHT);
+  tft.drawLine(0, 2*KEY_HEIGHT, SCR_WIDTH, 2*KEY_HEIGHT);
+  tft.drawLine(2*KEY_WIDTH, 3*KEY_HEIGHT, SCR_WIDTH, 3*KEY_HEIGHT);
+  tft.drawLine(KEY_WIDTH, 0, KEY_WIDTH, 2*KEY_HEIGHT);
+  tft.drawLine(2*KEY_WIDTH, 0, 2*KEY_WIDTH, SCR_HEIGHT);
+  tft.drawLine(3*KEY_WIDTH, 0, 3*KEY_WIDTH, SCR_HEIGHT);
+  tft.drawLine(4*KEY_WIDTH, 0, 4*KEY_WIDTH, SCR_HEIGHT);
+
+  tft.print("1", key1);
+  tft.print("2", key2);
+  tft.print("3", key3);
+  tft.print("4", key4);
+  tft.print("5", key5);
+  tft.print("6", key6);
+  tft.print("7", key7);
+  tft.print("8", key8);
+  tft.print("9", key9);
+  tft.print("0", key0);
+  tft.print("+1", keyPlus);
+  tft.print("-1", keyMinus);
+  tft.print("<", keyBackspace);
+  tft.print(captions.NO_KEY, keyCancel);
+  tft.print(captions.CLR_KEY, keyClear);
+  tft.print(captions.YES_KEY, keyOK);
+  editLabel = label;
+  tft.print(editLabel, LBL_FONT_SIZE, MAIN_COLOR_FLAT, keyLabel);
+  editValue = num;
+  drawKeyboardData();
+
+  prevActivePane = activePane;
+  activePane = Panes::KEYBOARD;
+  refreshTimeout = 0;
+
+  refreshTime = millis();
+  refreshRequired = false;
 }
 
 bool IMMega::refresh(bool full) {
@@ -901,7 +1081,7 @@ bool IMMega::refresh(bool full) {
           drawErrorsPane();
           break;
         case KEYBOARD:
-          //drawKeyboard();
+          drawKeyboard(editValue, editLabel);
           break;
       }
     } else {
@@ -916,7 +1096,7 @@ bool IMMega::refresh(bool full) {
           drawDash3Data();
           break;
         case KEYBOARD:
-          //drawKeyboardData();
+          drawKeyboardData();
           break;
         default:
           return refresh(true);
@@ -950,4 +1130,46 @@ void IMMega::blink() {
   tft.fillRect(blinkRect);
   blinkVisible = !blinkVisible;
   lastBlinkTime = millis();
+}
+
+void IMMega::readPrevLog() {
+  //find last log, read end. if @ finished -> stby
+  //                         if not -> load checkpoint and resumePrevSession = true;
+  //calculate timeout and water usage during blackout
+  //if log ended with error -> check if it still present
+  //if no log found -> stby
+  //fills queue with commands
+}
+
+void IMMega::logRestart() {
+  if (thisRestarted) {
+    logRestart(Board::NANO);
+    debugPort->println("nano restarted");
+    thisRestarted = false;
+  }
+  if (otherRestarted) {
+    logRestart(Board::MEGA);
+    debugPort->println("mega restarted");
+    otherRestarted = false;
+  }
+}
+
+void IMMega::logRestart(Board board) {
+  String rec = String(restartSign);
+
+  rec += " ";
+  rec += timer.getLogStamp();
+  rec += " ";
+  rec += String(board);
+
+  //logger.println(rec);
+}
+
+void IMMega::logData() {
+  //no log when paused
+}
+
+void IMMega::printDebugText() {
+  tft.paintBackground();
+  tft.print(debugText, ERR_FONT_SIZE, TEXT_COLOR, 0, SCR_HEIGHT);
 }

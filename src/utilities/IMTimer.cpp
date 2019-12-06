@@ -11,19 +11,34 @@ void IMTimer::setupTime() {
 }
 
 unsigned long IMTimer::start() {
+  active = true;
   startTime = millis();
   checkTime = startTime;
   return startTime;
 }
 
 unsigned long IMTimer::check() {
-  prevTime = checkTime;
-  checkTime = millis();
-  return checkTime - prevTime;
+  if (active) {
+    prevTime = checkTime;
+    checkTime = millis();
+    return checkTime - prevTime;
+  }
+  return 0;
+}
+
+unsigned long IMTimer::getElapsedTime() {
+  if (active) {
+    return millis() - startTime;
+  }
+  return 0;
 }
 
 unsigned long IMTimer::stop() {
-  return millis() - startTime;
+  if (active) {
+    active = false;
+    return millis() - startTime;
+  }
+  return 0;
 }
 
 String IMTimer::getTime() {
@@ -74,6 +89,6 @@ String IMTimer::getFileName() {
 }
 
 float IMTimer::getEnvTemp() {
-    clock.forceConversion();
-    return clock.readTemperature();
+  clock.forceConversion();
+  return clock.readTemperature();
 }

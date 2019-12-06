@@ -3,11 +3,11 @@
 
 #include "control/IMStepMotor.h"
 
+const int16_t HEAD_POS = 0;
+const int16_t BODY_POS = 1000;
+
 class IMSwitch {
   private:
-    static const int16_t HEAD_POS = 0;
-    static const int16_t BODY_POS = 1000;
-    
     IMStepMotor * swMtr;
 
   public:

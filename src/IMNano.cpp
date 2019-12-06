@@ -4,130 +4,110 @@ IMNano::IMNano() : InfiniteMoonshine(NANO_RST_PIN) {}
 
 bool IMNano::init() {
   bool result = true;
-
+  pinMode(LED_BUILTIN, OUTPUT);
   initWatchdog();
 
   port = &Serial;
   port->begin(serialSpeed);
   sendCallsign();
-
   return result;
 }
 
 void IMNano::loop() {
-  //refresh ui and wait for user input
-  //send callsigns
-  //check timeouts
-  //read env data
-  //check and handle errors. show error messages.
-  //if error handled, wait to log, then remove from list
   restartWatchdog();
-  //log
+
+  if (callsignReceived) {
+    if (millis() - responseTime >= callsignTimeout) {
+      sendCallsign();
+      
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(blinkDelay);
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+  } else {
+    if (waitingTimer.getElapsedTime() >= responseTimeLimit) {
+      if (connectionAttempts > attemptsLimit) {
+        if (restartAttempts > attemptsLimit) {
+          digitalWrite(LED_BUILTIN, HIGH);
+          delay(blinkDelay);
+          digitalWrite(LED_BUILTIN, LOW);
+          delay(blinkDelay); 
+        } else {
+          restartAttempts += 1;
+          restartOther();
+        }
+      } else {
+        connectionAttempts += 1;
+        sendCallsign();
+        
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(blinkDelay);
+        digitalWrite(LED_BUILTIN, LOW);
+      }
+    } else {
+      //waiting for callsign
+    }
+  }
 }
 
 void IMNano::debug() {
-  //fill array and transfer
+
 }
 
 void IMNano::receiveCallsign() {
   char answer = port->read();
-  //write response time
+
   switch(answer) {
     case initSign:
-      if (callsign == initSign) {
-        readPrevLog();
-        sendData();
-      } else if (callsign == onlineSign) {
+      if (callsign == onlineSign) {
         errors.add(IMError::MEGA_BLACKOUT);
         sendData();
-        //blackout handled
       }
+      callsignReceived = true;
+      responseTime = millis();
+      connectionAttempts = 0;
+      waitingTimer.stop();
       break;
     case onlineSign:
       if (callsign == initSign) {
-        //errors.add(IMError::UNO_BLACKOUT);
-        //receive full data >
+
       }
+      callsignReceived = true;
+      responseTime = millis();
+      connectionAttempts = 0;
+      waitingTimer.stop();
       break;
     case restartSign:
       thisRestarted = true;
-      receiveData();
-      logRestart();
-      break;
     case dataSign:
-      receiveData();//write timeout
+      receiveData();
+      callsignReceived = true;
+      responseTime = millis();
+      connectionAttempts = 0;
+      waitingTimer.stop();
       break;
     default:
       errors.add(IMError::TRANSMISSION_CORRUPTED);
+      //repeat transfer, attempts += 1; then if fails -> error
   }
-}
-
-void IMNano::readPrevLog() {
-  //find last log, read end. if @ finished -> stby
-  //                         if not -> load checkpoint and resumePrevSession = true;
-  //calculate timeout and water usage during blackout
-  //if log ended with error -> check if it still present
-  //if no log found -> stby
-  //fills queue with commands
-}
-
-void IMNano::logRestart() {
-  if (thisRestarted) {
-    logRestart(Board::NANO);
-    thisRestarted = false;
-  }
-  if (otherRestarted) {
-    logRestart(Board::MEGA);
-    otherRestarted = false;
-  }
-}
-
-void IMNano::logRestart(Board board) {
-  String rec = String(restartSign);
-
-  rec += " ";
-  rec += timer.getLogStamp();
-  rec += " ";
-  rec += String(board);
-
-  //logger.println(rec);
-}
-
-void IMNano::logData() {
-  //no log when paused
 }
 
 void IMNano::sendData() {
-  if (otherRestarted) {
-    callsign = restartSign;
-  } else {
-    callsign = dataSign;
-  }
-  queue = String(callsign);
-
-  if (errors.contains(IMError::MEGA_BLACKOUT) || otherRestarted || resumePrevSession) {
-    addToQueue(LogIndex::SESSION_NAME, String(getSessionName()));
-    addToQueue(LogIndex::STATE, String(getStateIndex()));
-    addToQueue(LogIndex::PAUSE, String(isPaused()));
-    addToQueue(LogIndex::COND_MTR, String(condMtrPos));
-    addToQueue(LogIndex::COND_MTR_ADJ, String(condMtrAdj));
-    addToQueue(LogIndex::SW, String(switchPosition));
-    addToQueue(LogIndex::HEAT, String(heatPower));
-    addToQueue(LogIndex::HEAT_ADJ, String(heatAdjStep));
-    addToQueue(LogIndex::RF, String(refluxRatio));
-    addToQueue(LogIndex::OUT_MTR, String(outMtrPos));
-    addToQueue(LogIndex::RET_MTR, String(retMtrPos));
-    addToQueue(LogIndex::EXT_ADJ, String(extMtrAdj));
-    //addToQueue(LogIndex::ENV_TEMP, String(envTemp));
-    //addToQueue(LogIndex::PRESSURE, String(pressure));
-    endQueue();
-    logRestart();
-  }
-
-
-
-  //cmd sends by one on press action
-
+  queue = String(restartSign);
+  addToQueue(LogIndex::SESSION_NAME, String(session.getName()));
+  addToQueue(LogIndex::STATE, String(session.getState()));
+  addToQueue(LogIndex::PAUSE, String(isPaused()));
+  addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
+  addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
+  addToQueue(LogIndex::SW, String(session.getSwitchPos()));
+  addToQueue(LogIndex::HEAT, String(session.getHeatPwr()));
+  addToQueue(LogIndex::HEAT_ADJ, String(session.getHeatAdj()));
+  addToQueue(LogIndex::RF, String(session.getRefluxRatio()));
+  addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrPos()));
+  addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
+  addToQueue(LogIndex::EXT_ADJ, String(session.getExtMtrAdj()));
+  endQueue();
+  debugText = "";
 }
 
 void IMNano::receiveData() {
@@ -136,10 +116,10 @@ void IMNano::receiveData() {
 
     switch(index) {
       case LogIndex::SESSION_NAME :
-        setSessionName(port->parseInt());
+        session.setName(port->parseInt());
         break;
       case LogIndex::STATE :
-        setStateIndex(port->parseInt());
+        session.setState(port->parseInt());
         break;
       case LogIndex::PAUSE :
         setPause(port->parseInt());
@@ -148,46 +128,46 @@ void IMNano::receiveData() {
         errors.add(port->parseInt());
         break;
       case LogIndex::HYDRO_LEVEL :
-        hydroLevel = port->parseInt();
+        session.setHydroLvl(port->parseInt());
         break;
       case LogIndex::ALC_LEVEL :
-        alcLevel = port->parseInt();
+        session.setAlcLvl(port->parseInt());
         break;
       case LogIndex::STEAM_TEMP :
-        steamTemp = port->parseFloat();
+        session.setSteamTemp(port->parseFloat());
         break;
       case LogIndex::COND_TEMP :
-        condTemp = port->parseFloat();
+        session.setCondTemp(port->parseFloat());
         break;
       case LogIndex::PIPE_TEMP :
-        pipeTemp = port->parseFloat();
+        session.setPipeTemp(port->parseFloat());
         break;
       case LogIndex::COND_MTR :
-        condMtrPos = port->parseInt();
+        session.setCondMtrPos(port->parseInt());
         break;
       case LogIndex::COND_MTR_ADJ :
-        condMtrAdj = port->parseInt();
+        session.setCondMtrAdj(port->parseInt());
         break;
       case LogIndex::SW :
-        switchPosition = port->parseInt();
+        session.setSwitchPos(port->parseInt());
         break;
       case LogIndex::HEAT :
-        heatPower = port->parseInt();
+        session.setHeatPwr(port->parseInt());
         break;
       case LogIndex::HEAT_ADJ :
-        heatAdjStep = port->parseInt();
+        session.setHeatAdj(port->parseInt());
         break;
       case LogIndex::RF :
-        refluxRatio = port->parseInt();
+        session.setRefluxRatio(port->parseInt());
         break;
       case LogIndex::OUT_MTR :
-        outMtrPos = port->parseInt();
+        session.setOutMtrPos(port->parseInt());
         break;
       case LogIndex::RET_MTR :
-        retMtrPos = port->parseInt();
+        session.setRetMtrPos(port->parseInt());
         break;
       case LogIndex::EXT_ADJ :
-        extMtrAdj = port->parseInt();
+        session.setExtMtrAdj(port->parseInt());
         break;
       case endOfTransmission:
         if (initialize) {

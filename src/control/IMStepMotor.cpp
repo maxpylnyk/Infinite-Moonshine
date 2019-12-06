@@ -7,7 +7,7 @@ IMStepMotor::IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4)
   }
 }
 
-bool IMStepMotor::setTargetPosition(int32_t position) {
+bool IMStepMotor::setTargetPosition(uint16_t position) {
   if (position < minPosition || position > maxPosition) {
     return false;
   }
@@ -15,7 +15,7 @@ bool IMStepMotor::setTargetPosition(int32_t position) {
   return true;
 }
 
-bool IMStepMotor::setCurrentPosition(int32_t position) {
+bool IMStepMotor::setCurrentPosition(uint16_t position) {
   if (position < minPosition || position > maxPosition) {
     return false;
   }
@@ -23,12 +23,12 @@ bool IMStepMotor::setCurrentPosition(int32_t position) {
   return true;
 }
 
-int32_t IMStepMotor::mlToSteps(uint16_t mlH) {
+uint16_t IMStepMotor::mlToSteps(uint16_t mlH) {
   return mlH;//tbd
 }
 
-uint16_t IMStepMotor::stepsToMl(int32_t steps) {
-  return (uint16_t) steps;//tbd
+uint16_t IMStepMotor::stepsToMl(uint16_t steps) {
+  return steps;//tbd
 }
 
 static unsigned long IMStepMotor::getPauseUS() {
@@ -53,23 +53,23 @@ bool IMStepMotor::onPosition() {
   return getCurrentPosition() == getTargetPosition();
 }
 
-int32_t IMStepMotor::getCurrentPosition() {
+uint16_t IMStepMotor::getCurrentPosition() {
   return currentPosition;
 }
 
-int32_t IMStepMotor::getTargetPosition() {
+uint16_t IMStepMotor::getTargetPosition() {
   return targetPosition;
 }
 
 bool IMStepMotor::setFlow(uint16_t mlH) {
   Serial.println("setFlow(): flow to set "+String(mlH));
-  int32_t steps = mlToSteps(mlH);
+  uint16_t steps = mlToSteps(mlH);
   Serial.println("setFlow(): steps to set "+String(steps));
   setTargetPosition(steps);
 }
 
 uint16_t IMStepMotor::getFlow() {
-  int32_t steps = getTargetPosition();
+  uint16_t steps = getTargetPosition();
   return stepsToMl(steps);
 }
 
@@ -80,8 +80,8 @@ void IMStepMotor::loop() {
   if (micros() - lastStepTime < getPauseUS()) {
     return;
   }
-  int32_t stepsToMove = getTargetPosition() - getCurrentPosition();
-  int32_t position = 0;
+  uint32_t stepsToMove = getTargetPosition() - getCurrentPosition();
+  uint32_t position = 0;
 
   if (stepsToMove > 0) {
     seqCounter += 1;
@@ -122,7 +122,7 @@ void IMStepMotor::disableMagnets() {
   move();
 }
 
-void IMStepMotor::move(int8_t step) {
+void IMStepMotor::move(uint8_t step) {
   switch(step) {
 #if defined(INVERT)
     case 4:

@@ -28,36 +28,37 @@ class IMValuesHolder {
     void prepareToCollect();
 
     void setSwitchPos(uint8_t);
+    void setRefluxRatio(uint8_t);
     void setHeatPwr(uint8_t);
     void setHeatAdj(uint8_t);
-    void setCondMtrPos(int16_t);
-    void setCondMtrAdj(int16_t);
-    void setOutMtrPos(int16_t);
-    void setRetMtrPos(int16_t);
-    void setExtAdj(int16_t);
-    void setRefluxRatio(float);
+    void setCondMtrPos(uint16_t);
+    void setCondMtrAdj(uint16_t);
+    void setOutMtrPos(uint16_t);
+    void setRetMtrPos(uint16_t);
+    void setExtAdj(uint16_t);
+
+    void setCondCurPos(uint16_t);
+    void setOutCurPos(uint16_t);
+    void setRetCurPos(uint16_t);
+    void setSwCurPos(uint16_t);
 
     uint8_t getSwitchPos();
-    String getSwitchPosString();
+    uint8_t getRefluxRatio();
     uint8_t getHeatPwr();
     uint8_t getHeatAdj();
     IMLevel getHydroLvl();
-    String getHydroLvlString();
     uint16_t getAlcLvl();
-    int16_t getCondMtrPos();
-    int16_t getCondMtrAdj();
-    int16_t getOutMtrPos();
-    int16_t getRetMtrPos();
-    int16_t getExtAdj();
+    uint16_t getCondMtrPos();
+    uint16_t getCondMtrAdj();
+    uint16_t getOutMtrPos();
+    uint16_t getRetMtrPos();
+    uint16_t getExtAdj();
     float getSteamTemp();
     float getCondTemp();
     float getPipeTemp();
     float getEnvTemp();
     float getCalcTemp();
     float getPressure();
-    float getRefluxRatio();
-
-    String getStateString();
 
 };
 

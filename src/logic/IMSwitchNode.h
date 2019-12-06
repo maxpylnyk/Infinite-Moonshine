@@ -16,6 +16,7 @@ class IMSwitchNode {
 
     IMSwitch * getSwitch();
     IMAlcoholSensor * getAlc();
+    void setMtrCurPos(uint16_t);
 
 };
 

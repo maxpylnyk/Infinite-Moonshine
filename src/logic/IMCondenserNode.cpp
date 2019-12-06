@@ -25,3 +25,7 @@ IMThermometer * IMCondenserNode::getEnvTrm() {
 void IMCondenserNode::setAdj(int16_t value) {
   adj = value;
 }
+
+void IMCondenserNode::setMtrCurPos(uint16_t value) {
+  condMtr->setCurrentPosition(value);
+}

@@ -8,7 +8,7 @@
 #include "logic/IMExtractionNode.h"
 #include "logic/IMSwitchNode.h"
 //#include "utilities/IMLogger.h"
-#include "utilities/IMValuesHolder.h"
+#include "logic/IMValuesHolder.h"
 
 class IMMega : public InfiniteMoonshine {
   private:
@@ -53,12 +53,35 @@ class IMMega : public InfiniteMoonshine {
     const IMRect data22 = IMRect(slot22.getXLo(), slot22.getYLo()+DASH_LBL_HEIGHT, slot22.getXHi(), slot22.getYHi());
     const IMRect data23 = IMRect(slot23.getXLo(), slot23.getYLo()+DASH_LBL_HEIGHT, slot23.getXHi(), slot23.getYHi());
 
+    const IMRect keyCancel = IMRect(0, 0, KEY_WIDTH, KEY_HEIGHT);
+    const IMRect keyOK = IMRect(KEY_WIDTH, 0, 2*KEY_WIDTH, KEY_HEIGHT);
+    const IMRect keyClear = IMRect(2*KEY_WIDTH, 0, 3*KEY_WIDTH, KEY_HEIGHT);
+    const IMRect key0 = IMRect(3*KEY_WIDTH, 0, 4*KEY_WIDTH, KEY_HEIGHT);
+    const IMRect keyBackspace = IMRect(4*KEY_WIDTH, 0, SCR_WIDTH, KEY_HEIGHT);
+    const IMRect keyMinus = IMRect(0, KEY_HEIGHT, KEY_WIDTH, 2*KEY_HEIGHT);
+    const IMRect keyPlus = IMRect(KEY_WIDTH, KEY_HEIGHT, 2*KEY_WIDTH, 2*KEY_HEIGHT);
+    const IMRect key7 = IMRect(2*KEY_WIDTH, KEY_HEIGHT, 3*KEY_WIDTH, 2*KEY_HEIGHT);
+    const IMRect key8 = IMRect(3*KEY_WIDTH, KEY_HEIGHT, 4*KEY_WIDTH, 2*KEY_HEIGHT);
+    const IMRect key9 = IMRect(4*KEY_WIDTH, KEY_HEIGHT, SCR_WIDTH, 2*KEY_HEIGHT);
+    const IMRect key4 = IMRect(2*KEY_WIDTH, 2*KEY_HEIGHT, 3*KEY_WIDTH, 3*KEY_HEIGHT);
+    const IMRect key5 = IMRect(3*KEY_WIDTH, 2*KEY_HEIGHT, 4*KEY_WIDTH, 3*KEY_HEIGHT);
+    const IMRect key6 = IMRect(4*KEY_WIDTH, 2*KEY_HEIGHT, SCR_WIDTH, 3*KEY_HEIGHT);
+    const IMRect key1 = IMRect(2*KEY_WIDTH, 3*KEY_HEIGHT, 3*KEY_WIDTH, SCR_HEIGHT);
+    const IMRect key2 = IMRect(3*KEY_WIDTH, 3*KEY_HEIGHT, 4*KEY_WIDTH, SCR_HEIGHT);
+    const IMRect key3 = IMRect(4*KEY_WIDTH, 3*KEY_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
+    const IMRect keyDisplay = IMRect(0, 2*KEY_HEIGHT, 2*KEY_WIDTH-1, SCR_HEIGHT);
+    const IMRect keyLabel = IMRect(keyDisplay.getXLo(), keyDisplay.getYLo(), keyDisplay.getXHi(), keyDisplay.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect keyData = IMRect(keyDisplay.getXLo(), keyDisplay.getYLo()+KEY_HEIGHT/2, keyDisplay.getXHi(), keyDisplay.getYHi());
+
     Language locale = Language::RUSSIAN;
     IMCaptions captions = IMCaptions(locale);
-    State currentState = STAND_BY_STATE;
 
     Panes activePane;
     Panes prevActivePane;
+
+    bool appendAllowed;
+    uint32_t editValue;
+    String editLabel;
 
     IMTouchScreen ts;
     IMTFT tft = IMTFT(locale);
@@ -85,12 +108,16 @@ class IMMega : public InfiniteMoonshine {
     bool initUI();
     void sendData();
     void receiveData();
-    void showErrors();
+    void printErrors();
     bool handleErrors();
     void moveMotors();
 
+    void applyEditing();
     void handleTouch();
     void drawBottomBar();
+    void drawPrevPane();
+    bool drawConfirmDialog();
+    void drawSlot(String, String, IMRect);
     void drawInitPane();
     void drawFrontPane();
     void drawErrorsPane();
@@ -100,16 +127,21 @@ class IMMega : public InfiniteMoonshine {
     void drawDash2();
     void drawDash3Data();
     void drawDash3();
-    void drawKeyboardData(int);
-    void drawKeyboard(int);
+    void drawKeyboardData();
+    void drawKeyboard(int, String);
     bool refresh();
     bool refresh(bool);
     void requireRefresh();
     void blink();
+    
+    void readPrevLog();
+    void logRestart();
+    void logRestart(Board);
+    void logStateChange();
+    void logData();
 
-    bool sessionIsActive();
-    bool setState(State);
-
+    void printDebugText();
+    
   public:
     IMMega();
 

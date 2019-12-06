@@ -1,19 +1,12 @@
 #ifndef INFINITE_MOONSHINE_H
 #define INFINITE_MOONSHINE_H
 
-#include "Arduino.h"
 #include <avr/wdt.h>
-#include "stdint.h"
 #include "utilities/IMTimer.h"
 #include "utilities/IMErrors.h"
 #include "utilities/IMCommons.h"
 #include "utilities/IMCaptions.h"
-
-#define DEBUG_MODE                1
-#define MANUAL_MODE               1
-#define UNSTABLE_PRESSURE_REGION  0
-
-#define VERSION                   "0.1"
+#include "logic/IMSession.h"
 
 class InfiniteMoonshine {
   protected:
@@ -26,18 +19,23 @@ class InfiniteMoonshine {
     static const uint8_t rstWdtDelay = WDTO_8S;
 
     static const byte rstPinDelay = 10;
-    static const byte attemptsLimit = 3;
-    static const byte responseTimeLimit = 10;//measure that
+    static const byte attemptsLimit = 1;
     static const byte bufferSize = 64;
+    static const uint16_t blinkDelay = 420;
 
     static const long maxSpeed = 8 * 250000;
     static const long usbSpeed = 9600;
     static const long serialSpeed = maxSpeed;
     static const unsigned long bytesArrivalTime = (8 * bufferSize * 1000000) / serialSpeed;
     static const unsigned long watchdogTimeout = 7 * 1000;
-    static const unsigned long callsignTimeout = 1 * 1000;//measure
-    static const unsigned long dataSyncTimeout = 2 * 1000;//measure
-    static const unsigned long logTimeout = 20 * 1000;//measure
+    static const unsigned long responseTimeLimit = 5 * 1000;
+    static const unsigned long callsignTimeout = 10 * 1000;
+    static const unsigned long megaInitDelay = 5 * 1000 +
+#if DISABLE_ALC_METER
+    0;
+#else
+    60 * 1000;
+#endif
     static const unsigned long controlPauseTimeout = 10 * 60 * 1000;//measure
     static const unsigned long controlTimeout =
 #if UNSTABLE_PRESSURE_REGION
@@ -50,42 +48,40 @@ class InfiniteMoonshine {
     bool initialize = true;
     bool thisRestarted = false;
     bool otherRestarted = false;
+    bool callsignReceived = true;
+    bool transfering = false;
     uint8_t pause = Pause::RESUME;
     uint8_t manualPause = Pause::RESUME;
 
     byte connectionAttempts = 0;
+    byte restartAttempts = 0;
     char callsign = initSign;
-    uint8_t stateIndex = 0;
     int rstPin;
-    uint32_t sessionName = 0;
-    unsigned long responseTime = 0;
-    //add timers
+    //unsigned long callsignTime;
+    unsigned long responseTime;
     unsigned long wtdRstTime;
 
     IMTimer timer = IMTimer();
+    IMTimer waitingTimer = IMTimer();
     IMErrors errors = IMErrors();
     String queue = "";
     HardwareSerial * port;
     HardwareSerial * debugPort;
+    IMSession session;
+    String debugText;
 
     uint8_t isPaused();
     void setPause(uint8_t);
     void setManualPause(uint8_t);
-
-    uint8_t getStateIndex();
-    void setStateIndex(uint8_t);
-
-    uint32_t getSessionName();
-    void setSessionName(uint32_t);
     
     void initWatchdog();
+    void disableWatchdog();
     void restartWatchdog();
     
     void restartOther();
 
     void sendCallsign();
-    void sendData();
-    void receiveData();
+    virtual void sendData() = 0;
     void addToQueue(byte number, String value);
     void endQueue();
 
