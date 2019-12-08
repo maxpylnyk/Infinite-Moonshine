@@ -48,6 +48,7 @@ void IMHydroLevel::setLevel(IMLevel value) {
 }
 
 void IMHydroLevel::debug() {
+  /*
   receiveData();
   int Vin = 5;
   float VoutLo = 0;
@@ -76,6 +77,7 @@ void IMHydroLevel::debug() {
   Serial.println("resistance "+String(RLo)+" "+String(RHi)+" "+String(ROver));
   Serial.println();
   delay(1000);
+  */
 }
 
 void IMHydroLevel::requestData() {
@@ -94,7 +96,7 @@ void IMHydroLevel::receiveData() {
 }
 
 IMLevel IMHydroLevel::getLevel() {
-  Serial.println("hlvl "+String(getDataLo())+" "+String(getDataHi())+" "+String(getDataOver()));
+  //Serial.println("hlvl "+String(getDataLo())+" "+String(getDataHi())+" "+String(getDataOver()));
   if (overReached()) {
     return IMLevel::OVR;
   }

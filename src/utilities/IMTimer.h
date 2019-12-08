@@ -30,6 +30,8 @@ class IMTimer {
     String getLogStamp();
     String getFileName();
     float getEnvTemp();
+    uint8_t getHH();
+    uint8_t getMM();
     
 };
 

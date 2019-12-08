@@ -32,6 +32,14 @@ class IMSwitch {
       }
     }
 
+    void setCurrentPos(uint8_t value) {
+      if (value) {
+        swMtr->setCurrentPosition(BODY_POS);
+      } else {
+        swMtr->setCurrentPosition(HEAD_POS);
+      }
+    }
+
 };
 
 #endif

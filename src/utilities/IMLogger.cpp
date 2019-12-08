@@ -2,7 +2,7 @@
 
 IMLogger::IMLogger() {
   filePath = "";
-  Serial.println("log constructed");
+  //Serial.println("log constructed");
 }
 
 IMLogger::IMLogger(String fileName) {

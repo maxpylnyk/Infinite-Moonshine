@@ -95,8 +95,12 @@ void IMNano::receiveCallsign() {
 void IMNano::sendData() {
   queue = String(restartSign);
   addToQueue(LogIndex::SESSION_NAME, String(session.getName()));
+  addToQueue(LogIndex::START_TIME, String(session.getStartTime()));
+  addToQueue(LogIndex::UPD_TIME, String(updTime));
   addToQueue(LogIndex::STATE, String(session.getState()));
-  addToQueue(LogIndex::PAUSE, String(isPaused()));
+  addToQueue(LogIndex::PAUSE, String(session.isPaused()));
+  addToQueue(LogIndex::SRC_VOL, String(session.getSrcVol()));
+  addToQueue(LogIndex::SRC_TYPE, String(session.getSrcType()));
   addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
   addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
   addToQueue(LogIndex::SW, String(session.getSwitchPos()));
@@ -105,7 +109,11 @@ void IMNano::sendData() {
   addToQueue(LogIndex::RF, String(session.getRefluxRatio()));
   addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrPos()));
   addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
-  addToQueue(LogIndex::EXT_ADJ, String(session.getExtMtrAdj()));
+  addToQueue(LogIndex::EXT_ADJ, String(session.getExtAdj()));
+  addToQueue(LogIndex::HEAD_OUT_ML, String(session.getHeadOutML()));
+  addToQueue(LogIndex::BODY_OUT_ML, String(session.getBodyOutML()));
+  addToQueue(LogIndex::USED_WATER_ML, String(session.getUsedWaterML()));
+  addToQueue(LogIndex::USED_POWER_W, String(session.getUsedPowerW()));
   endQueue();
   debugText = "";
 }
@@ -118,11 +126,23 @@ void IMNano::receiveData() {
       case LogIndex::SESSION_NAME :
         session.setName(port->parseInt());
         break;
+      case LogIndex::START_TIME :
+        session.setStartTime(port->parseInt());
+        break;
+      case LogIndex::UPD_TIME :
+        updTime = port->parseInt();
+        break;
       case LogIndex::STATE :
         session.setState(port->parseInt());
         break;
       case LogIndex::PAUSE :
-        setPause(port->parseInt());
+        session.setPause(port->parseInt());
+        break;
+      case LogIndex::SRC_VOL :
+        session.setSrcVol(port->parseInt());
+        break;
+      case LogIndex::SRC_TYPE :
+        session.setSrcType(port->parseInt());
         break;
       case LogIndex::ERROR_CODES :
         errors.add(port->parseInt());
@@ -167,7 +187,19 @@ void IMNano::receiveData() {
         session.setRetMtrPos(port->parseInt());
         break;
       case LogIndex::EXT_ADJ :
-        session.setExtMtrAdj(port->parseInt());
+        session.setExtAdj(port->parseInt());
+        break;
+      case LogIndex::HEAD_OUT_ML :
+        session.setHeadOutML(port->parseInt());
+        break;
+      case LogIndex::BODY_OUT_ML :
+        session.setBodyOutML(port->parseInt());
+        break;
+      case LogIndex::USED_WATER_ML :
+        session.setUsedWaterML(port->parseInt());
+        break;
+      case LogIndex::USED_POWER_W :
+        session.setUsedPowerW(port->parseInt());
         break;
       case endOfTransmission:
         if (initialize) {

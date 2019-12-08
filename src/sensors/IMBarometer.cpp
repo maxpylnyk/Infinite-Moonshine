@@ -22,7 +22,8 @@ void IMBarometer::requestData() {
 
 void IMBarometer::receiveData() {
   bool result = sensor.getPressure(p, t);
-  setPressure(p * mmHgMultiplier);
+  temp = IMDecimal(p);
+  setPressure(temp.getFloat() * mmHgMultiplier);
   setMeasuring(false);
   setMeasured(result);
 }

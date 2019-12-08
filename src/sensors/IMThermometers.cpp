@@ -7,10 +7,12 @@ IMThermometers::IMThermometers() : IMSensor(initTime, requestTime, receiveTime, 
 }
 
 void IMThermometers::printAddress(const uint8_t * address) {
+  /*
   for (uint8_t i = 0; i < 8; i++) {
     if (address[i] < 16) Serial.print("0");
     Serial.print(address[i], HEX);
   }
+  */
 }
 
 bool IMThermometers::init() {
@@ -25,6 +27,7 @@ bool IMThermometers::init() {
 }
 
 void IMThermometers::debug() {
+  /*
   uint8_t deviceCount = sensors.getDeviceCount();
   DeviceAddress addr[deviceCount];
 
@@ -43,6 +46,7 @@ void IMThermometers::debug() {
   }
   Serial.println("overall measure time "+String(stopwatch.stop())+" ms");
   Serial.println();
+  */
 }
 
 void IMThermometers::setErrorList(IMErrors * list) {

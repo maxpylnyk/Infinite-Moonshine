@@ -4,25 +4,6 @@ InfiniteMoonshine::InfiniteMoonshine(int rstPin) : rstPin(rstPin) {
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
-uint8_t InfiniteMoonshine::isPaused() {
-  if (MANUAL_MODE) {
-    if (manualPause) {
-      return manualPause;
-    }
-  }
-  return pause;
-}
-
-void InfiniteMoonshine::setPause(uint8_t value) {
-    pause = value;
-}
-
-void InfiniteMoonshine::setManualPause(uint8_t value) {
-  if (MANUAL_MODE) {
-    manualPause = value;
-  }
-}
-
 void InfiniteMoonshine::initWatchdog() {
   wdt_disable();
   wdt_enable(rstWdtDelay);

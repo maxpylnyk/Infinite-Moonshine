@@ -51,13 +51,26 @@ const int HDR_FONT_SIZE = 2;
 const int SCR_HEIGHT = 240;
 const int SCR_WIDTH = 320;
 const int BAR_HEIGHT = 42;
+const int TOP_BAR_HEIGHT = SCR_HEIGHT - BAR_HEIGHT;
 const int DASH_SLOT_HEIGHT = (SCR_HEIGHT - 2 * BAR_HEIGHT) / 2;
 const int DASH_SLOT_WIDTH = SCR_WIDTH / 3;
-const int DASH_LBL_HEIGHT = LBL_FONT_SIZE * HEIGHT_MULT;
-const int DASH_DATA_HEIGHT = DASH_SLOT_HEIGHT - DASH_LBL_HEIGHT;
+const int DASH_LBL_HEIGHT = LBL_FONT_SIZE * HEIGHT_MULT * 4;
+const int DASH_DATA_HEIGHT = DASH_SLOT_HEIGHT - 2 * DASH_LBL_HEIGHT;
+const int DASH_DATA_YLO2 = BAR_HEIGHT + DASH_LBL_HEIGHT;
+const int DASH_DATA_YHI2 = SCR_HEIGHT / 2 - DASH_LBL_HEIGHT;
+const int DASH_DATA_YLO1 = SCR_HEIGHT / 2 + DASH_LBL_HEIGHT;
+const int DASH_DATA_YHI1 = TOP_BAR_HEIGHT - DASH_LBL_HEIGHT;
 const int BTN_WIDTH = 50;
 const int KEY_WIDTH = SCR_WIDTH / 5;
 const int KEY_HEIGHT = SCR_HEIGHT / 4; 
+const int HH_XLO = (SCR_WIDTH - 5 * NUM_FONT_SIZE * WIDTH_MULT) / 2 - 1;
+const int HH_XHI = HH_XLO + 2 * NUM_FONT_SIZE * WIDTH_MULT;
+const int TWO_SPOT_XLO = HH_XHI;
+const int TWO_SPOT_XHI = HH_XHI + NUM_FONT_SIZE * WIDTH_MULT;
+const int MM_XLO = TWO_SPOT_XHI;
+const int MM_XHI = TWO_SPOT_XHI + 2 * NUM_FONT_SIZE * WIDTH_MULT;
+const int CLOCK_YLO = (SCR_HEIGHT - 3 * BAR_HEIGHT) / 2 + 2 * BAR_HEIGHT - (NUM_FONT_SIZE * HEIGHT_MULT / 2) - 6;
+const int CLOCK_YHI = CLOCK_YLO + (NUM_FONT_SIZE * HEIGHT_MULT) + 3;
 
 const uint16_t MAIN_COLOR        = 0x97fc;
 const uint16_t MAIN_COLOR_FLAT   = 0x3b4c;
@@ -71,6 +84,7 @@ const uint16_t BACKGROUND_COLOR  = 0x0000;
 
 const uint16_t TEXT_COLOR        = MAIN_COLOR;
 const uint16_t ERROR_COLOR       = STAB_COLOR;
+const uint16_t TARGET_COLOR      = HEAT_COLOR;
 
 const unsigned long SENSORS_UPD_TIMEOUT = (unsigned long) 5 * 1000;
 const unsigned long ALC_TIMEOUT = (unsigned long) 30 * 60 * 1000;
@@ -106,8 +120,13 @@ typedef enum Panes : uint8_t {
 
 typedef enum LogIndex : uint8_t {
   SESSION_NAME = 1,
+  START_TIME,
+  ELAPSED_TIME,
+  UPD_TIME,
   STATE,
   PAUSE,
+  SRC_VOL,
+  SRC_TYPE,
   HYDRO_LEVEL,
   ALC_LEVEL,
   STEAM_TEMP,
@@ -125,6 +144,10 @@ typedef enum LogIndex : uint8_t {
   OUT_MTR,
   RET_MTR,
   EXT_ADJ,
+  HEAD_OUT_ML,
+  BODY_OUT_ML,
+  USED_WATER_ML,
+  USED_POWER_W,
   ERROR_CODES
 } LogIndex;
 

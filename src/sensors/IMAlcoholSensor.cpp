@@ -18,6 +18,7 @@ bool IMAlcoholSensor::init() {
 }
 
 void IMAlcoholSensor::debug() {
+  /*
   digitalWrite(ALC_HEAT_PIN, HIGH);
 
   for (int i = 1; i <= 60; i++) {
@@ -29,6 +30,7 @@ void IMAlcoholSensor::debug() {
   Serial.println();
   digitalWrite(ALC_HEAT_PIN, LOW);
   delay(5000);
+  */
 }
 
 bool IMAlcoholSensor::ethanolDetected() {

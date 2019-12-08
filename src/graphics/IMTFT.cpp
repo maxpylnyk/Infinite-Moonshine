@@ -45,6 +45,11 @@ void IMTFT::paintBackground() {
   paintBackground(BACKGROUND_COLOR);
 }
 
+void IMTFT::clearPane() {
+  setColor(BACKGROUND_COLOR);
+  fillRect(0, BAR_HEIGHT+1, SCR_WIDTH, SCR_HEIGHT);
+}
+
 void IMTFT::drawLine(int x1, int y1, int x2, int y2) {
   tft.drawLine(x1, SCR_HEIGHT - y1, x2, SCR_HEIGHT - y2);
 }
@@ -58,7 +63,7 @@ void IMTFT::fillRect(IMRect r) {
 }
 
 void IMTFT::fillRect(int x1, int y1, int x2, int y2) {
-  tft.fillRect(x1, SCR_HEIGHT - y1, x2, SCR_HEIGHT - y2);
+  tft.fillRect(x1, SCR_HEIGHT - y1 + 2, x2, SCR_HEIGHT - y2);
 }
 
 void IMTFT::fillCircle(int x0, int y0, int r) {

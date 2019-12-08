@@ -21,7 +21,6 @@ class IMCondenserNode {
     IMThermometer * getEnvTrm();
 
     void setAdj(int16_t);
-    void setMtrCurPos(uint16_t);
     
 };
 

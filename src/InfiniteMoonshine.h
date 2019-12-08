@@ -50,16 +50,14 @@ class InfiniteMoonshine {
     bool otherRestarted = false;
     bool callsignReceived = true;
     bool transfering = false;
-    uint8_t pause = Pause::RESUME;
-    uint8_t manualPause = Pause::RESUME;
 
     byte connectionAttempts = 0;
     byte restartAttempts = 0;
     char callsign = initSign;
     int rstPin;
-    //unsigned long callsignTime;
     unsigned long responseTime;
     unsigned long wtdRstTime;
+    unsigned long updTime;
 
     IMTimer timer = IMTimer();
     IMTimer waitingTimer = IMTimer();
@@ -69,10 +67,6 @@ class InfiniteMoonshine {
     HardwareSerial * debugPort;
     IMSession session;
     String debugText;
-
-    uint8_t isPaused();
-    void setPause(uint8_t);
-    void setManualPause(uint8_t);
     
     void initWatchdog();
     void disableWatchdog();

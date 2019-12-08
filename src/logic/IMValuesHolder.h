@@ -60,6 +60,12 @@ class IMValuesHolder {
     float getCalcTemp();
     float getPressure();
 
+    uint16_t getCondCurPos();
+    uint16_t getOutCurPos();
+    uint16_t getRetCurPos();
+    uint16_t getSwCurPos();
+    uint16_t getSwMtrPos();
+
 };
 
 #endif

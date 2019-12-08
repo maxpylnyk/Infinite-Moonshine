@@ -61,11 +61,3 @@ void IMExtractionNode::setRefluxRatio(uint8_t value) {
   refluxRatio = value;
   //upd motors
 }
-
-void IMExtractionNode::setOutCurPos(uint16_t value) {
-  outMtr->setCurrentPosition(value);
-}
-
-void IMExtractionNode::setRetCurPos(uint16_t value) {
-  retMtr->setCurrentPosition(value);
-}

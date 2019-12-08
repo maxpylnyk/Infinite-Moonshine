@@ -65,8 +65,24 @@ uint16_t IMSession::getRetMtrPos() {
   return retMtrPos;
 }
 
-uint16_t IMSession::getExtMtrAdj() {
-  return extMtrAdj;
+uint16_t IMSession::getCondMtrCurPos() {
+  return condMtrCurPos;
+}
+
+uint16_t IMSession::getOutMtrCurPos() {
+  return outMtrCurPos;
+}
+
+uint16_t IMSession::getRetMtrCurPos() {
+  return retMtrCurPos;
+}
+
+uint16_t IMSession::getSwMtrCurPos() {
+  return swMtrCurPos;
+}
+
+uint16_t IMSession::getExtAdj() {
+  return extAdj;
 }
 
 float IMSession::getSteamTemp() {
@@ -93,20 +109,20 @@ float IMSession::getPressure() {
   return pressure;
 }
 
-uint16_t IMSession::getHeadsOutML() {
-  return headsOutML;
+uint16_t IMSession::getHeadOutML() {
+  return headOutML;
 }
 
-uint32_t IMSession::getEthanolOutML() {
-  return ethanolOutML;
+uint32_t IMSession::getBodyOutML() {
+  return bodyOutML;
 }
 
-uint32_t IMSession::getConsumedWaterML() {
-  return consumedWaterML;
+uint32_t IMSession::getUsedWaterML() {
+  return usedWaterML;
 }
 
-uint32_t IMSession::getConsumedPowerW() {
-  return consumedPowerW;
+uint32_t IMSession::getUsedPowerW() {
+  return usedPowerW;
 }
 
 unsigned long IMSession::getStartTime() {
@@ -119,6 +135,33 @@ unsigned long IMSession::getElapsedTime() {
 
 void IMSession::setName(uint32_t value) {
   name = value;
+}
+
+uint8_t IMSession::isPaused() {
+  if (MANUAL_MODE) {
+    if (manualPause) {
+      return manualPause;
+    }
+  }
+  return pause;
+}
+
+void IMSession::setPause(uint8_t value) {
+    pause = value;
+}
+
+void IMSession::setManualPause(uint8_t value) {
+  if (MANUAL_MODE) {
+    manualPause = value;
+  }
+}
+
+void IMSession::setSrcVol(uint8_t value) {
+  srcVol = value;
+}
+
+void IMSession::setSrcType(SrcType value) {
+  srcType = value;
 }
 
 void IMSession::setState(State value) {
@@ -165,8 +208,24 @@ void IMSession::setRetMtrPos(uint16_t value) {
   retMtrPos = value;
 }
 
-void IMSession::setExtMtrAdj(uint16_t value) {
-  extMtrAdj = value;
+void IMSession::setCondMtrCurPos(uint16_t value) {
+  condMtrCurPos = value;
+}
+
+void IMSession::setOutMtrCurPos(uint16_t value) {
+  outMtrCurPos = value;
+}
+
+void IMSession::setRetMtrCurPos(uint16_t value) {
+  retMtrCurPos = value;
+}
+
+void IMSession::setSwMtrCurPos(uint16_t value) {
+  swMtrCurPos = value;
+}
+
+void IMSession::setExtAdj(uint16_t value) {
+  extAdj = value;
 }
 
 void IMSession::setSteamTemp(float value) {
@@ -193,20 +252,20 @@ void IMSession::setPressure(float value) {
   pressure = value;
 }
 
-void IMSession::setHeadsOutML(uint16_t value) {
-  headsOutML = value;
+void IMSession::setHeadOutML(uint16_t value) {
+  headOutML = value;
 }
 
-void IMSession::setEthanolOutML(uint32_t value) {
-  ethanolOutML = value;
+void IMSession::setBodyOutML(uint32_t value) {
+  bodyOutML = value;
 }
 
-void IMSession::setConsumedWaterML(uint32_t value) {
-  consumedWaterML = value;
+void IMSession::setUsedWaterML(uint32_t value) {
+  usedWaterML = value;
 }
 
-void IMSession::setConsumedPowerW(uint32_t value) {
-  consumedPowerW = value;
+void IMSession::setUsedPowerW(uint32_t value) {
+  usedPowerW = value;
 }
 
 void IMSession::setStartTime(unsigned long value) {

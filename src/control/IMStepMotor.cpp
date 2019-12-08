@@ -62,9 +62,7 @@ uint16_t IMStepMotor::getTargetPosition() {
 }
 
 bool IMStepMotor::setFlow(uint16_t mlH) {
-  Serial.println("setFlow(): flow to set "+String(mlH));
   uint16_t steps = mlToSteps(mlH);
-  Serial.println("setFlow(): steps to set "+String(steps));
   setTargetPosition(steps);
 }
 

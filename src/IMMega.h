@@ -13,45 +13,50 @@
 class IMMega : public InfiniteMoonshine {
   private:
     bool blinkVisible;
-    bool refreshRequired;    
-    unsigned long refreshTime;
-    unsigned long refreshTimeout;
+    uint8_t hh, mm;
+    String hours, minutes;
     unsigned long blinkTimeout = 1000;
     unsigned long lastBlinkTime;
-    IMRect blinkRect = IMRect(0, 115, 10, 125);
 
     const IMRect fullScr = IMRect(0, 0, SCR_WIDTH, SCR_HEIGHT);
-    const IMRect topBar = IMRect(0, SCR_HEIGHT-BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
+    const IMRect topBar = IMRect(0, TOP_BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
     const IMRect bottomBar = IMRect(0, 0, SCR_WIDTH, BAR_HEIGHT);
     const IMRect srcBar = IMRect(0, BAR_HEIGHT, SCR_WIDTH, 2*BAR_HEIGHT);
-    const IMRect timeRect = IMRect(0, 2*BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT);
+    const IMRect hoursRect = IMRect(HH_XLO, CLOCK_YLO, HH_XHI, CLOCK_YHI);
+    const IMRect minutesRect = IMRect(MM_XLO, CLOCK_YLO, MM_XHI, CLOCK_YHI);
+    const IMRect twospotRect = IMRect(TWO_SPOT_XLO, CLOCK_YLO, TWO_SPOT_XHI, CLOCK_YHI);
 
-    const IMRect topLeftRect = IMRect(0, SCR_HEIGHT-BAR_HEIGHT, BTN_WIDTH, SCR_HEIGHT);
-    const IMRect topL2Rect = IMRect(BTN_WIDTH, SCR_HEIGHT-BAR_HEIGHT, 2*BTN_WIDTH, SCR_HEIGHT);
-    const IMRect topRightRect = IMRect(SCR_WIDTH-BTN_WIDTH, SCR_HEIGHT-BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
+    const IMRect topLeftRect = IMRect(0, TOP_BAR_HEIGHT, BTN_WIDTH, SCR_HEIGHT);
+    const IMRect topL2Rect = IMRect(BTN_WIDTH, TOP_BAR_HEIGHT, 2*BTN_WIDTH, SCR_HEIGHT);
+    const IMRect topRightRect = IMRect(SCR_WIDTH-BTN_WIDTH, TOP_BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT);
     const IMRect bottomLeftRect = IMRect(0, 0, BTN_WIDTH, BAR_HEIGHT);
     const IMRect bottomRightRect = IMRect(SCR_WIDTH-BTN_WIDTH, 0, SCR_WIDTH, BAR_HEIGHT);
 
-    const IMRect slot11 = IMRect(0, SCR_HEIGHT/2, DASH_SLOT_WIDTH, SCR_HEIGHT-BAR_HEIGHT);
-    const IMRect slot12 = IMRect(DASH_SLOT_WIDTH, SCR_HEIGHT/2, DASH_SLOT_WIDTH*2, SCR_HEIGHT-BAR_HEIGHT);
-    const IMRect slot13 = IMRect(DASH_SLOT_WIDTH*2, SCR_HEIGHT/2, SCR_WIDTH, SCR_HEIGHT-BAR_HEIGHT);
-    const IMRect slot21 = IMRect(0, BAR_HEIGHT, DASH_SLOT_WIDTH, SCR_HEIGHT/2);
-    const IMRect slot22 = IMRect(DASH_SLOT_WIDTH, BAR_HEIGHT, DASH_SLOT_WIDTH*2, SCR_HEIGHT/2);
-    const IMRect slot23 = IMRect(DASH_SLOT_WIDTH*2, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT/2);
+    const IMRect slot11 = IMRect(0, SCR_HEIGHT/2, DASH_SLOT_WIDTH, TOP_BAR_HEIGHT-1);
+    const IMRect slot12 = IMRect(DASH_SLOT_WIDTH, SCR_HEIGHT/2, DASH_SLOT_WIDTH*2, TOP_BAR_HEIGHT-1);
+    const IMRect slot13 = IMRect(DASH_SLOT_WIDTH*2, SCR_HEIGHT/2, SCR_WIDTH, TOP_BAR_HEIGHT-1);
+    const IMRect slot21 = IMRect(0, BAR_HEIGHT, DASH_SLOT_WIDTH, SCR_HEIGHT/2-1);
+    const IMRect slot22 = IMRect(DASH_SLOT_WIDTH, BAR_HEIGHT, DASH_SLOT_WIDTH*2, SCR_HEIGHT/2-1);
+    const IMRect slot23 = IMRect(DASH_SLOT_WIDTH*2, BAR_HEIGHT, SCR_WIDTH, SCR_HEIGHT/2-1);
 
-    const IMRect label11 = IMRect(slot11.getXLo(), slot11.getYLo(), slot11.getXHi(), slot11.getYLo()+DASH_LBL_HEIGHT*5);
-    const IMRect label12 = IMRect(slot12.getXLo(), slot12.getYLo(), slot12.getXHi(), slot12.getYLo()+DASH_LBL_HEIGHT*5);
-    const IMRect label13 = IMRect(slot13.getXLo(), slot13.getYLo(), slot13.getXHi(), slot13.getYLo()+DASH_LBL_HEIGHT*5);
-    const IMRect label21 = IMRect(slot21.getXLo(), slot21.getYLo(), slot21.getXHi(), slot21.getYLo()+DASH_LBL_HEIGHT*5);
-    const IMRect label22 = IMRect(slot22.getXLo(), slot22.getYLo(), slot22.getXHi(), slot22.getYLo()+DASH_LBL_HEIGHT*5);
-    const IMRect label23 = IMRect(slot23.getXLo(), slot23.getYLo(), slot23.getXHi(), slot23.getYLo()+DASH_LBL_HEIGHT*5);
+    const IMRect label11 = IMRect(slot11.getXLo(), slot11.getYLo(), slot11.getXHi(), slot11.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label12 = IMRect(slot12.getXLo(), slot12.getYLo(), slot12.getXHi(), slot12.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label13 = IMRect(slot13.getXLo(), slot13.getYLo(), slot13.getXHi(), slot13.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label21 = IMRect(slot21.getXLo(), slot21.getYLo(), slot21.getXHi(), slot21.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label22 = IMRect(slot22.getXLo(), slot22.getYLo(), slot22.getXHi(), slot22.getYLo()+DASH_LBL_HEIGHT);
+    const IMRect label23 = IMRect(slot23.getXLo(), slot23.getYLo(), slot23.getXHi(), slot23.getYLo()+DASH_LBL_HEIGHT);
 
-    const IMRect data11 = IMRect(slot11.getXLo(), slot11.getYLo()+DASH_LBL_HEIGHT, slot11.getXHi(), slot11.getYHi());
-    const IMRect data12 = IMRect(slot12.getXLo(), slot12.getYLo()+DASH_LBL_HEIGHT, slot12.getXHi(), slot12.getYHi());
-    const IMRect data13 = IMRect(slot13.getXLo(), slot13.getYLo()+DASH_LBL_HEIGHT, slot13.getXHi(), slot13.getYHi());
-    const IMRect data21 = IMRect(slot21.getXLo(), slot21.getYLo()+DASH_LBL_HEIGHT, slot21.getXHi(), slot21.getYHi());
-    const IMRect data22 = IMRect(slot22.getXLo(), slot22.getYLo()+DASH_LBL_HEIGHT, slot22.getXHi(), slot22.getYHi());
-    const IMRect data23 = IMRect(slot23.getXLo(), slot23.getYLo()+DASH_LBL_HEIGHT, slot23.getXHi(), slot23.getYHi());
+    const IMRect data11 = IMRect(slot11.getXLo(), slot11.getYLo()+DASH_LBL_HEIGHT, slot11.getXHi(), slot11.getYHi()-DASH_LBL_HEIGHT);
+    const IMRect data12 = IMRect(slot12.getXLo(), slot12.getYLo()+DASH_LBL_HEIGHT, slot12.getXHi(), slot12.getYHi()-DASH_LBL_HEIGHT);
+    const IMRect data13 = IMRect(slot13.getXLo(), slot13.getYLo()+DASH_LBL_HEIGHT, slot13.getXHi(), slot13.getYHi()-DASH_LBL_HEIGHT);
+    const IMRect data21 = IMRect(slot21.getXLo(), slot21.getYLo()+DASH_LBL_HEIGHT, slot21.getXHi(), slot21.getYHi()-DASH_LBL_HEIGHT);
+    const IMRect data22 = IMRect(slot22.getXLo(), slot22.getYLo()+DASH_LBL_HEIGHT, slot22.getXHi(), slot22.getYHi()-DASH_LBL_HEIGHT);
+    const IMRect data23 = IMRect(slot23.getXLo(), slot23.getYLo()+DASH_LBL_HEIGHT, slot23.getXHi(), slot23.getYHi()-DASH_LBL_HEIGHT);
+
+    const IMRect topLabel11 = IMRect(0, DASH_DATA_YHI1, DASH_SLOT_WIDTH, TOP_BAR_HEIGHT-1);
+    const IMRect topLabel12 = IMRect(DASH_SLOT_WIDTH, DASH_DATA_YHI1, 2*DASH_SLOT_WIDTH, TOP_BAR_HEIGHT-1);
+    const IMRect topLabel13 = IMRect(2*DASH_SLOT_WIDTH, DASH_DATA_YHI1, SCR_WIDTH, TOP_BAR_HEIGHT-1);
+    const IMRect topLabel21 = IMRect(0, DASH_DATA_YHI2, DASH_SLOT_WIDTH, SCR_HEIGHT/2);
 
     const IMRect keyCancel = IMRect(0, 0, KEY_WIDTH, KEY_HEIGHT);
     const IMRect keyOK = IMRect(KEY_WIDTH, 0, 2*KEY_WIDTH, KEY_HEIGHT);
@@ -79,10 +84,13 @@ class IMMega : public InfiniteMoonshine {
     Panes activePane;
     Panes prevActivePane;
 
+    bool changed;
     bool appendAllowed;
+    uint8_t errCount;
     uint32_t editValue;
     String editLabel;
-
+    IMErrors displayedErrors;
+    String errText;
     IMTouchScreen ts;
     IMTFT tft = IMTFT(locale);
 
@@ -129,10 +137,10 @@ class IMMega : public InfiniteMoonshine {
     void drawDash3();
     void drawKeyboardData();
     void drawKeyboard(int, String);
-    bool refresh();
-    bool refresh(bool);
-    void requireRefresh();
+    void update();
     void blink();
+    void drawMM();
+    void drawHH();
     
     void readPrevLog();
     void logRestart();

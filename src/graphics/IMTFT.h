@@ -33,6 +33,7 @@ class IMTFT {
     void setFontSize(int size);
     void paintBackground(uint16_t color);
     void paintBackground();
+    void clearPane();
     void drawLine(int x1, int y1, int x2, int y2);
     void drawCircle(int x0, int y0, int r);
     void fillRect(IMRect r);

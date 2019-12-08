@@ -4,6 +4,7 @@
 #include "sensors/IMSensor.h"
 #include "Wire.h"
 #include "SFE_BMP180.h"
+#include "utilities/IMDecimal.h"
 
 class IMBarometer : public IMSensor {
   private:
@@ -15,6 +16,7 @@ class IMBarometer : public IMSensor {
     static const unsigned int receiveTime = 1;
     float pressure;
     double p, t;
+    IMDecimal temp;
     SFE_BMP180 sensor;
 
     void setPressure(double);

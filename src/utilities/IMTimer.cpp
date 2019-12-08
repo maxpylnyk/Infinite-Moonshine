@@ -92,3 +92,13 @@ float IMTimer::getEnvTemp() {
   clock.forceConversion();
   return clock.readTemperature();
 }
+
+uint8_t IMTimer::getHH() {
+  dt = clock.getDateTime();
+  return dt.hour;
+}
+
+uint8_t IMTimer::getMM() {
+  dt = clock.getDateTime();
+  return dt.minute;
+}

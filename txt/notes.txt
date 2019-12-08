@@ -299,13 +299,18 @@ how to handle errors?
 проследить зависимость мощности нагрева от температуры среды или сырья. 
 	если зависимости нет - прописать константы в классе нагревателя.
 предхвост для зерновых
-крышка алкодатчика - эпоксидная смола
-remove serial from classes
 display heads and body in % of absolute
 график выбранного параметра с маштабированием
 отображение значения при нажатии
 фон соответствует режиму работы
 темный при ожидании
+
+sync. test restart. test no connection
+	работает только при перезагрузке мега -> test with empty mega loop
+	имитировать ситуацию когда нано онлайн, а мега инит.
+	нано присылает данные при инициализации мега
+	проверить как они пройдут
+	hardware serial block?
 
 
 ****	after research	****
@@ -319,34 +324,23 @@ if no space -> extract usefull data to exp file and remove oldest logs
 		добавить отверстия для земли гидроуровня 4 шт, датчика алкоголя 1 шт
 		отдалить термодатчик на плате от шнуров
 
+настройки: мощность нагревателя, язык
+dash with counters
+
 
 
 
 
 **** schedule ****
 
-sync. test restart. test no connection
-	работает только при перезагрузке мега
-errors
-calibrate mtr
-ui 
-	отображать конечную позицию кранов.
-	при изменении фч изменять конечную позицию крана возврата
-	следить за температурой охлаждения автоматически
-	отладить обновление
-
-logic
+extraction node -> upd motors
+step motor -> ml to steps
+при изменении фч изменять конечную позицию крана возврата
+следить за температурой охлаждения автоматически
+	
+logic changes values, ui in manual mode. changes appears in host
 switch states
 
-имитировать ситуацию когда нано онлайн, а мега инит.
-	нано присылает данные при инициализации мега
-	проверить как они пройдут
-отладить механизм обработки ошибок
-transfer start and current time and counters to nano
-process values in loop: data to send, refresh ui
-dash with counters
-
-move pause to session?
 paused state for control values measurement and manual mode
 manual mode -> nano controls pause. mega can't cancel it with control check
 normal operation -> mega sets pause to check control values
@@ -365,7 +359,9 @@ heater: debug calibrate, default adjStep, powerHead, powerBody
 крепление плат и моторов
 шестерни
 прокладки
-резьбовая фиксация 
+резьбовая фиксация
+блок питания на кубе
+крышка алкодатчика - эпоксидная смола
 
 new session from begining to end
 warn about state borders
@@ -375,24 +371,3 @@ warnings and confirmation dialogs
 adj doesn't work
 achieve to reconnect sensors in loop
 check thermometers status while executing
-
-
-
-
-**** refresh algorithm ****
-
-pane inited -> assign prev and current pane
-
-init pane -> front pane
-
-front pane -> refresh clock (if changed, partly) 
-	minutes and hours separately
-
-common -> refresh bottom bar if state is changed
-
-dashboards -> refresh each block separately
-							each value separately if changed
-
-
-
-

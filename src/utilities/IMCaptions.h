@@ -177,6 +177,7 @@ class IMCaptions {
     char * DASH1_HDR = "@ * *";
     char * DASH2_HDR = "* @ *";
     char * DASH3_HDR = "* * @";
+    char * TWO_SPOT = ":";
     char * STEAM_TEMP_LBL;
     char * PIPE_TEMP_LBL;
     char * ALC_LVL_LBL;
