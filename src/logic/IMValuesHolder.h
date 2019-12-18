@@ -20,27 +20,29 @@ class IMValuesHolder {
     IMExtractionNode * extNode;
     IMSwitchNode * swNode;
     IMThermometers * trm;
+    IMErrors * errors;
 
   public:
     IMValuesHolder(IMCondenserNode*, IMExtractionNode*, IMSwitchNode*, IMThermometers*);
 
-    bool collectValues();
-    void prepareToCollect();
+    bool collectValues(bool);
+    void prepareToCollect(bool);
+    void setErrorList(IMErrors*);
 
     void setSwitchPos(uint8_t);
     void setRefluxRatio(uint8_t);
     void setHeatPwr(uint8_t);
     void setHeatAdj(uint8_t);
-    void setCondMtrPos(uint16_t);
-    void setCondMtrAdj(uint16_t);
-    void setOutMtrPos(uint16_t);
-    void setRetMtrPos(uint16_t);
-    void setExtAdj(uint16_t);
+    void setCondMtrPos(int16_t);
+    void setCondMtrAdj(int16_t);
+    void setOutMtrPos(int16_t);
+    void setRetMtrPos(int16_t);
+    void setExtAdj(int16_t);
 
-    void setCondCurPos(uint16_t);
-    void setOutCurPos(uint16_t);
-    void setRetCurPos(uint16_t);
-    void setSwCurPos(uint16_t);
+    void setCondCurPos(int16_t);
+    void setOutCurPos(int16_t);
+    void setRetCurPos(int16_t);
+    void setSwCurPos(int16_t);
 
     uint8_t getSwitchPos();
     uint8_t getRefluxRatio();
@@ -48,11 +50,11 @@ class IMValuesHolder {
     uint8_t getHeatAdj();
     IMLevel getHydroLvl();
     uint16_t getAlcLvl();
-    uint16_t getCondMtrPos();
-    uint16_t getCondMtrAdj();
-    uint16_t getOutMtrPos();
-    uint16_t getRetMtrPos();
-    uint16_t getExtAdj();
+    int16_t getCondMtrPos();
+    int16_t getCondMtrAdj();
+    int16_t getOutMtrPos();
+    int16_t getRetMtrPos();
+    int16_t getExtAdj();
     float getSteamTemp();
     float getCondTemp();
     float getPipeTemp();
@@ -60,11 +62,11 @@ class IMValuesHolder {
     float getCalcTemp();
     float getPressure();
 
-    uint16_t getCondCurPos();
-    uint16_t getOutCurPos();
-    uint16_t getRetCurPos();
-    uint16_t getSwCurPos();
-    uint16_t getSwMtrPos();
+    int16_t getCondCurPos();
+    int16_t getOutCurPos();
+    int16_t getRetCurPos();
+    int16_t getSwCurPos();
+    int16_t getSwMtrPos();
 
 };
 

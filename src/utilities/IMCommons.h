@@ -86,11 +86,15 @@ const uint16_t TEXT_COLOR        = MAIN_COLOR;
 const uint16_t ERROR_COLOR       = STAB_COLOR;
 const uint16_t TARGET_COLOR      = HEAT_COLOR;
 
+const float FLEGMA_TEMP = 62.5;
+const float TEMP_OFFSET = 0.5;
+
 const unsigned long SENSORS_UPD_TIMEOUT = (unsigned long) 5 * 1000;
-const unsigned long ALC_TIMEOUT = (unsigned long) 30 * 60 * 1000;
+const unsigned long ALC_TIMEOUT = (unsigned long) 10 * 60 * 1000;
 const unsigned long TRM_TIMEOUT = SENSORS_UPD_TIMEOUT;
 const unsigned long BAR_TIMEOUT = SENSORS_UPD_TIMEOUT;
 const unsigned long HLVL_TIMEOUT = 0;
+const unsigned long COND_INERTION = (unsigned long) 2 * 60 * 1000;
 
 const unsigned long FRONT_PANE_TIMEOUT = 60000;
 const unsigned long DASHBOARD_TIMEOUT = SENSORS_UPD_TIMEOUT;
@@ -112,6 +116,7 @@ typedef enum Panes : uint8_t {
   DASH2_PANE,
   DASH3_PANE,
   KEYBOARD,
+  MESSAGE,
   CONFIRM_DIALOG,
   LOG_PANE,
   PREF_PANE,

@@ -22,7 +22,7 @@ bool IMMega::init() {
   //timer.setupTime();
   //setMasterSPI();
   //initWatchdog();
-  disableWatchdog();
+  //disableWatchdog();
 
   debugPort = &Serial;
   debugPort->begin(usbSpeed);
@@ -94,18 +94,6 @@ bool IMMega::init() {
     timer.check();
     result = false;
   }
-  if (!DISABLE_ALC_METER) {
-    debugPort->print("initializing alcohol sensor.. ");
-
-    if (alc.init()) {
-      debugPort->println("done in "+String(timer.check())+" ms");
-    } else {
-      errors.add(IMError::NO_ALC);
-      debugPort->println("failed");
-    timer.check();
-      result = false;
-    }
-  }
   /*
   debugPort->print("initializing serial interface.. ");
   port = &Serial1;
@@ -145,7 +133,11 @@ bool IMMega::init() {
 }
 
 void IMMega::loop() {
-  restartWatchdog();
+  //restartWatchdog();
+
+  if (movingMotors()) {
+    return;
+  }
   /*
   if (millis() - responseTime >= callsignTimeout) {
     restartOther();
@@ -157,12 +149,11 @@ void IMMega::loop() {
       drawErrorsPane();
     }
   }
-  moveMotors();
   
-  if (host.collectValues()) {
-    //control logic
+  if (host.collectValues(session.inHeadState())) {
     update();
-    host.prepareToCollect();
+    updateNodes();
+    host.prepareToCollect(session.inHeadState());
   }
   handleTouch();
   blink();
@@ -174,7 +165,6 @@ void IMMega::debug() {
 }
 
 void IMMega::update() {
-  //write to current session, check if changed
   queue = "";
   /*
   //session changes -> processed in createSession() or pauseSession() -> use changed flag
@@ -471,11 +461,57 @@ void IMMega::update() {
   }
 }
 
-void IMMega::moveMotors() {
+void IMMega::updateNodes() {
+  if (MANUAL_MODE) {
+    condNode.cool();
+    return;
+  }
+  switch (session.getState()) {
+    case STAND_BY_STATE :
+      condNode.standBy();
+      break;
+    case HEAT_STATE :
+      condNode.cool();
+      break;
+    case STAB_STATE :
+      condNode.cool();
+      break;
+    case HEAD_STATE :
+      condNode.cool();
+      break;
+    case PRE_BODY_STATE :
+      condNode.cool();
+      break;
+    case BODY_STATE :
+      condNode.cool();
+      break;
+    case PRE_TAIL_STATE :
+      condNode.cool();
+      break;
+    case FINISH_STATE :
+      condNode.standBy();
+      break;
+    case CANCEL_STATE :
+      condNode.standBy();
+      break;
+    case ERROR_STATE :
+      condNode.standBy();
+      break;
+  }
+}
+
+bool IMMega::movingMotors() {
   outMtr.loop();
   retMtr.loop();
   condMtr.loop();
   swMtr.loop();
+
+  bool movement = host.getOutCurPos() != host.getOutMtrPos();
+  movement |= host.getRetCurPos() != host.getRetMtrPos();
+  movement |= host.getCondCurPos() != host.getCondMtrPos();
+  movement |= host.getSwCurPos() != host.getSwMtrPos();
+
+  return movement;
 }
 
 bool IMMega::handleErrors() {
@@ -715,6 +751,10 @@ void IMMega::applyEditing() {
   }
   if (editLabel == captions.OUT_MTR_LBL) {
     host.setOutMtrPos(editValue);
+    
+    if (host.getRefluxRatio()) {
+      host.setRetMtrPos(editValue * (uint32_t) host.getRefluxRatio());
+    }
   }
   if (editLabel == captions.RET_MTR_LBL) {
     host.setRetMtrPos(editValue);
@@ -975,8 +1015,11 @@ void IMMega::drawBottomBar() {
     tft.print(captions.ARROW_RIGHT, bottomRightRect);
   }
   */
-
-  tft.print(String(captions.getStateString(session.getState())), bottomBar);
+  if (MANUAL_MODE) {
+    tft.print(String(captions.MANUAL_MODE_LBL), bottomBar);
+  } else {
+    tft.print(String(captions.getStateString(session.getState())), bottomBar);
+  }
 }
 
 void IMMega::drawPrevPane() {
@@ -1015,6 +1058,7 @@ void IMMega::drawFrontPane() {
   tft.setFontSize(HDR_FONT_SIZE);
   tft.drawLine(0, TOP_BAR_HEIGHT, SCR_WIDTH, TOP_BAR_HEIGHT);
 
+  if (!MANUAL_MODE) {
   if (session.isActive()) {
     tft.print(captions.ABORT_SESSION, topLeftRect);
     if (MANUAL_MODE) {
@@ -1024,6 +1068,7 @@ void IMMega::drawFrontPane() {
   } else {
     tft.print(captions.NEW_SESSION, topLeftRect);
     //clear session parameters
+  }
   }
   tft.print(captions.INFO, topRightRect);
   drawHH();

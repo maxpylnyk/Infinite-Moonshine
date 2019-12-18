@@ -38,10 +38,10 @@ class IMCaptions {
       ALC_LVL_LBL = "alcohol";
       CALC_TEMP_LBL = "calc, *C";
       ENV_TEMP_LBL = "room, *C";
-      PRES_LBL = "pres., mm Hg";
-      OUT_MTR_LBL = "out flow, ml/h";
-      RET_MTR_LBL = "ret. flow, ml/h";
-      COND_MTR_LBL = "cond. flow, ml/h";
+      PRES_LBL = "pres, mm Hg";
+      OUT_MTR_LBL = "out, ml/h";
+      RET_MTR_LBL = "ret, ml/h";
+      COND_MTR_LBL = "cond, ml/min";
       HEAT_PWR_LBL = "heater, %";
       HLVL_LBL = "hydrolevel";
       COND_TEMP_LBL = "cond, *C";
@@ -61,6 +61,7 @@ class IMCaptions {
       FINISH_LBL = "FINISHED";
       CANCEL_LBL = "CANCELED";
       ERROR_LBL = "ERROR";
+      MANUAL_MODE_LBL = "MANUAL MODE";
 
       LO_LVL = "LO";
       OK_LVL = "OK";
@@ -108,7 +109,7 @@ class IMCaptions {
       PRES_LBL = "давл., мм.р.ст.";
       OUT_MTR_LBL = "отбор, мл/ч";
       RET_MTR_LBL = "возврат, мл/ч";
-      COND_MTR_LBL = "охл., мл/ч";
+      COND_MTR_LBL = "охл., мл/мин";
       HEAT_PWR_LBL = "нагрев, %";
       HLVL_LBL = "гидроуровень";
       COND_TEMP_LBL = "вода, *С";
@@ -128,6 +129,7 @@ class IMCaptions {
       FINISH_LBL = "ЗАКОНЧЕНО";
       CANCEL_LBL = "ОТМЕНЕНО";
       ERROR_LBL = "ОШИБКА";
+      MANUAL_MODE_LBL = "РУЧНОЙ РЕЖИМ";
 
       LO_LVL = "НИЗ";
       OK_LVL = "НОРМ";
@@ -206,6 +208,7 @@ class IMCaptions {
     char * FINISH_LBL;
     char * CANCEL_LBL;
     char * ERROR_LBL;
+    char * MANUAL_MODE_LBL;
 
     char * LO_LVL;
     char * OK_LVL;

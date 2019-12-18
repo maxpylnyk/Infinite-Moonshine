@@ -10,11 +10,14 @@ void IMAlcoholSensor::setLevel(int16_t data) {
 }
 
 bool IMAlcoholSensor::init() {
-  requestData();
-  delay(requestTime);
-  receiveData();
-  initLevel = getLevel();
-  return initLevel < treshold;
+  if (!initialized) {
+    requestData();
+    delay(requestTime);
+    receiveData();
+    initLevel = getLevel();
+    initialized = initLevel < treshold;
+  }
+  return initialized;
 }
 
 void IMAlcoholSensor::debug() {

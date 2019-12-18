@@ -11,6 +11,9 @@ class IMCondenserNode {
     IMStepMotor * condMtr;
     IMThermometer * condTrm;
     IMThermometer * envTrm;
+    unsigned long updTime;
+
+    void maintainTemp(float);
 
   public:
     IMCondenserNode(IMThermometers*, IMStepMotor*);
@@ -21,6 +24,10 @@ class IMCondenserNode {
     IMThermometer * getEnvTrm();
 
     void setAdj(int16_t);
+    int mlToSteps(int);
+    int stepsToMl(int);
+    void standBy();
+    void cool();
     
 };
 

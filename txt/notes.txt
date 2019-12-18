@@ -325,6 +325,7 @@ if no space -> extract usefull data to exp file and remove oldest logs
 		отдалить термодатчик на плате от шнуров
 
 настройки: мощность нагревателя, язык
+сохранить в файл
 dash with counters
 
 
@@ -333,40 +334,26 @@ dash with counters
 
 **** schedule ****
 
-extraction node -> upd motors
-step motor -> ml to steps
-при изменении фч изменять конечную позицию крана возврата
-следить за температурой охлаждения автоматически
-	
-logic changes values, ui in manual mode. changes appears in host
-switch states
+search algorhytm in function nodes
+не ждать показаний алкодатчика в цикле
 
 paused state for control values measurement and manual mode
 manual mode -> nano controls pause. mega can't cancel it with control check
 normal operation -> mega sets pause to check control values
 
-calibrate motors, convert steps to ml (approx)
-mtr return current position when target reached
-mtr: extSpeed refluxSpeed waterSpeed
-двигать краны по очереди
-выключать питание после каждого шага
-отображать конечное и текущее положение кранов
+rename mtr methods: extSpeed refluxSpeed waterSpeed
 отображать остаточный объём
 
 heater: debug calibrate, default adjStep, powerHead, powerBody
 определить линейный участок напряжений нагревателя
 
-крепление плат и моторов
-шестерни
-прокладки
-резьбовая фиксация
-блок питания на кубе
 крышка алкодатчика - эпоксидная смола
 
 new session from begining to end
 warn about state borders
 
 warnings and confirmation dialogs
+new session dialog
 
 adj doesn't work
 achieve to reconnect sensors in loop

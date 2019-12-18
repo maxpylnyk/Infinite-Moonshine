@@ -5,6 +5,10 @@ IMSession::IMSession() : name(0), srcType(0), srcVol(0) {}
 IMSession::IMSession(uint32_t name, unsigned long startTime, SrcType srcType, uint8_t srcVol) :
   name(name), startTime(startTime), srcType(srcType), srcVol(srcVol) {}
 
+bool IMSession::inHeadState() {
+  return getState() == State::HEAD_STATE;
+}
+
 uint32_t IMSession::getName() {
   return name;
 }
@@ -49,39 +53,39 @@ uint16_t IMSession::getAlcLvl() {
   return alcLvl;
 }
 
-uint16_t IMSession::getCondMtrPos() {
+int16_t IMSession::getCondMtrPos() {
   return condMtrPos;
 }
 
-uint16_t IMSession::getCondMtrAdj() {
+int16_t IMSession::getCondMtrAdj() {
   return condMtrAdj;
 }
 
-uint16_t IMSession::getOutMtrPos() {
+int16_t IMSession::getOutMtrPos() {
   return outMtrPos;
 }
 
-uint16_t IMSession::getRetMtrPos() {
+int16_t IMSession::getRetMtrPos() {
   return retMtrPos;
 }
 
-uint16_t IMSession::getCondMtrCurPos() {
+int16_t IMSession::getCondMtrCurPos() {
   return condMtrCurPos;
 }
 
-uint16_t IMSession::getOutMtrCurPos() {
+int16_t IMSession::getOutMtrCurPos() {
   return outMtrCurPos;
 }
 
-uint16_t IMSession::getRetMtrCurPos() {
+int16_t IMSession::getRetMtrCurPos() {
   return retMtrCurPos;
 }
 
-uint16_t IMSession::getSwMtrCurPos() {
+int16_t IMSession::getSwMtrCurPos() {
   return swMtrCurPos;
 }
 
-uint16_t IMSession::getExtAdj() {
+int16_t IMSession::getExtAdj() {
   return extAdj;
 }
 
@@ -192,39 +196,39 @@ void IMSession::setAlcLvl(uint16_t value) {
   alcLvl = value;
 }
 
-void IMSession::setCondMtrPos(uint16_t value) {
+void IMSession::setCondMtrPos(int16_t value) {
   condMtrPos = value;
 }
 
-void IMSession::setCondMtrAdj(uint16_t value) {
+void IMSession::setCondMtrAdj(int16_t value) {
   condMtrAdj = value;
 }
 
-void IMSession::setOutMtrPos(uint16_t value) {
+void IMSession::setOutMtrPos(int16_t value) {
   outMtrPos = value;
 }
 
-void IMSession::setRetMtrPos(uint16_t value) {
+void IMSession::setRetMtrPos(int16_t value) {
   retMtrPos = value;
 }
 
-void IMSession::setCondMtrCurPos(uint16_t value) {
+void IMSession::setCondMtrCurPos(int16_t value) {
   condMtrCurPos = value;
 }
 
-void IMSession::setOutMtrCurPos(uint16_t value) {
+void IMSession::setOutMtrCurPos(int16_t value) {
   outMtrCurPos = value;
 }
 
-void IMSession::setRetMtrCurPos(uint16_t value) {
+void IMSession::setRetMtrCurPos(int16_t value) {
   retMtrCurPos = value;
 }
 
-void IMSession::setSwMtrCurPos(uint16_t value) {
+void IMSession::setSwMtrCurPos(int16_t value) {
   swMtrCurPos = value;
 }
 
-void IMSession::setExtAdj(uint16_t value) {
+void IMSession::setExtAdj(int16_t value) {
   extAdj = value;
 }
 

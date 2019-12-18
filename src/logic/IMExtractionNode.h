@@ -36,8 +36,8 @@ class IMExtractionNode {
     int16_t getAdj();
     uint8_t getRefluxRatio();
     float getCalcTemp();
-    uint16_t getOutCurPos();
-    uint16_t getRetCurPos();
+    int mlToSteps(int);
+    int stepsToMl(int);
 
     void setAdj(int16_t);
     void setRefluxRatio(uint8_t);

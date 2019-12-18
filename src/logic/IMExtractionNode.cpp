@@ -54,10 +54,18 @@ float IMExtractionNode::getCalcTemp() {
   
 void IMExtractionNode::setAdj(int16_t value) {
   adj = value;
-  //upd motors
 }
 
 void IMExtractionNode::setRefluxRatio(uint8_t value) {
   refluxRatio = value;
-  //upd motors
+}
+
+int IMExtractionNode::stepsToMl(int steps) {
+  return 0.0027 * steps * steps - 0.3846 * steps + 39.1;
+}
+
+int IMExtractionNode::mlToSteps(int ml) {
+  int steps = 0;
+  for (; ml / stepsToMl(steps) > 1; steps++);
+  return steps;
 }

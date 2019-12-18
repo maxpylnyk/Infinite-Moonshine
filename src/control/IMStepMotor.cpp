@@ -7,7 +7,7 @@ IMStepMotor::IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4)
   }
 }
 
-bool IMStepMotor::setTargetPosition(uint16_t position) {
+bool IMStepMotor::setTargetPosition(int16_t position) {
   if (position < minPosition || position > maxPosition) {
     return false;
   }
@@ -15,20 +15,12 @@ bool IMStepMotor::setTargetPosition(uint16_t position) {
   return true;
 }
 
-bool IMStepMotor::setCurrentPosition(uint16_t position) {
+bool IMStepMotor::setCurrentPosition(int16_t position) {
   if (position < minPosition || position > maxPosition) {
     return false;
   }
   currentPosition = position;
   return true;
-}
-
-uint16_t IMStepMotor::mlToSteps(uint16_t mlH) {
-  return mlH;//tbd
-}
-
-uint16_t IMStepMotor::stepsToMl(uint16_t steps) {
-  return steps;//tbd
 }
 
 static unsigned long IMStepMotor::getPauseUS() {
@@ -53,33 +45,23 @@ bool IMStepMotor::onPosition() {
   return getCurrentPosition() == getTargetPosition();
 }
 
-uint16_t IMStepMotor::getCurrentPosition() {
+int16_t IMStepMotor::getCurrentPosition() {
   return currentPosition;
 }
 
-uint16_t IMStepMotor::getTargetPosition() {
+int16_t IMStepMotor::getTargetPosition() {
   return targetPosition;
 }
 
-bool IMStepMotor::setFlow(uint16_t mlH) {
-  uint16_t steps = mlToSteps(mlH);
-  setTargetPosition(steps);
-}
-
-uint16_t IMStepMotor::getFlow() {
-  uint16_t steps = getTargetPosition();
-  return stepsToMl(steps);
-}
-
-void IMStepMotor::loop() {
+bool IMStepMotor::loop() {
   if (onPosition()) {
-    return;
+    return false;
   }
   if (micros() - lastStepTime < getPauseUS()) {
-    return;
+    return false;
   }
-  uint32_t stepsToMove = getTargetPosition() - getCurrentPosition();
-  uint32_t position = 0;
+  int32_t stepsToMove = getTargetPosition() - getCurrentPosition();
+  int32_t position = 0;
 
   if (stepsToMove > 0) {
     seqCounter += 1;
@@ -98,17 +80,14 @@ void IMStepMotor::loop() {
   } else {
     seqCounter = 0;
   }
-  //Serial.println("loop(): stepsToMove: "+String(stepsToMove));
-  //Serial.println("loop(): seq: "+String(seqCounter));
-  //Serial.println("loop(): position: "+String(position));
   setCurrentPosition(position);
   move();
   lastStepTime = micros();
 
   if (onPosition()) {
-    //Serial.println("loop(): sequence completed");
     disableMagnets();
   }
+  return true;
 }
 
 void IMStepMotor::move() {
@@ -120,7 +99,7 @@ void IMStepMotor::disableMagnets() {
   move();
 }
 
-void IMStepMotor::move(uint8_t step) {
+void IMStepMotor::move(int8_t step) {
   switch(step) {
 #if defined(INVERT)
     case 4:

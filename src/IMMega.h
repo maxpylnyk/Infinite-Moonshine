@@ -118,7 +118,7 @@ class IMMega : public InfiniteMoonshine {
     void receiveData();
     void printErrors();
     bool handleErrors();
-    void moveMotors();
+    bool movingMotors();
 
     void applyEditing();
     void handleTouch();
@@ -138,6 +138,7 @@ class IMMega : public InfiniteMoonshine {
     void drawKeyboardData();
     void drawKeyboard(int, String);
     void update();
+    void updateNodes();
     void blink();
     void drawMM();
     void drawHH();

@@ -5,6 +5,7 @@
 
 class IMAlcoholSensor : public IMSensor {
   private:
+    bool initialized = false;
     static const uint16_t treshold = 320;//heads < 310
     static const uint32_t requestTime = 60000;
     static const uint32_t receiveTime = 5;
