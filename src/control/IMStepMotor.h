@@ -14,7 +14,6 @@ class IMStepMotor {
     static const uint16_t stepsPerRound = 2048;
     static const int16_t minPosition = 0;
     static const int16_t maxPosition = INT16_MAX;
-    static const int16_t adjStep = 1;
     static const unsigned long minuteUS = 60000000;
     static const unsigned long pauseUS = -1.6 * roundsPerMinute + minuteUS / ((unsigned long) stepsPerRound * roundsPerMinute);
     int8_t seqCounter;
@@ -32,8 +31,6 @@ class IMStepMotor {
     IMStepMotor(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4);
 
     unsigned long getPauseUS();
-    bool increase();
-    bool decrease();
     bool onPosition();
     bool zeroPosition();
     bool setCurrentPosition(int16_t);
@@ -41,6 +38,7 @@ class IMStepMotor {
     int16_t getCurrentPosition();
     int16_t getTargetPosition();
     bool loop();
+    bool isMoving();
 
 };
 

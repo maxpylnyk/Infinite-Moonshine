@@ -76,7 +76,7 @@ class InfiniteMoonshine {
 
     void sendCallsign();
     virtual void sendData() = 0;
-    void addToQueue(byte number, String value);
+    void addToQueue(uint8_t number, String value);
     void endQueue();
 
     float calculateTemp(float pressure);

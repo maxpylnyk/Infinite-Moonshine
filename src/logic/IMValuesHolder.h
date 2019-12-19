@@ -28,33 +28,14 @@ class IMValuesHolder {
     bool collectValues(bool);
     void prepareToCollect(bool);
     void setErrorList(IMErrors*);
-
-    void setSwitchPos(uint8_t);
     void setRefluxRatio(uint8_t);
     void setHeatPwr(uint8_t);
     void setHeatAdj(uint8_t);
-    void setCondMtrPos(int16_t);
-    void setCondMtrAdj(int16_t);
-    void setOutMtrPos(int16_t);
-    void setRetMtrPos(int16_t);
-    void setExtAdj(int16_t);
-
-    void setCondCurPos(int16_t);
-    void setOutCurPos(int16_t);
-    void setRetCurPos(int16_t);
-    void setSwCurPos(int16_t);
-
-    uint8_t getSwitchPos();
     uint8_t getRefluxRatio();
     uint8_t getHeatPwr();
     uint8_t getHeatAdj();
     IMLevel getHydroLvl();
     uint16_t getAlcLvl();
-    int16_t getCondMtrPos();
-    int16_t getCondMtrAdj();
-    int16_t getOutMtrPos();
-    int16_t getRetMtrPos();
-    int16_t getExtAdj();
     float getSteamTemp();
     float getCondTemp();
     float getPipeTemp();
@@ -62,11 +43,31 @@ class IMValuesHolder {
     float getCalcTemp();
     float getPressure();
 
-    int16_t getCondCurPos();
-    int16_t getOutCurPos();
-    int16_t getRetCurPos();
-    int16_t getSwCurPos();
-    int16_t getSwMtrPos();
+    int16_t getWaterAdj();
+    int16_t getExtAdj();
+    void setWaterAdj(int16_t);
+    void setExtAdj(int16_t);
+    bool outMtrMoving();
+    bool retMtrMoving();
+    bool condMtrMoving();
+    bool swMtrMoving();
+
+    uint8_t getSwitchPos();
+    int16_t getSwitchSteps();
+    int16_t getSwitchTarget();
+    int16_t getExtSpeed();
+    int16_t getRefluxSpeed();
+    int16_t getWaterSpeed();
+
+    void setSwitchPos(uint8_t);
+    void setExtSpeed(int16_t);
+    void setRefluxSpeed(int16_t);
+    void setWaterSpeed(int16_t);
+
+    void restoreSwitch(uint8_t);
+    void restoreExtSpeed(int16_t);
+    void restoreRefluxSpeed(int16_t);
+    void restoreWaterSpeed(int16_t);
 
 };
 

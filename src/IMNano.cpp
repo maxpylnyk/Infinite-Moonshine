@@ -101,19 +101,19 @@ void IMNano::sendData() {
   addToQueue(LogIndex::PAUSE, String(session.isPaused()));
   addToQueue(LogIndex::SRC_VOL, String(session.getSrcVol()));
   addToQueue(LogIndex::SRC_TYPE, String(session.getSrcType()));
-  addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
-  addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
+  addToQueue(LogIndex::WATER_SPEED, String(session.getWaterSpeed()));
+  addToQueue(LogIndex::WATER_ADJ, String(session.getWaterAdj()));
   addToQueue(LogIndex::SW, String(session.getSwitchPos()));
   addToQueue(LogIndex::HEAT, String(session.getHeatPwr()));
   addToQueue(LogIndex::HEAT_ADJ, String(session.getHeatAdj()));
   addToQueue(LogIndex::RF, String(session.getRefluxRatio()));
-  addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrPos()));
-  addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
+  addToQueue(LogIndex::EXT_SPEED, String(session.getExtSpeed()));
+  addToQueue(LogIndex::REF_SPEED, String(session.getRefluxSpeed()));
   addToQueue(LogIndex::EXT_ADJ, String(session.getExtAdj()));
   addToQueue(LogIndex::HEAD_OUT_ML, String(session.getHeadOutML()));
   addToQueue(LogIndex::BODY_OUT_ML, String(session.getBodyOutML()));
-  addToQueue(LogIndex::USED_WATER_ML, String(session.getUsedWaterML()));
-  addToQueue(LogIndex::USED_POWER_W, String(session.getUsedPowerW()));
+  addToQueue(LogIndex::USED_WATER_L, String(session.getUsedWaterL()));
+  addToQueue(LogIndex::USED_POWER_KW, String(session.getUsedPowerKW()));
   endQueue();
   debugText = "";
 }
@@ -162,11 +162,11 @@ void IMNano::receiveData() {
       case LogIndex::PIPE_TEMP :
         session.setPipeTemp(port->parseFloat());
         break;
-      case LogIndex::COND_MTR :
-        session.setCondMtrPos(port->parseInt());
+      case LogIndex::WATER_SPEED :
+        session.setWaterSpeed(port->parseInt());
         break;
-      case LogIndex::COND_MTR_ADJ :
-        session.setCondMtrAdj(port->parseInt());
+      case LogIndex::WATER_ADJ :
+        session.setWaterAdj(port->parseInt());
         break;
       case LogIndex::SW :
         session.setSwitchPos(port->parseInt());
@@ -180,11 +180,11 @@ void IMNano::receiveData() {
       case LogIndex::RF :
         session.setRefluxRatio(port->parseInt());
         break;
-      case LogIndex::OUT_MTR :
-        session.setOutMtrPos(port->parseInt());
+      case LogIndex::EXT_SPEED :
+        session.setExtSpeed(port->parseInt());
         break;
-      case LogIndex::RET_MTR :
-        session.setRetMtrPos(port->parseInt());
+      case LogIndex::REF_SPEED :
+        session.setRefluxSpeed(port->parseInt());
         break;
       case LogIndex::EXT_ADJ :
         session.setExtAdj(port->parseInt());
@@ -195,11 +195,11 @@ void IMNano::receiveData() {
       case LogIndex::BODY_OUT_ML :
         session.setBodyOutML(port->parseInt());
         break;
-      case LogIndex::USED_WATER_ML :
-        session.setUsedWaterML(port->parseInt());
+      case LogIndex::USED_WATER_L :
+        session.setUsedWaterL(port->parseFloat());
         break;
-      case LogIndex::USED_POWER_W :
-        session.setUsedPowerW(port->parseInt());
+      case LogIndex::USED_POWER_KW :
+        session.setUsedPowerKW(port->parseFloat());
         break;
       case endOfTransmission:
         if (initialize) {

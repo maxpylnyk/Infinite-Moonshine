@@ -26,12 +26,14 @@ void IMCondenserNode::setAdj(int16_t value) {
   adj = value;
 }
 
-int IMCondenserNode::stepsToMl(int steps) {
-  return 1.9236 * steps + 124;
+int16_t IMCondenserNode::stepsToMl(int steps) {
+  IMDecimal ml = IMDecimal(1.9236 * steps + 124.5);
+  return ml.getInt();
 }
 
-int IMCondenserNode::mlToSteps(int ml) {
-  return (ml - 124) / 1.9236;
+int16_t IMCondenserNode::mlToSteps(int ml) {
+  IMDecimal steps = IMDecimal(1.0 * (ml - 124) / 1.9236);
+  return steps.getInt();
 }
 
 void IMCondenserNode::standBy() {
@@ -43,6 +45,7 @@ void IMCondenserNode::cool() {
 }
 
 void IMCondenserNode::maintainTemp(float target) {
+  
   if (millis() - updTime < COND_INERTION || !getMtr()->onPosition()) {
     return;
   }
@@ -58,4 +61,5 @@ void IMCondenserNode::maintainTemp(float target) {
     );
   }
   updTime = millis();
+  
 }

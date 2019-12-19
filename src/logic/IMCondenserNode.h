@@ -4,6 +4,7 @@
 #include "utilities/IMCommons.h"
 #include "sensors/IMThermometers.h"
 #include "control/IMStepMotor.h"
+#include "utilities/IMDecimal.h"
 
 class IMCondenserNode {
   private:
@@ -24,8 +25,8 @@ class IMCondenserNode {
     IMThermometer * getEnvTrm();
 
     void setAdj(int16_t);
-    int mlToSteps(int);
-    int stepsToMl(int);
+    int16_t mlToSteps(int);
+    int16_t stepsToMl(int);
     void standBy();
     void cool();
     

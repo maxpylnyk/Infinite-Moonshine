@@ -134,10 +134,11 @@ bool IMMega::init() {
 
 void IMMega::loop() {
   //restartWatchdog();
-
+  
   if (movingMotors()) {
     return;
   }
+  
   /*
   if (millis() - responseTime >= callsignTimeout) {
     restartOther();
@@ -145,6 +146,14 @@ void IMMega::loop() {
   }
   */
   if (!errors.isEmpty()) {
+    debugPort->print("errors:");
+
+    for (int i = 0; i < errors.getCount(); i++) {
+      debugPort->print(" ");
+      debugPort->print(errors.get(i));
+    }
+    debugPort->println();
+
     if (!handleErrors()) {
       drawErrorsPane();
     }
@@ -152,7 +161,7 @@ void IMMega::loop() {
   
   if (host.collectValues(session.inHeadState())) {
     update();
-    updateNodes();
+    //updateNodes();
     host.prepareToCollect(session.inHeadState());
   }
   handleTouch();
@@ -235,20 +244,18 @@ void IMMega::update() {
     session.setPressure(host.getPressure());
     addToQueue(LogIndex::PRESSURE, String(session.getPressure()));
   }
-
-  if (session.getOutMtrCurPos() != host.getOutCurPos()) {
+  
+  if (session.getExtSpeed() != host.getExtSpeed()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(0, DASH_DATA_YLO1, DASH_SLOT_WIDTH, DASH_DATA_YHI1);
-      tft.print(String(host.getOutCurPos()), DATA_FONT_SIZE, MAIN_COLOR, data11);
+      tft.print(String(host.getExtSpeed()), DATA_FONT_SIZE, MAIN_COLOR, data11);
     }
-    session.setOutMtrCurPos(host.getOutCurPos());
+    session.setExtSpeed(host.getExtSpeed());
+    addToQueue(LogIndex::EXT_SPEED, String(session.getExtSpeed()));
   }
-  if (session.getOutMtrPos() != host.getOutMtrPos()) {
-    session.setOutMtrPos(host.getOutMtrPos());
-    addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrCurPos()));
-  }
-  if (host.getOutMtrPos() != host.getOutCurPos()) {
+  /*
+  if (host.outMtrMoving()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(topLabel11);
@@ -262,20 +269,18 @@ void IMMega::update() {
       tft.fillRect(topLabel11);
     }
   }
-
-  if (session.getRetMtrCurPos() != host.getRetCurPos()) {
+  */
+  if (session.getRefluxSpeed() != host.getRefluxSpeed()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(DASH_SLOT_WIDTH, DASH_DATA_YLO1, 2*DASH_SLOT_WIDTH, DASH_DATA_YHI1);
-      tft.print(String(host.getRetCurPos()), DATA_FONT_SIZE, MAIN_COLOR, data12);
+      tft.print(String(host.getRefluxSpeed()), DATA_FONT_SIZE, MAIN_COLOR, data12);
     }
-    session.setRetMtrCurPos(host.getRetCurPos());
+    session.setRefluxSpeed(host.getRefluxSpeed());
+    addToQueue(LogIndex::REF_SPEED, String(session.getRefluxSpeed()));
   }
-  if (session.getRetMtrPos() != host.getRetMtrPos()) {
-    session.setRetMtrPos(host.getRetMtrPos());
-    addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
-  }
-  if (host.getRetMtrPos() != host.getRetCurPos()) {
+  /*
+  if (host.retMtrMoving()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(topLabel12);
@@ -289,20 +294,18 @@ void IMMega::update() {
       tft.fillRect(topLabel12);
     }
   }
-
-  if (session.getCondMtrCurPos() != host.getCondCurPos()) {
+  */
+  if (session.getWaterSpeed() != host.getWaterSpeed()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(2*DASH_SLOT_WIDTH, DASH_DATA_YLO1, SCR_WIDTH, DASH_DATA_YHI1);
-      tft.print(String(host.getCondCurPos()), DATA_FONT_SIZE, MAIN_COLOR, data13);
+      tft.print(String(host.getWaterSpeed()), DATA_FONT_SIZE, MAIN_COLOR, data13);
     }
-    session.setCondMtrCurPos(host.getCondCurPos());
+    session.setWaterSpeed(host.getWaterSpeed());
+    addToQueue(LogIndex::WATER_SPEED, String(session.getWaterSpeed()));
   }
-  if (session.getCondMtrPos() != host.getCondMtrPos()) {
-    session.setCondMtrPos(host.getCondMtrPos());
-    addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
-  }
-  if (host.getCondMtrPos() != host.getCondCurPos()) {
+  /*
+  if (host.condMtrMoving()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(topLabel13);
@@ -316,7 +319,7 @@ void IMMega::update() {
       tft.fillRect(topLabel13);
     }
   }
-
+  */
   if (session.getHeatPwr() != host.getHeatPwr()) {
     if (activePane == DASH2_PANE) {
       tft.setColor(BACKGROUND_COLOR);
@@ -373,14 +376,14 @@ void IMMega::update() {
     addToQueue(LogIndex::EXT_ADJ, String(session.getExtAdj()));
   }
 
-  if (session.getCondMtrAdj() != host.getCondMtrAdj()) {
+  if (session.getWaterAdj() != host.getWaterAdj()) {
     if (activePane == DASH3_PANE) {
       tft.setColor(BACKGROUND_COLOR);
       tft.fillRect(DASH_SLOT_WIDTH, DASH_DATA_YLO1, 2*DASH_SLOT_WIDTH, DASH_DATA_YHI1);
-      tft.print(String(host.getCondMtrAdj()), DATA_FONT_SIZE, MAIN_COLOR, data12);
+      tft.print(String(host.getWaterAdj()), DATA_FONT_SIZE, MAIN_COLOR, data12);
     }
-    session.setCondMtrAdj(host.getCondMtrAdj());
-    addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
+    session.setWaterAdj(host.getWaterAdj());
+    addToQueue(LogIndex::WATER_ADJ, String(session.getWaterAdj()));
   }
 
   if (session.getHeatAdj() != host.getHeatAdj()) {
@@ -408,30 +411,6 @@ void IMMega::update() {
     session.setSwitchPos(host.getSwitchPos());
     addToQueue(LogIndex::SW, String(session.getSwitchPos()));
   }
-  /*
-  if (session.getSwMtrCurPos() != host.getSwCurPos()) {
-    if (activePane == DASH3_PANE) {
-      tft.setColor(BACKGROUND_COLOR);
-      tft.fillRect(topLabel21);
-      tft.print(String(host.getSwCurPos()), LBL_FONT_SIZE, MAIN_COLOR_FLAT, topLabel21);
-    }
-    session.setSwMtrCurPos(host.getSwCurPos());
-  }
-  */
-  if (host.getSwCurPos() != host.getSwMtrPos()) {
-    if (activePane == DASH3_PANE) {
-      tft.setColor(BACKGROUND_COLOR);
-      tft.fillRect(topLabel21);
-      tft.setFontSize(LBL_FONT_SIZE);
-      tft.setColor(TARGET_COLOR);
-      tft.print(String(host.getSwCurPos())+" "+String(captions.ARROW_RIGHT)+" "+String(host.getSwMtrPos()), topLabel21);
-    }
-  } else {
-    if (activePane == DASH3_PANE) {
-      tft.setColor(BACKGROUND_COLOR);
-      tft.fillRect(topLabel21);
-    }
-  }
   
   if (session.getRefluxRatio() != host.getRefluxRatio()) {
     if (activePane == DASH3_PANE) {
@@ -446,8 +425,8 @@ void IMMega::update() {
   //calculate
   session.getHeadOutML();
   session.getBodyOutML();
-  session.getUsedWaterML();
-  session.getUsedPowerW();
+  session.getUsedWaterL();
+  session.getUsedPowerKW();
   session.getElapsedTime();
   */
   /*
@@ -506,10 +485,10 @@ bool IMMega::movingMotors() {
   condMtr.loop();
   swMtr.loop();
 
-  bool movement = host.getOutCurPos() != host.getOutMtrPos();
-  movement |= host.getRetCurPos() != host.getRetMtrPos();
-  movement |= host.getCondCurPos() != host.getCondMtrPos();
-  movement |= host.getSwCurPos() != host.getSwMtrPos();
+  bool movement = host.outMtrMoving();
+  movement |= host.retMtrMoving();
+  movement |= host.condMtrMoving();
+  movement |= host.swMtrMoving();
 
   return movement;
 }
@@ -583,19 +562,19 @@ void IMMega::sendData() {
   addToQueue(LogIndex::PAUSE, String(session.isPaused()));
   addToQueue(LogIndex::SRC_VOL, String(session.getSrcVol()));
   addToQueue(LogIndex::SRC_TYPE, String(session.getSrcType()));
-  addToQueue(LogIndex::COND_MTR, String(session.getCondMtrPos()));
-  addToQueue(LogIndex::COND_MTR_ADJ, String(session.getCondMtrAdj()));
+  addToQueue(LogIndex::WATER_SPEED, String(session.getWaterSpeed()));
+  addToQueue(LogIndex::WATER_ADJ, String(session.getWaterAdj()));
   addToQueue(LogIndex::SW, String(session.getSwitchPos()));
   addToQueue(LogIndex::HEAT, String(session.getHeatPwr()));
   addToQueue(LogIndex::HEAT_ADJ, String(session.getHeatAdj()));
   addToQueue(LogIndex::RF, String(session.getRefluxRatio()));
-  addToQueue(LogIndex::OUT_MTR, String(session.getOutMtrPos()));
-  addToQueue(LogIndex::RET_MTR, String(session.getRetMtrPos()));
+  addToQueue(LogIndex::EXT_SPEED, String(session.getExtSpeed()));
+  addToQueue(LogIndex::REF_SPEED, String(session.getRefluxSpeed()));
   addToQueue(LogIndex::EXT_ADJ, String(session.getExtAdj()));
   addToQueue(LogIndex::HEAD_OUT_ML, String(session.getHeadOutML()));
   addToQueue(LogIndex::BODY_OUT_ML, String(session.getBodyOutML()));
-  addToQueue(LogIndex::USED_WATER_ML, String(session.getUsedWaterML()));
-  addToQueue(LogIndex::USED_POWER_W, String(session.getUsedPowerW()));
+  addToQueue(LogIndex::USED_WATER_L, String(session.getUsedWaterL()));
+  addToQueue(LogIndex::USED_POWER_KW, String(session.getUsedPowerKW()));
   endQueue();
 }
 
@@ -605,6 +584,7 @@ void IMMega::receiveData() {
   while (port->available()) {
     int index = port->parseInt();
     long iTemp;
+    float fTemp;
 
     switch(index) {
       case LogIndex::SESSION_NAME :
@@ -647,23 +627,23 @@ void IMMega::receiveData() {
         debugText += "\n"+String(index)+" (error) "+String(iTemp);
         errors.add(iTemp);
         break;
-      case LogIndex::COND_MTR :
+      case LogIndex::WATER_SPEED :
         iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (cond mtr pos) "+String(iTemp);
-        session.setCondMtrPos(iTemp);
-        host.setCondCurPos(iTemp);
+        debugText += "\n"+String(index)+" (water speed) "+String(iTemp);
+        session.setWaterSpeed(iTemp);
+        host.restoreWaterSpeed(iTemp);
         break;
-      case LogIndex::COND_MTR_ADJ :
+      case LogIndex::WATER_ADJ :
         iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (cond mtr adj) "+String(iTemp);
-        session.setCondMtrAdj(iTemp);
-        host.setCondMtrAdj(iTemp);
+        debugText += "\n"+String(index)+" (water adj) "+String(iTemp);
+        session.setWaterAdj(iTemp);
+        host.setWaterAdj(iTemp);
         break;
       case LogIndex::SW :
         iTemp = port->parseInt();
         debugText += "\n"+String(index)+" (switch pos) "+String(iTemp);
         session.setSwitchPos(iTemp);
-        host.setSwCurPos(iTemp);
+        host.restoreSwitch(iTemp);
         break;
       case LogIndex::HEAT :
         iTemp = port->parseInt();
@@ -683,17 +663,17 @@ void IMMega::receiveData() {
         session.setRefluxRatio(iTemp);
         host.setRefluxRatio(iTemp);
         break;
-      case LogIndex::OUT_MTR :
+      case LogIndex::EXT_SPEED :
         iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (out mtr pos) "+String(iTemp);
-        session.setOutMtrPos(iTemp);
-        host.setOutCurPos(iTemp);
+        debugText += "\n"+String(index)+" (ext speed) "+String(iTemp);
+        session.setExtSpeed(iTemp);
+        host.restoreExtSpeed(iTemp);
         break;
-      case LogIndex::RET_MTR :
+      case LogIndex::REF_SPEED :
         iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (ret mtr pos) "+String(iTemp);
-        session.setRetMtrPos(iTemp);
-        host.setRetCurPos(iTemp);
+        debugText += "\n"+String(index)+" (reflux speed) "+String(iTemp);
+        session.setRefluxSpeed(iTemp);
+        host.restoreRefluxSpeed(iTemp);
         break;
       case LogIndex::EXT_ADJ :
         iTemp = port->parseInt();
@@ -711,15 +691,15 @@ void IMMega::receiveData() {
         debugText += "\n"+String(index)+" (body out) "+String(iTemp);
         session.setBodyOutML(iTemp);//add calculated quantity for freezing time
         break;
-      case LogIndex::USED_WATER_ML :
-        iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (used water ml) "+String(iTemp);
-        session.setUsedWaterML(iTemp);//add calculated quantity for freezing time
+      case LogIndex::USED_WATER_L :
+        fTemp = port->parseFloat();
+        debugText += "\n"+String(index)+" (used water l) "+String(fTemp);
+        session.setUsedWaterL(fTemp);//add calculated quantity for freezing time
         break;
-      case LogIndex::USED_POWER_W :
-        iTemp = port->parseInt();
-        debugText += "\n"+String(index)+" (used power W) "+String(iTemp);
-        session.setUsedPowerW(iTemp);//add calculated quantity for freezing time
+      case LogIndex::USED_POWER_KW :
+        fTemp = port->parseFloat();
+        debugText += "\n"+String(index)+" (used power kW) "+String(fTemp);
+        session.setUsedPowerKW(fTemp);//add calculated quantity for freezing time
         break;
       case endOfTransmission:
         debugText += "\n"+String(index)+" (eot)";
@@ -750,17 +730,17 @@ void IMMega::applyEditing() {
     }
   }
   if (editLabel == captions.OUT_MTR_LBL) {
-    host.setOutMtrPos(editValue);
+    host.setExtSpeed(editValue);
     
     if (host.getRefluxRatio()) {
-      host.setRetMtrPos(editValue * (uint32_t) host.getRefluxRatio());
+      host.setRefluxSpeed(editValue * host.getRefluxRatio());
     }
   }
   if (editLabel == captions.RET_MTR_LBL) {
-    host.setRetMtrPos(editValue);
+    host.setRefluxSpeed(editValue);
   }
   if (editLabel == captions.COND_MTR_LBL) {
-    host.setCondMtrPos(editValue);
+    host.setWaterSpeed(editValue);
   }
   if (editLabel == captions.HEAT_PWR_LBL) {
     if (editValue > UINT8_MAX) {
@@ -772,7 +752,7 @@ void IMMega::applyEditing() {
     host.setExtAdj(editValue);
   }
   if (editLabel == captions.COND_ADJ_LBL) {
-    host.setCondMtrAdj(editValue);
+    host.setWaterAdj(editValue);
   }
   if (editLabel == captions.HEAT_ADJ_LBL) {
     if (editValue > UINT8_MAX) {
@@ -798,7 +778,6 @@ void IMMega::handleTouch() {
   IMPoint touch = ts.getTouchPosition();
 
   if (touch.hasValue()) {
-    //Serial.println(String(touch.x)+" "+String(touch.y));
     /*
     if (MANUAL_MODE && sessionIsActive()) {
       if (bottomLeftRect.hasPoint(touch)) {
@@ -880,13 +859,13 @@ void IMMega::handleTouch() {
         }
         if (MANUAL_MODE) {
           if (slot11.hasPoint(touch)) {
-            drawKeyboard(host.getOutMtrPos(), captions.OUT_MTR_LBL);
+            drawKeyboard(host.getExtSpeed(), captions.OUT_MTR_LBL);
           }
           if (slot12.hasPoint(touch)) {
-            drawKeyboard(host.getRetMtrPos(), captions.RET_MTR_LBL);
+            drawKeyboard(host.getRefluxSpeed(), captions.RET_MTR_LBL);
           }
           if (slot13.hasPoint(touch)) {
-            drawKeyboard(host.getCondMtrPos(), captions.COND_MTR_LBL);
+            drawKeyboard(host.getWaterSpeed(), captions.COND_MTR_LBL);
           }
           if (slot21.hasPoint(touch)) {
             drawKeyboard(host.getHeatPwr(), captions.HEAT_PWR_LBL);
@@ -902,7 +881,7 @@ void IMMega::handleTouch() {
             drawKeyboard(host.getExtAdj(), captions.EXT_ADJ_LBL);
           }
           if (slot12.hasPoint(touch)) {
-            drawKeyboard(host.getCondMtrAdj(), captions.COND_ADJ_LBL);
+            drawKeyboard(host.getWaterAdj(), captions.COND_ADJ_LBL);
           }
           if (slot13.hasPoint(touch)) {
             drawKeyboard(host.getHeatAdj(), captions.HEAT_ADJ_LBL);
@@ -1280,9 +1259,9 @@ void IMMega::drawDash2Data() {
   tft.setColor(MAIN_COLOR);
   tft.setFontSize(DATA_FONT_SIZE);
 
-  tft.print(String(host.getOutCurPos()), data11);
-  tft.print(String(host.getRetCurPos()), data12);
-  tft.print(String(host.getCondCurPos()), data13);
+  tft.print(String(host.getExtSpeed()), data11);
+  tft.print(String(host.getRefluxSpeed()), data12);
+  tft.print(String(host.getWaterSpeed()), data13);
   tft.print(String(host.getHeatPwr()), data21);
 
   switch (host.getHydroLvl()) {
@@ -1309,18 +1288,6 @@ void IMMega::drawDash2Data() {
   tft.print(captions.HEAT_PWR_LBL, label21);
   tft.print(captions.HLVL_LBL, label22);
   tft.print(captions.COND_TEMP_LBL, label23);
-
-  tft.setColor(TARGET_COLOR);
-
-  if (host.getOutMtrPos() != host.getOutCurPos()) {
-    tft.print(String(captions.ARROW_RIGHT)+" "+String(host.getOutMtrPos()), topLabel11);
-  }
-  if (host.getRetMtrPos() != host.getRetCurPos()) {
-    tft.print(String(captions.ARROW_RIGHT)+" "+String(host.getRetMtrPos()), topLabel12);
-  }
-  if (host.getCondMtrPos() != host.getCondCurPos()) {
-    tft.print(String(captions.ARROW_RIGHT)+" "+String(host.getCondMtrPos()), topLabel13);
-  }
 }
 
 void IMMega::drawDash2() {
@@ -1343,7 +1310,7 @@ void IMMega::drawDash3Data() {
   tft.setColor(MAIN_COLOR);
   tft.setFontSize(DATA_FONT_SIZE);
   tft.print(String(host.getExtAdj()), data11);
-  tft.print(String(host.getCondMtrAdj()), data12);
+  tft.print(String(host.getWaterAdj()), data12);
   tft.print(String(host.getHeatAdj()), data13);
 
   if (host.getSwitchPos()) {
@@ -1360,11 +1327,6 @@ void IMMega::drawDash3Data() {
   tft.print(captions.HEAT_ADJ_LBL, label13);
   tft.print(captions.SW_LBL, label21);
   tft.print(captions.RF_LBL, label22);
-
-  if (host.getSwCurPos() != host.getSwMtrPos()) {
-    tft.setColor(TARGET_COLOR);
-    tft.print(String(host.getSwCurPos())+" "+String(captions.ARROW_RIGHT)+" "+String(host.getSwMtrPos()), topLabel21);
-  }
 }
 
 void IMMega::drawDash3() {

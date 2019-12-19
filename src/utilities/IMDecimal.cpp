@@ -65,3 +65,12 @@ float IMDecimal::getFloat() {
   return result;
 }
 
+int IMDecimal::getInt() {
+  int out = whole;
+  
+  if (fract * 10 / precision >= 5) {
+    out += 1;
+  }
+  return out;
+}
+

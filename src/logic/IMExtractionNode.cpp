@@ -49,7 +49,8 @@ uint8_t IMExtractionNode::getRefluxRatio() {
 }
 
 float IMExtractionNode::getCalcTemp() {
-  return 0.038 * bar->getPressure() + 49.27;
+  float temp = 0.038 * bar->getPressure() + 49.27;
+  return temp;
 }
   
 void IMExtractionNode::setAdj(int16_t value) {
@@ -61,11 +62,15 @@ void IMExtractionNode::setRefluxRatio(uint8_t value) {
 }
 
 int IMExtractionNode::stepsToMl(int steps) {
-  return 0.0027 * steps * steps - 0.3846 * steps + 39.1;
+  float ml = 0.0027 * steps * steps - 0.3846 * steps + 39.1;
+  return (int) ml;
 }
 
 int IMExtractionNode::mlToSteps(int ml) {
   int steps = 0;
-  for (; ml / stepsToMl(steps) > 1; steps++);
+
+  while (ml > stepsToMl(steps)) {
+    steps += 1;
+  }
   return steps;
 }

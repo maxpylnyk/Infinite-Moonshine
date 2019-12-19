@@ -331,7 +331,6 @@ dash with counters
 
 
 
-
 **** schedule ****
 
 search algorhytm in function nodes

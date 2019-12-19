@@ -86,6 +86,8 @@ const uint16_t TEXT_COLOR        = MAIN_COLOR;
 const uint16_t ERROR_COLOR       = STAB_COLOR;
 const uint16_t TARGET_COLOR      = HEAT_COLOR;
 
+const uint16_t QUEUE_LEN = 100;
+const uint16_t DEBUG_TXT_LEN = 300;
 const float FLEGMA_TEMP = 62.5;
 const float TEMP_OFFSET = 0.5;
 
@@ -140,19 +142,19 @@ typedef enum LogIndex : uint8_t {
   PIPE_TEMP,
   ENV_TEMP,
   PRESSURE,
-  COND_MTR,
-  COND_MTR_ADJ,
+  WATER_SPEED,
+  WATER_ADJ,
   SW,
   HEAT,
   HEAT_ADJ,
   RF,
-  OUT_MTR,
-  RET_MTR,
+  EXT_SPEED,
+  REF_SPEED,
   EXT_ADJ,
   HEAD_OUT_ML,
   BODY_OUT_ML,
-  USED_WATER_ML,
-  USED_POWER_W,
+  USED_WATER_L,
+  USED_POWER_KW,
   ERROR_CODES
 } LogIndex;
 

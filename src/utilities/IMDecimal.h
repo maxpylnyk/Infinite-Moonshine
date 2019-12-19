@@ -21,6 +21,7 @@ class IMDecimal {
     bool operator>=(const IMDecimal& other) const;
     bool operator<=(const IMDecimal& other) const;
     float getFloat();
+    int getInt();
 };
 
 #endif

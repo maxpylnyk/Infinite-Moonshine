@@ -2,6 +2,8 @@
 
 InfiniteMoonshine::InfiniteMoonshine(int rstPin) : rstPin(rstPin) {
   pinMode(LED_BUILTIN, OUTPUT);
+  queue.reserve(QUEUE_LEN);
+  debugText.reserve(DEBUG_TXT_LEN);
 }
 
 void InfiniteMoonshine::initWatchdog() {
@@ -40,7 +42,8 @@ void InfiniteMoonshine::sendCallsign() {
   waitingTimer.start();
 }
 
-void InfiniteMoonshine::addToQueue(byte number, String value) {
+void InfiniteMoonshine::addToQueue(uint8_t number, String value) {
+  /*
   String pair = String(number) + " " + value + " ";
   int len = queue.length() + pair.length();
 
@@ -51,6 +54,7 @@ void InfiniteMoonshine::addToQueue(byte number, String value) {
     delayMicroseconds(bytesArrivalTime);
   }
   queue += pair;
+  */
 }
 
 void InfiniteMoonshine::endQueue() {

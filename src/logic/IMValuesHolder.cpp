@@ -35,10 +35,6 @@ void IMValuesHolder::setErrorList(IMErrors * e) {
   errors = e;
 }
 
-void IMValuesHolder::setSwitchPos(uint8_t value) {
-  swNode->getSwitch()->setSwitchPos(value);
-}
-
 void IMValuesHolder::setRefluxRatio(uint8_t value) {
   extNode->setRefluxRatio(value);
 }
@@ -49,46 +45,6 @@ void IMValuesHolder::setHeatPwr(uint8_t value) {
 
 void IMValuesHolder::setHeatAdj(uint8_t value) {
   extNode->getHeater()->setAdjStep(value);
-}
-
-void IMValuesHolder::setCondMtrPos(int16_t ml) {
-  condNode->getMtr()->setTargetPosition(condNode->mlToSteps(ml));
-}
-
-void IMValuesHolder::setCondMtrAdj(int16_t value) {
-  condNode->setAdj(value);
-}
-
-void IMValuesHolder::setOutMtrPos(int16_t ml) {
-  extNode->getOutMtr()->setTargetPosition(extNode->mlToSteps(ml));
-}
-
-void IMValuesHolder::setRetMtrPos(int16_t ml) {
-  extNode->getRetMtr()->setTargetPosition(extNode->mlToSteps(ml));
-}
-
-void IMValuesHolder::setExtAdj(int16_t value) {
-  extNode->setAdj(value);
-}
-
-void IMValuesHolder::setCondCurPos(int16_t value) {
-  condNode->getMtr()->setCurrentPosition(value);
-}
-
-void IMValuesHolder::setOutCurPos(int16_t value) {
-  extNode->getOutMtr()->setCurrentPosition(value);
-}
-
-void IMValuesHolder::setRetCurPos(int16_t value) {
-  extNode->getRetMtr()->setCurrentPosition(value);
-}
-
-void IMValuesHolder::setSwCurPos(int16_t value) {
-  swNode->getSwitch()->setCurrentPos(value);
-}
-
-uint8_t IMValuesHolder::getSwitchPos() {
-  return swNode->getSwitch()->getSwitchPos();
 }
 
 uint8_t IMValuesHolder::getRefluxRatio() {
@@ -112,26 +68,6 @@ uint16_t IMValuesHolder::getAlcLvl() {
     return 0;
   }
   return swNode->getAlc()->getLevel();
-}
-
-int16_t IMValuesHolder::getCondMtrPos() {
-  return condNode->getMtr()->getTargetPosition();
-}
-
-int16_t IMValuesHolder::getCondMtrAdj() {
-  return condNode->getAdj();
-}
-
-int16_t IMValuesHolder::getOutMtrPos() {
-  return extNode->getOutMtr()->getTargetPosition();
-}
-
-int16_t IMValuesHolder::getRetMtrPos() {
-  return extNode->getRetMtr()->getTargetPosition();
-}
-
-int16_t IMValuesHolder::getExtAdj() {
-  return extNode->getAdj();
 }
 
 float IMValuesHolder::getSteamTemp() {
@@ -158,22 +94,108 @@ float IMValuesHolder::getPressure() {
   return extNode->getBar()->getPressure();
 }
 
-int16_t IMValuesHolder::getCondCurPos() {
-  return condNode->stepsToMl(condNode->getMtr()->getCurrentPosition());
+int16_t IMValuesHolder::getWaterAdj() {
+  return condNode->getAdj();
 }
 
-int16_t IMValuesHolder::getOutCurPos() {
-  return extNode->stepsToMl(extNode->getOutMtr()->getCurrentPosition());
+int16_t IMValuesHolder::getExtAdj() {
+  return extNode->getAdj();
 }
 
-int16_t IMValuesHolder::getRetCurPos() {
-  return extNode->stepsToMl(extNode->getRetMtr()->getCurrentPosition());
+void IMValuesHolder::setWaterAdj(int16_t value) {
+  condNode->setAdj(value);
 }
 
-int16_t IMValuesHolder::getSwCurPos() {
+void IMValuesHolder::setExtAdj(int16_t value) {
+  extNode->setAdj(value);
+}
+
+bool IMValuesHolder::outMtrMoving() {
+  return extNode->getOutMtr()->isMoving();
+}
+
+bool IMValuesHolder::retMtrMoving() {
+  return extNode->getRetMtr()->isMoving();
+}
+
+bool IMValuesHolder::condMtrMoving() {
+  return condNode->getMtr()->isMoving();
+}
+
+bool IMValuesHolder::swMtrMoving() {
+  return swNode->getMtr()->isMoving();
+}
+
+uint8_t IMValuesHolder::getSwitchPos() {
+  return swNode->getSwitch()->getSwitchPos();
+}
+
+int16_t IMValuesHolder::getSwitchSteps() {
   return swNode->getMtr()->getCurrentPosition();
 }
 
-int16_t IMValuesHolder::getSwMtrPos() {
+int16_t IMValuesHolder::getSwitchTarget() {
   return swNode->getMtr()->getTargetPosition();
+}
+
+int16_t IMValuesHolder::getExtSpeed() {
+  return extNode->stepsToMl(extNode->getOutMtr()->getCurrentPosition());
+}
+
+int16_t IMValuesHolder::getRefluxSpeed() {
+  return extNode->stepsToMl(extNode->getRetMtr()->getCurrentPosition());
+}
+
+int16_t IMValuesHolder::getWaterSpeed() {
+  return condNode->stepsToMl(condNode->getMtr()->getCurrentPosition());
+}
+
+void IMValuesHolder::setSwitchPos(uint8_t value) {
+  swNode->getSwitch()->setSwitchPos(value);
+}
+
+void IMValuesHolder::setExtSpeed(int16_t ml) {
+  if (ml < extNode->stepsToMl(0)) {
+    ml = extNode->stepsToMl(0);
+  }
+  extNode->getOutMtr()->setTargetPosition(extNode->mlToSteps(ml));
+}
+
+void IMValuesHolder::setRefluxSpeed(int16_t ml) {
+  if (ml < extNode->stepsToMl(0)) {
+    ml = extNode->stepsToMl(0);
+  }
+  extNode->getRetMtr()->setTargetPosition(extNode->mlToSteps(ml));
+}
+
+void IMValuesHolder::setWaterSpeed(int16_t ml) {
+  if (ml < condNode->stepsToMl(0)) {
+    ml = condNode->stepsToMl(0);
+  }
+  condNode->getMtr()->setTargetPosition(condNode->mlToSteps(ml));
+}
+
+void IMValuesHolder::restoreSwitch(uint8_t pos) {
+  swNode->getSwitch()->setCurrentPos(pos);
+}
+
+void IMValuesHolder::restoreExtSpeed(int16_t ml) {
+  if (ml < extNode->stepsToMl(0)) {
+    ml = extNode->stepsToMl(0);
+  }
+  extNode->getOutMtr()->setCurrentPosition(extNode->mlToSteps(ml));
+}
+
+void IMValuesHolder::restoreRefluxSpeed(int16_t ml) {
+  if (ml < extNode->stepsToMl(0)) {
+    ml = extNode->stepsToMl(0);
+  }
+  extNode->getRetMtr()->setCurrentPosition(extNode->mlToSteps(ml));
+}
+
+void IMValuesHolder::restoreWaterSpeed(int16_t ml) {
+  if (ml < condNode->stepsToMl(0)) {
+    ml = condNode->stepsToMl(0);
+  }
+  condNode->getMtr()->setCurrentPosition(condNode->mlToSteps(ml));
 }

@@ -53,36 +53,20 @@ uint16_t IMSession::getAlcLvl() {
   return alcLvl;
 }
 
-int16_t IMSession::getCondMtrPos() {
-  return condMtrPos;
+int16_t IMSession::getWaterSpeed() {
+  return waterSpeed;
 }
 
-int16_t IMSession::getCondMtrAdj() {
-  return condMtrAdj;
+int16_t IMSession::getWaterAdj() {
+  return waterAdj;
 }
 
-int16_t IMSession::getOutMtrPos() {
-  return outMtrPos;
+int16_t IMSession::getExtSpeed() {
+  return extSpeed;
 }
 
-int16_t IMSession::getRetMtrPos() {
-  return retMtrPos;
-}
-
-int16_t IMSession::getCondMtrCurPos() {
-  return condMtrCurPos;
-}
-
-int16_t IMSession::getOutMtrCurPos() {
-  return outMtrCurPos;
-}
-
-int16_t IMSession::getRetMtrCurPos() {
-  return retMtrCurPos;
-}
-
-int16_t IMSession::getSwMtrCurPos() {
-  return swMtrCurPos;
+int16_t IMSession::getRefluxSpeed() {
+  return refluxSpeed;
 }
 
 int16_t IMSession::getExtAdj() {
@@ -121,12 +105,12 @@ uint32_t IMSession::getBodyOutML() {
   return bodyOutML;
 }
 
-uint32_t IMSession::getUsedWaterML() {
-  return usedWaterML;
+float IMSession::getUsedWaterL() {
+  return usedWaterL;
 }
 
-uint32_t IMSession::getUsedPowerW() {
-  return usedPowerW;
+float IMSession::getUsedPowerKW() {
+  return usedPowerKW;
 }
 
 unsigned long IMSession::getStartTime() {
@@ -196,36 +180,20 @@ void IMSession::setAlcLvl(uint16_t value) {
   alcLvl = value;
 }
 
-void IMSession::setCondMtrPos(int16_t value) {
-  condMtrPos = value;
+void IMSession::setWaterSpeed(int16_t value) {
+  waterSpeed = value;
 }
 
-void IMSession::setCondMtrAdj(int16_t value) {
-  condMtrAdj = value;
+void IMSession::setWaterAdj(int16_t value) {
+  waterAdj = value;
 }
 
-void IMSession::setOutMtrPos(int16_t value) {
-  outMtrPos = value;
+void IMSession::setExtSpeed(int16_t value) {
+  extSpeed = value;
 }
 
-void IMSession::setRetMtrPos(int16_t value) {
-  retMtrPos = value;
-}
-
-void IMSession::setCondMtrCurPos(int16_t value) {
-  condMtrCurPos = value;
-}
-
-void IMSession::setOutMtrCurPos(int16_t value) {
-  outMtrCurPos = value;
-}
-
-void IMSession::setRetMtrCurPos(int16_t value) {
-  retMtrCurPos = value;
-}
-
-void IMSession::setSwMtrCurPos(int16_t value) {
-  swMtrCurPos = value;
+void IMSession::setRefluxSpeed(int16_t value) {
+  refluxSpeed = value;
 }
 
 void IMSession::setExtAdj(int16_t value) {
@@ -264,12 +232,12 @@ void IMSession::setBodyOutML(uint32_t value) {
   bodyOutML = value;
 }
 
-void IMSession::setUsedWaterML(uint32_t value) {
-  usedWaterML = value;
+void IMSession::setUsedWaterL(float value) {
+  usedWaterL = value;
 }
 
-void IMSession::setUsedPowerW(uint32_t value) {
-  usedPowerW = value;
+void IMSession::setUsedPowerKW(float value) {
+  usedPowerKW = value;
 }
 
 void IMSession::setStartTime(unsigned long value) {

@@ -27,16 +27,6 @@ static unsigned long IMStepMotor::getPauseUS() {
   return pauseUS;
 }
 
-bool IMStepMotor::increase() {
-  int position = getTargetPosition() + adjStep;
-  return setTargetPosition(position);
-}
-
-bool IMStepMotor::decrease() {
-  int position = getTargetPosition() - adjStep;
-  return setTargetPosition(position);
-}
-
 bool IMStepMotor::zeroPosition() {
   return setTargetPosition(minPosition);
 }
@@ -161,4 +151,9 @@ void IMStepMotor::move(int8_t step) {
   for (int i = 0; i < pinsCount; i++) {
     digitalWrite(pins[i], pattern[i]);
   }
+}
+
+bool IMStepMotor::isMoving() {
+  bool mov = getCurrentPosition() != getTargetPosition();
+  return mov;
 }
