@@ -129,6 +129,11 @@ Including files from the sketch folder, and subfolders,
  uses "" around the path/file name.
 
 
+ddrg configures pins io
+portg write all pins
+ping read all pins at the same time
+
+
 UNO
 13	SCK
 12	MISO

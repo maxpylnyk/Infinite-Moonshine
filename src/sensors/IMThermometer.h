@@ -28,7 +28,6 @@ class IMThermometer {
     uint8_t * getAddress();
     void setErrorList(IMErrors*);
     bool receiveData();
-    bool online();
     bool dataReady();
 
 };

@@ -1,7 +1,7 @@
 #ifndef IM_EXTRACTION_NODE_H
 #define IM_EXTRACTION_NODE_H
 
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 #include "sensors/IMHydroLevel.h"
 #include "sensors/IMThermometers.h"
 #include "sensors/IMBarometer.h"

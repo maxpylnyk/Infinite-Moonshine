@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 #include "graphics/IMRect.h"
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 #include "Arduino.h"
 #include "UTFTGLUE.h"
 

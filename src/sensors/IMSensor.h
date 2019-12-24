@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 #include "Arduino.h"
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 #include "utilities/IMTimer.h"
 
 class IMSensor {

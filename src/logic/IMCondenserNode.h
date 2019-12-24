@@ -1,7 +1,7 @@
 #ifndef IM_CONDENSER_NODE_H
 #define IM_CONDENSER_NODE_H
 
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 #include "sensors/IMThermometers.h"
 #include "control/IMStepMotor.h"
 #include "utilities/IMDecimal.h"

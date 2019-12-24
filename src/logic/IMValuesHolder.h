@@ -1,7 +1,7 @@
 #ifndef IM_VALUES_HOLDER_H
 #define IM_VALUES_HOLDER_H
 
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 #include "sensors/IMSensor.h";
 #include "sensors/IMHydroLevel.h"
 #include "sensors/IMAlcoholSensor.h"

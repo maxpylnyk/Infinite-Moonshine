@@ -1,5 +1,5 @@
-#ifndef IM_COMMONS_H
-#define IM_COMMONS_H
+#ifndef IM_CONSTANTS_H
+#define IM_CONSTANTS_H
 
 #include <stdint.h>
 
@@ -34,7 +34,7 @@ const int MTR4_2_PIN    = 35;
 const int MTR4_3_PIN    = 36;
 const int MTR4_4_PIN    = 37;
 const int MEGA_RST_PIN  = 43;
-const int SSR_PIN       = 45;
+const int SSR_PIN       = 3;
 const int TRM_PIN       = 47;
 
 const int DATA_PRECISION = 2;

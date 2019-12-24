@@ -58,7 +58,6 @@ bool IMMega::init() {
   if (trm.init()) {
     debugPort->println("done in "+String(timer.check())+" ms");
   } else {
-    errors.add(IMError::NO_TRM);
     debugPort->println("failed");
     timer.check();
     result = false;
@@ -146,6 +145,7 @@ void IMMega::loop() {
   }
   */
   if (!errors.isEmpty()) {
+    /*
     debugPort->print("errors:");
 
     for (int i = 0; i < errors.getCount(); i++) {
@@ -153,7 +153,7 @@ void IMMega::loop() {
       debugPort->print(errors.get(i));
     }
     debugPort->println();
-
+    */
     if (!handleErrors()) {
       drawErrorsPane();
     }
@@ -169,6 +169,7 @@ void IMMega::loop() {
 }
 
 void IMMega::debug() {
+  //trm.debug();
   //hlvl.debug();
   //delay(2000);
 }
@@ -1110,67 +1111,67 @@ void IMMega::printErrors() {
 
       switch(error) {
         case OVERFLOW :
-          errText += String(captions.OVERFLOW) + "\n";
+          errText += "\n * " + String(captions.OVERFLOW) + "\n";
           break;
         case NO_HLVL :
-          errText += String(captions.NO_HLVL) + "\n";
+          errText += "\n * " + String(captions.NO_HLVL) + "\n";
           break;
         case NO_CONNECTION :
-          errText += String(captions.NO_CONNECTION) + "\n";
+          errText += "\n * " + String(captions.NO_CONNECTION) + "\n";
           break;
         case NO_SD_CARD :
-          errText += String(captions.NO_SD_CARD) + "\n";
+          errText += "\n * " + String(captions.NO_SD_CARD) + "\n";
           break;
         case NO_SD_SPACE :
-          errText += String(captions.NO_SD_SPACE) + "\n";
+          errText += "\n * " + String(captions.NO_SD_SPACE) + "\n";
           break;
         case NO_OUT_MTR :
-          errText += String(captions.NO_OUT_MTR) + "\n";
+          errText += "\n * " + String(captions.NO_OUT_MTR) + "\n";
           break;
         case NO_RET_MTR :
-          errText += String(captions.NO_RET_MTR) + "\n";
+          errText += "\n * " + String(captions.NO_RET_MTR) + "\n";
           break;
         case NO_COND_MTR :
-          errText += String(captions.NO_COND_MTR) + "\n";
+          errText += "\n * " + String(captions.NO_COND_MTR) + "\n";
           break;
         case NO_SW :
-          errText += String(captions.NO_SW) + "\n";
+          errText += "\n * " + String(captions.NO_SW) + "\n";
           break;
         case NO_ALC :
-          errText += String(captions.NO_ALC) + "\n";
+          errText += "\n * " + String(captions.NO_ALC) + "\n";
           break;
         case NO_BAR :
-          errText += String(captions.NO_BAR) + "\n";
+          errText += "\n * " + String(captions.NO_BAR) + "\n";
           break;
         case NO_RTC :
-          errText += String(captions.NO_RTC) + "\n";
+          errText += "\n * " + String(captions.NO_RTC) + "\n";
           break;
         case NO_STEAM_TRM :
-          errText += String(captions.NO_STEAM_TRM) + "\n";
+          errText += "\n * " + String(captions.NO_STEAM_TRM) + "\n";
           break;
         case NO_PIPE_TRM :
-          errText += String(captions.NO_PIPE_TRM) + "\n";
+          errText += "\n * " + String(captions.NO_PIPE_TRM) + "\n";
           break;
         case NO_COND_TRM :
-          errText += String(captions.NO_COND_TRM) + "\n";
+          errText += "\n * " + String(captions.NO_COND_TRM) + "\n";
           break;
         case NO_ENV_TRM :
-          errText += String(captions.NO_ENV_TRM) + "\n";
+          errText += "\n * " + String(captions.NO_ENV_TRM) + "\n";
           break;
         case NO_HEAT :
-          errText += String(captions.NO_HEAT) + "\n";
+          errText += "\n * " + String(captions.NO_HEAT) + "\n";
           break;
         case NANO_BLACKOUT :
-          errText += String(captions.NANO_BLACKOUT) + "\n";
+          errText += "\n * " + String(captions.NANO_BLACKOUT) + "\n";
           break;
         case MEGA_BLACKOUT :
-          errText += String(captions.MEGA_BLACKOUT) + "\n";
+          errText += "\n * " + String(captions.MEGA_BLACKOUT) + "\n";
           break;
         case TRANSMISSION_CORRUPTED :
-          errText += String(captions.TRANSMISSION_CORRUPTED) + "\n";
+          errText += "\n * " + String(captions.TRANSMISSION_CORRUPTED) + "\n";
           break;
         case NO_LOG_DIR :
-          errText += String(captions.NO_LOG_DIR) + "\n";
+          errText += "\n * " + String(captions.NO_LOG_DIR) + "\n";
           break;
       }
     }

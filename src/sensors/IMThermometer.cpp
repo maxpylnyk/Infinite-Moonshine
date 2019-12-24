@@ -52,15 +52,6 @@ void IMThermometer::setErrorList(IMErrors * list) {
   errors = list;
 }
 
-bool IMThermometer::online() {
-  bool connected = sensors->isConnected(getAddress());
-
-  if (!connected) {
-    errors->add(error);
-  }
-  return connected;
-}
-
 bool IMThermometer::receiveData() {
   bool ready = true;
   float value;

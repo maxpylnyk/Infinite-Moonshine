@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "stdint.h"
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 
 class IMSession {
   private:

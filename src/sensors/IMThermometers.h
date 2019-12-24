@@ -38,6 +38,7 @@ class IMThermometers : public IMSensor {
     IMThermometer trms[thermometersCount] = {steamTrm, pipeTrm, condTrm, envTrm};
     
     void printAddress(const uint8_t*);
+    bool addressMatch(const uint8_t*, const uint8_t*);
 
   public:
     IMThermometers();

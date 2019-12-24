@@ -1,7 +1,7 @@
 #ifndef IM_CAPTIONS_H
 #define IM_CAPTIONS_H
 
-#include "utilities/IMCommons.h"
+#include "utilities/IMConstants.h"
 
 class IMCaptions {
   private:
