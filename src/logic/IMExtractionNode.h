@@ -7,6 +7,7 @@
 #include "sensors/IMBarometer.h"
 #include "control/IMHeater.h"
 #include "control/IMStepMotor.h"
+#include "utilities/IMDecimal.h"
 
 class IMExtractionNode {
   private:

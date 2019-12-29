@@ -2,15 +2,11 @@
 
 IMHeater::IMHeater() {
   pinMode(SSR_PIN, OUTPUT);
-  setAdjStep(16);
+  setAdjStep(defaultAdj);
   off();
 }
 
 bool IMHeater::setAdjStep(uint8_t value) {
-  if (DEBUG_MODE || MANUAL_MODE) {
-    adjStep = value;
-    return true;
-  }
   if (value >= minAdjStep && value <= maxAdjStep) {
     adjStep = value;
     return true;
@@ -19,7 +15,7 @@ bool IMHeater::setAdjStep(uint8_t value) {
 }
 
 void IMHeater::setPower(uint8_t value) {
-  analogWrite(SSR_PIN, power);
+  analogWrite(SSR_PIN, value);
   power = value;
 }
 

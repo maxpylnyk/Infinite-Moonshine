@@ -14,12 +14,13 @@ typedef enum HeaterCall : int8_t {
 
 class IMHeater {
   private:
-    static const uint8_t powerOff = 0;
-    static const uint8_t powerMax = 255;
-    static const uint8_t minAdjStep = 1;
-    static const uint8_t maxAdjStep = 128;
-    static const int8_t maxCount = 3;
-    static const int8_t adjCoef = 2;
+    const uint8_t powerOff = 0;
+    const uint8_t powerMax = 255;
+    const uint8_t minAdjStep = 1;
+    const uint8_t maxAdjStep = 128;
+    const uint8_t defaultAdj = 16;
+    const int8_t maxCount = 3;
+    const int8_t adjCoef = 2;
 
     int8_t coarseCounter;
     int8_t fineCounter;

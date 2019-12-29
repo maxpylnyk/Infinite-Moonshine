@@ -18,14 +18,18 @@ bool IMThermometers::addressMatch(const uint8_t* addr1, const uint8_t* addr2) {
 }
 
 bool IMThermometers::init() {
+  sensors.begin();
+  sensors.setResolution(resolution);
+  delay(50);
+  return check();
+}
+
+bool IMThermometers::check() {
   bool ready = true;
   bool steamFound = false;
   bool pipeFound = false;
   bool condFound = false;
   bool envFound = false;
-
-  sensors.begin();
-  sensors.setResolution(resolution);
   
   uint8_t deviceCount = sensors.getDeviceCount();
   DeviceAddress addr[deviceCount];
@@ -54,7 +58,6 @@ bool IMThermometers::init() {
     errors->add(IMError::NO_ENV_TRM);
     ready = false;
   }
-  
   return ready;
 }
 

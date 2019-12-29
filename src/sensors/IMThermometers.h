@@ -44,6 +44,7 @@ class IMThermometers : public IMSensor {
     IMThermometers();
 
     bool init();
+    bool check();
     void debug();
     void requestData();
     void receiveData();

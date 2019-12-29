@@ -134,20 +134,7 @@ portg write all pins
 ping read all pins at the same time
 
 
-UNO
-13	SCK
-12	MISO
-11	MOSI
-10	SS
-A4	SDA
-A5	SCL
-
-MEGA
-44-46	PWM
-50	MISO
-51	MOSI
-52	SCK
-53	SS
+12В ток питания 300 мА + 200 мА на мотор
 
 реечная передача
 	рейка 20 см
@@ -345,7 +332,6 @@ paused state for control values measurement and manual mode
 manual mode -> nano controls pause. mega can't cancel it with control check
 normal operation -> mega sets pause to check control values
 
-rename mtr methods: extSpeed refluxSpeed waterSpeed
 отображать остаточный объём
 
 heater: debug calibrate, default adjStep, powerHead, powerBody
@@ -362,3 +348,66 @@ new session dialog
 adj doesn't work
 achieve to reconnect sensors in loop
 check thermometers status while executing
+
+
+
+
+**** tap calibration ****
+
+water tap
+0
+100
+200
+300		0
+350		
+400		20
+450		40
+500		80
+550		160
+600		250
+650		350
+700		450
+750		530
+800		720
+900		900
+1000	1050
+
+ml(steps) = 0.0015 * steps * steps -0.287 * steps -104.24; if (steps <= 378) return 0;
+steps(ml) = -0.000295 * ml * ml +0.875 * ml + 378;
+
+extraction tap
+
+500   0
+600   0.3
+700   1
+800   2.5
+900   4
+1000	5
+1100  9
+1200  13
+1300  17
+1400  22
+1500  29
+1600  35
+
+checkpoints:
+100 ml/h -> 1.65 ml/min
+300 ml/h -> 5 ml/min
+700 ml/h -> 11.64 ml/min
+2100 ml/h -> 35 ml/min
+
+ml(steps) = 0.002 * steps * steps -2.42 * steps + 733; if (steps <= 637) return 0;
+steps(ml) = -0.000221 * ml * ml +0.9 * ml + 637;
+
+
+
+
+**** versions ****
+
+0.6		sync
+0.7		log
+0.8		logic
+0.9		stats
+1.0		ui
+1.1		errors handling
+1.2		expenience

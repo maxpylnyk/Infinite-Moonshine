@@ -126,12 +126,18 @@ bool IMMega::init() {
   } else {
     debugPort->println("system initialization failure");
     drawErrorsPane();
+
+    if (IGNORE_ERRORS) {
+      drawFrontPane();
+      drawBottomBar();
+    }
   }
 
   return result;
 }
 
 void IMMega::loop() {
+  blink();
   //restartWatchdog();
   
   if (movingMotors()) {
@@ -165,7 +171,6 @@ void IMMega::loop() {
     host.prepareToCollect(session.inHeadState());
   }
   handleTouch();
-  blink();
 }
 
 void IMMega::debug() {
@@ -481,10 +486,19 @@ void IMMega::updateNodes() {
 }
 
 bool IMMega::movingMotors() {
-  outMtr.loop();
-  retMtr.loop();
-  condMtr.loop();
-  swMtr.loop();
+  if (outMtr.onPosition()) {
+    if (retMtr.onPosition()) {
+      if (condMtr.onPosition()) {
+        swMtr.loop();
+      } else {
+        condMtr.loop();
+      }
+    } else {
+      retMtr.loop();
+    }
+  } else {
+    outMtr.loop();
+  }
 
   bool movement = host.outMtrMoving();
   movement |= host.retMtrMoving();
@@ -1184,6 +1198,9 @@ void IMMega::printErrors() {
 }
 
 void IMMega::drawErrorsPane() {
+  if (IGNORE_ERRORS) {
+    return;
+  }
   errCount = errors.getCount();
 
   if (activePane == ERROR_PANE) {

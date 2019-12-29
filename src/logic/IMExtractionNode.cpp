@@ -62,8 +62,11 @@ void IMExtractionNode::setRefluxRatio(uint8_t value) {
 }
 
 int IMExtractionNode::stepsToMl(int steps) {
-  float ml = 0.0027 * steps * steps - 0.3846 * steps + 39.1;
-  return (int) ml;
+  if (steps <= 637) {
+    return 0;
+  }
+  IMDecimal ml = IMDecimal(0.002 * steps * steps - 2.42 * steps + 733.0);
+  return ml.getInt();
 }
 
 int IMExtractionNode::mlToSteps(int ml) {

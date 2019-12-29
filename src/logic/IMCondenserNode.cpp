@@ -27,13 +27,20 @@ void IMCondenserNode::setAdj(int16_t value) {
 }
 
 int16_t IMCondenserNode::stepsToMl(int steps) {
-  IMDecimal ml = IMDecimal(1.9236 * steps + 124.5);
+  if (steps <= 378) {
+    return 0;
+  }
+  IMDecimal ml = IMDecimal(0.0015 * steps * steps -0.287 * steps -104.24);
   return ml.getInt();
 }
 
 int16_t IMCondenserNode::mlToSteps(int ml) {
-  IMDecimal steps = IMDecimal(1.0 * (ml - 124) / 1.9236);
-  return steps.getInt();
+  int steps = 0;
+
+  while (ml > stepsToMl(steps)) {
+    steps += 1;
+  }
+  return steps;
 }
 
 void IMCondenserNode::standBy() {

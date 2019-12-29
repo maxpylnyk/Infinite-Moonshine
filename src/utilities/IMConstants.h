@@ -5,8 +5,8 @@
 
 #define FLOAT_PRECISION           3
 #define DISABLE_ALC_METER         1
-#define DEBUG_MODE                1
 #define MANUAL_MODE               1
+#define IGNORE_ERRORS             0
 #define UNSTABLE_PRESSURE_REGION  0
 
 const int NANO_RST_PIN  = 61;//A7 (54+num)
