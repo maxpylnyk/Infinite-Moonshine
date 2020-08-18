@@ -1,5 +1,5 @@
 # Infinite-Moonshine
-is an atomated device for ethanol rectification. It is controlled by the single-board computer with an arduino mega connected via asynchronous port. Aruino is connected to the sensors and the step engines, while computer runs rectification algorithm.
+is an automated device for ethanol rectification. It is controlled by the single-board computer with an arduino mega connected via asynchronous port. Aruino is connected to the sensors and the step engines, while computer runs rectification algorithm.
 
 I'm using an Orange PI PC Plus with Armbian 5 OS and UART3. To enable this port you need to
 
