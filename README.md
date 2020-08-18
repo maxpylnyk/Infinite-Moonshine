@@ -8,7 +8,9 @@ add "overlays=uart3" in /boot/armbianEnv.txt
 and run theese commands in the terminal:
 
 sudo chmod 644 /etc/cron.weekly/apt-xapian-index
+
 chmod 4775 /usr/bin/python3
+
 pip3 install OPi.GPIO pyserial
 
 then reboot.
