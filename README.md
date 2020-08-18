@@ -15,13 +15,16 @@ then reboot.
 
 To communicate with arduino you'll need a logic-level translator connected in the following way:
 
-ORANGE PI PC+    |  LOGIC LEVEL |  ARDUINO MEGA
-                 |  TRANSLATOR  |
-                 
-PA13 (UART3_TX)  |  LV1    HV1  |  RX2 17
-PA14 (UART3_RX)  |  LV2    HV2  |  TX2 16
-+3.3V            |  LV     HV   |  +5V
-Ground           |  GND    GND  |  GND
-PC4              |  LV3    HV3  |  RESET
-PC7              |  LV4    LV4  |
+Orange PI PC+   - Translator - Arduino Mega
 
+PA13 (UART3_TX) - LV1 - HV1 - RX2 17
+
+PA14 (UART3_RX) - LV2 - HV2 - TX2 16
+
++3.3V           - LV  - HV  - +5V
+
+Ground          - GND - GND - GND
+
+PC4             - LV3 - HV3 - RESET
+
+PC7             - LV4 - HV4
